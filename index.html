@@ -13,35 +13,19 @@
       font-family: sans-serif;
       cursor: pointer;
     }
+
     .emoji {
       position: absolute;
       font-size: 2rem;
       animation: floatUp 1.2s ease-out forwards;
       pointer-events: none;
     }
-    @keyframes floatUp {
-      0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-100px) scale(1.5);
-      }
-    }
-  </style>
-</head>
-<body onclick="popEmoji(event)">
-  <script>
-    function popEmoji(e) {
-      const emoji = document.createElement("div");
-      emoji.className = "emoji";
-      emoji.textContent = "💰";
-      emoji.style.left = `${e.clientX - 10}px`;
-      emoji.style.top = `${e.clientY - 10}px`;
-      document.body.appendChild(emoji);
-      setTimeout(() => emoji.remove(), 1200);
-    }
-  </script>
-</body>
-</html>
+
+    #counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ffffffdd;
+      padding: 10px 20px;
+      border-radius: 20px;
+      box-shadow: 0
