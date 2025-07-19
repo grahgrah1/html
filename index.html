@@ -1,32 +1,104 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>toontoon</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        background: #fffbe6;
-        font-family: sans-serif;
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>toontoon</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      cursor: pointer;
+      overflow: hidden;
+
+      background-image: url('https://i.natgeofe.com/n/4cebbf38-5df4-4ed0-864a-4ebeb64d33a4/NationalGeographic_1468962_4x3.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    h2 {
+      cursor: pointer;
+      transition: transform 0.2s;
+      background: #ffffffcc;
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+
+    h2:hover {
+      transform: scale(1.05);
+      color: #ff4081;
+    }
+
+    .emoji {
+      position: absolute;
+      font-size: 2rem;
+      animation: floatUp 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    #score {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ffffffdd;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      box-shadow: 0 0 10px gold;
+      font-weight: bold;
+      color: #333;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
-    </style>
-  </head>
-  <body>
-    <h1>ตูนสร้างเอง</h1>
-    <h2>จองกุก (Jungkook) – BTS</h2>
-    <h2>พัค ซอจุน (Park Seo-joon)</h2>
-    <h2>อี มินโฮ (Lee Min-ho)</h2>
-    <h2>ชา อึนอู (Cha Eun-woo)</h2>
-    <h2>กงยู (Gong Yoo)</h2>  
-    <h2>คิม ซอนโฮ (Kim Seon-ho)</h2>
-    <h2>ซง คัง (Song Kang)</h2>
-    <h2>ฮยอนบิน (Hyun Bin)</h2> 
-    <h2>นัม จูฮยอก (Nam Joo-hyuk)</h2>
-    <h2>อี จงซอก (Lee Jong-suk)</h2>
-  </body> 
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1.5);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="score">คะแนน: 0</div>
+
+  <h1 style="background: #ffffffcc; padding: 10px 20px; border-radius: 15px;">ตูนสร้างเอง</h1>
+  <h2 onclick="popEmoji(event)">จองกุก (Jungkook) – BTS</h2>
+  <h2 onclick="popEmoji(event)">พัค ซอจุน (Park Seo-joon)</h2>
+  <h2 onclick="popEmoji(event)">อี มินโฮ (Lee Min-ho)</h2>
+  <h2 onclick="popEmoji(event)">ชา อึนอู (Cha Eun-woo)</h2>
+  <h2 onclick="popEmoji(event)">กงยู (Gong Yoo)</h2>
+  <h2 onclick="popEmoji(event)">คิม ซอนโฮ (Kim Seon-ho)</h2>
+  <h2 onclick="popEmoji(event)">ซง คัง (Song Kang)</h2>
+  <h2 onclick="popEmoji(event)">ฮยอนบิน (Hyun Bin)</h2>
+  <h2 onclick="popEmoji(event)">นัม จูฮยอก (Nam Joo-hyuk)</h2>
+  <h2 onclick="popEmoji(event)">อี จงซอก (Lee Jong-suk)</h2>
+
+  <script>
+    const emojis = ["💖", "💫", "✨", "🎉", "💘", "😍", "🎶", "⭐", "🎈", "🩷"];
+    let score = 0;
+
+    function popEmoji(e) {
+      const emoji = document.createElement("div");
+      emoji.className = "emoji";
+      emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      emoji.style.left = `${e.clientX}px`;
+      emoji.style.top = `${e.clientY}px`;
+      document.body.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 1000);
+
+      score++;
+      document.getElementById("score").textContent = `คะแนน: ${score}`;
+    }
+  </script>
+</body>
 </html>
