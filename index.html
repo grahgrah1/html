@@ -28,4 +28,42 @@
       background: #ffffffdd;
       padding: 10px 20px;
       border-radius: 20px;
-      box-shadow: 0
+      box-shadow: 0 0 10px #ffd700;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #444;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1.5);
+      }
+    }
+  </style>
+</head>
+<body onclick="popEmoji(event)">
+  <div id="counter">💰 0 เหรียญ</div>
+
+  <script>
+    let count = 0;
+
+    function popEmoji(e) {
+      count++;
+      document.getElementById("counter").textContent = `💰 ${count} เหรียญ`;
+
+      const emoji = document.createElement("div");
+      emoji.className = "emoji";
+      emoji.textContent = "💰";
+      emoji.style.left = `${e.clientX - 10}px`;
+      emoji.style.top = `${e.clientY - 10}px`;
+      document.body.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 1200);
+    }
+  </script>
+</body>
+</html>
