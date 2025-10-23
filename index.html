@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: "Prompt", sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+      background: linear-gradient(135deg, #0a0a23, #1a1a40);
       color: gold;
       text-align: center;
       padding: 50px;
@@ -35,23 +35,33 @@
   <script>
     async function fetchGoldPrice() {
       try {
-        // ตัวอย่าง API ราคาทอง (จาก Thaigold.info)
-        const res = await fetch("https://api.thaigold.info/price.json");
-        const data = await res.json();
-        
-        const gold = data.response.detail[0].gold_buy;
-        document.getElementById("goldPrice").innerText = gold + " บาท/บาททองคำ";
-        document.getElementById("updateTime").innerText = "อัปเดตล่าสุด: " + new Date().toLocaleTimeString();
+        // (1) ถ้าอยากใช้ API จริง — สมัครที่ https://www.goldapi.io/
+        // const res = await fetch("https://www.goldapi.io/api/XAU/THB", {
+        //   headers: { "x-access-token": "goldapi-your-api-key" }
+        // });
+
+        // (2) ตอนนี้ใช้ข้อมูลจำลองแทน (mock data)
+        const data = {
+          price_gram_24k: 2880.55,
+          price_gram_22k: 2640.40,
+          price_gram_18k: 2160.33,
+          timestamp: new Date()
+        };
+
+        document.getElementById("goldPrice").innerHTML =
+          `ทอง 99.99%: ${data.price_gram_24k.toFixed(2)} บาท/กรัม<br>
+           ทอง 96.5%: ${(data.price_gram_24k * 0.965).toFixed(2)} บาท/กรัม`;
+
+        document.getElementById("updateTime").innerText =
+          "อัปเดตล่าสุด: " + new Date().toLocaleTimeString();
       } catch (e) {
         document.getElementById("goldPrice").innerText = "❌ โหลดข้อมูลไม่ได้";
         console.error(e);
       }
     }
 
-    // เรียกครั้งแรก
     fetchGoldPrice();
-    // อัปเดตทุก 5 วินาที
-    setInterval(fetchGoldPrice, 5000);
+    setInterval(fetchGoldPrice, 5000); // อัปเดตทุก 5 วินาที
   </script>
 
 </body>
