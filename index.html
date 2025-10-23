@@ -3,65 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ราคาทองคำวันนี้แบบ Real-Time</title>
+  <title>เกมทายราคาทองคำ 💰</title>
   <style>
     body {
       font-family: "Prompt", sans-serif;
-      background: linear-gradient(135deg, #0a0a23, #1a1a40);
+      background: radial-gradient(circle at top, #111, #300);
       color: gold;
       text-align: center;
-      padding: 50px;
+      padding: 30px;
     }
+
     h1 {
       color: #ffd700;
+      font-size: 2.5em;
+      text-shadow: 0 0 10px gold;
     }
-    .price {
-      font-size: 3em;
-      margin: 20px 0;
+
+    .price-box {
+      font-size: 2em;
+      margin: 30px;
       color: #00ff99;
+      text-shadow: 0 0 5px #0f0;
     }
-    .update-time {
-      font-size: 0.9em;
+
+    button {
+      font-size: 1.5em;
+      margin: 10px;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(45deg, #d4af37, #ffcc00);
+      box-shadow: 0 0 10px #ff0;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    .result {
+      font-size: 1.8em;
+      margin-top: 20px;
+    }
+
+    .score {
+      margin-top: 10px;
+      font-size: 1.2em;
       color: #ccc;
     }
   </style>
 </head>
 <body>
 
-  <h1>💰 ราคาทองคำวันนี้ (Real-Time)</h1>
-  <div class="price" id="goldPrice">กำลังโหลด...</div>
-  <div class="update-time" id="updateTime"></div>
+  <h1>💰 เกมทายราคาทองคำ 💰</h1>
+  <div class="price-box" id="currentPrice">ราคาทองวันนี้: ???</div>
+
+  <p>คิดว่าราคาทองจะ <b>เกิน</b> หรือ <b>ไม่ถึง</b> 65,000 บาท?</p>
+
+  <button onclick="guess('up')">เกิน 💹</button>
+  <button onclick="guess('down')">ไม่ถึง 📉</button>
+
+  <div class="result" id="result"></div>
+  <div class="score" id="score">คะแนน: 0</div>
 
   <script>
-    async function fetchGoldPrice() {
-      try {
-        // (1) ถ้าอยากใช้ API จริง — สมัครที่ https://www.goldapi.io/
-        // const res = await fetch("https://www.goldapi.io/api/XAU/THB", {
-        //   headers: { "x-access-token": "goldapi-your-api-key" }
-        // });
+    let score = 0;
 
-        // (2) ตอนนี้ใช้ข้อมูลจำลองแทน (mock data)
-        const data = {
-          price_gram_24k: 2880.55,
-          price_gram_22k: 2640.40,
-          price_gram_18k: 2160.33,
-          timestamp: new Date()
-        };
-
-        document.getElementById("goldPrice").innerHTML =
-          `ทอง 99.99%: ${data.price_gram_24k.toFixed(2)} บาท/กรัม<br>
-           ทอง 96.5%: ${(data.price_gram_24k * 0.965).toFixed(2)} บาท/กรัม`;
-
-        document.getElementById("updateTime").innerText =
-          "อัปเดตล่าสุด: " + new Date().toLocaleTimeString();
-      } catch (e) {
-        document.getElementById("goldPrice").innerText = "❌ โหลดข้อมูลไม่ได้";
-        console.error(e);
-      }
+    function randomGoldPrice() {
+      return 64000 + Math.floor(Math.random() * 2000); // 64,000-66,000
     }
 
-    fetchGoldPrice();
-    setInterval(fetchGoldPrice, 5000); // อัปเดตทุก 5 วินาที
+    function guess(choice) {
+      const price = randomGoldPrice();
+      document.getElementById("currentPrice").innerText = `ราคาทองวันนี้: ${price.toLocaleString()} บาท`;
+
+      const isUp = price > 65000;
+      const resultDiv = document.getElementById("result");
+
+      if ((choice === "up" && isUp) || (choice === "down" && !isUp)) {
+        score++;
+        resultDiv.innerHTML = "✅ ทายถูก! ได้ทองเพิ่มหนึ่งแต้ม!";
+        resultDiv.style.color = "#00ff99";
+      } else {
+        score--;
+        resultDiv.innerHTML = "❌ ทายผิด! ทองหายหนึ่งแต้ม!";
+        resultDiv.style.color = "#ff6666";
+      }
+
+      document.getElementById("score").innerText = `คะแนน: ${score}`;
+    }
   </script>
 
 </body>
