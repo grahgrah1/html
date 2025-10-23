@@ -1,22 +1,58 @@
-<DOCTYPE html>
-  <html>
-    <head>
-      <title>1234</title>
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ราคาทองคำวันนี้แบบ Real-Time</title>
+  <style>
+    body {
+      font-family: "Prompt", sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+      color: gold;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #ffd700;
+    }
+    .price {
+      font-size: 3em;
+      margin: 20px 0;
+      color: #00ff99;
+    }
+    .update-time {
+      font-size: 0.9em;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
 
-      <div>
-        <h1>ราคาทองคำวันนี้</h1>
-        <p>ราคาทองคำในแต่ละช่วง <span style="color:gold;">เช้า</span> ,<span style="color:red;">สาย</span> ,<span style="color:green;">บ่าย</span></p>
-      </div>
+  <h1>💰 ราคาทองคำวันนี้ (Real-Time)</h1>
+  <div class="price" id="goldPrice">กำลังโหลด...</div>
+  <div class="update-time" id="updateTime"></div>
 
-      <div>
-        <h1><span style="color:blue;">ประเภททรัพย์ที่รับจำนำ</span></h1>
-        <ol>
-          <il>สร้อยคอ</il>
-          <il>สร้อยมือ</il>
-          <il>แหวน</il>
-        </ol>
-      </div>
-    </body>
-  </html>
+  <script>
+    async function fetchGoldPrice() {
+      try {
+        // ตัวอย่าง API ราคาทอง (จาก Thaigold.info)
+        const res = await fetch("https://api.thaigold.info/price.json");
+        const data = await res.json();
+        
+        const gold = data.response.detail[0].gold_buy;
+        document.getElementById("goldPrice").innerText = gold + " บาท/บาททองคำ";
+        document.getElementById("updateTime").innerText = "อัปเดตล่าสุด: " + new Date().toLocaleTimeString();
+      } catch (e) {
+        document.getElementById("goldPrice").innerText = "❌ โหลดข้อมูลไม่ได้";
+        console.error(e);
+      }
+    }
+
+    // เรียกครั้งแรก
+    fetchGoldPrice();
+    // อัปเดตทุก 5 วินาที
+    setInterval(fetchGoldPrice, 5000);
+  </script>
+
+</body>
+</html>
