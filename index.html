@@ -1,140 +1,310 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>Gold Jump 🪙</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  body{
-    margin:0;
-    background:#111;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    font-family:Prompt, sans-serif;
-    color:gold;
-  }
-  canvas{
-    background:linear-gradient(#300,#111);
-    border-radius:16px;
-    box-shadow:0 0 20px gold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Jump 🪙</title>
+  <style>
+    body{
+      margin:0;
+      background:#111;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, "Prompt", sans-serif;
+      color:gold;
+      padding:16px;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action: manipulation;
+    }
+    .wrap{ width:min(920px, 100%); text-align:center; }
+    h1{ margin:0 0 8px; text-shadow:0 0 10px rgba(255,215,0,.6); }
+    .hint{ margin:0 0 12px; color:#ddd; font-size:14px; }
+    canvas{
+      width:100%;
+      max-width:920px;
+      aspect-ratio: 16 / 6;
+      background: linear-gradient(#300, #111);
+      border-radius:16px;
+      box-shadow:0 0 20px rgba(255,215,0,.35);
+      border:1px solid rgba(255,215,0,.25);
+      display:block;
+      margin:0 auto;
+      touch-action: none;
+    }
+    .bar{
+      display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+      margin: 10px 0 0;
+    }
+    button{
+      font-size:16px;
+      padding:10px 16px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      background: linear-gradient(45deg, #d4af37, #ffcc00);
+      color:#111;
+      box-shadow:0 0 12px rgba(255,204,0,.35);
+    }
+    .hud{ margin-top:10px; color:#eee; font-size:14px; }
+    .hud b{ color:#00ff99; }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>🪙 Gold Jump — กระโดดข้ามทอง 🪙</h1>
+    <p class="hint">คลิก/แตะที่เกมเพื่อ “กระโดด” • ชนทอง = จบเกม</p>
 
-<canvas id="game" width="900" height="300"></canvas>
+    <canvas id="game" width="960" height="360"></canvas>
+
+    <div class="bar">
+      <button id="startBtn">เริ่มเกม</button>
+      <button id="restartBtn">เริ่มใหม่</button>
+    </div>
+
+    <div class="hud">
+      คะแนน: <b id="score">0</b> • สถิติสูงสุด: <b id="best">0</b> • สถานะ: <b id="state">พร้อม</b>
+    </div>
+  </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
 
-let speed = 6;
-let score = 0;
-let frame = 0;
+  const scoreEl = document.getElementById("score");
+  const bestEl  = document.getElementById("best");
+  const stateEl = document.getElementById("state");
+  const startBtn = document.getElementById("startBtn");
+  const restartBtn = document.getElementById("restartBtn");
 
-// Player
-const player = {
-  x:80,
-  y:200,
-  w:40,
-  h:50,
-  vy:0,
-  onGround:true
-};
+  const W = canvas.width, H = canvas.height;
+  const groundY = Math.floor(H * 0.78);
 
-// Gold obstacles
-const golds = [];
+  const BEST_KEY = "goldjump_best";
+  let best = Number(localStorage.getItem(BEST_KEY) || 0);
+  bestEl.textContent = best.toLocaleString();
 
-function spawnGold(){
-  golds.push({
-    x:canvas.width,
-    y:210,
-    w:35,
-    h:35
-  });
-}
+  let running = false;
+  let gameOver = false;
+  let frame = 0;
+  let score = 0;
+  let speed = 6.0;
 
-function update(){
-  frame++;
-  speed += 0.0008;
-  score++;
+  const player = {
+    x: Math.floor(W * 0.12),
+    y: groundY - 52,
+    w: 40,
+    h: 52,
+    vy: 0,
+    onGround: true
+  };
 
-  // gravity
-  player.vy += 1;
-  player.y += player.vy;
-  if(player.y >= 200){
-    player.y = 200;
+  const golds = [];
+  let spawnTick = 0;
+
+  function rand(min, max){ return Math.random() * (max-min) + min; }
+
+  function reset(){
+    running = false;
+    gameOver = false;
+    frame = 0;
+    score = 0;
+    speed = 6.0;
+    player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
+    golds.length = 0;
+    spawnTick = 0;
+    scoreEl.textContent = "0";
+    stateEl.textContent = "พร้อม";
+    draw(); // วาดหน้าพร้อมเล่น
   }
 
-  // spawn gold
-  if(frame % 90 === 0) spawnGold();
-
-  // move gold
-  for(let i=golds.length-1;i>=0;i--){
-    golds[i].x -= speed;
-    if(golds[i].x < -50) golds.splice(i,1);
-  }
-
-  // collision
-  for(const g of golds){
-    if(
-      player.x < g.x + g.w &&
-      player.x + player.w > g.x &&
-      player.y < g.y + g.h &&
-      player.y + player.h > g.y
-    ){
-      alert("GAME OVER\nคะแนน: "+score);
-      location.reload();
+  function jump(){
+    if (!running || gameOver) return;
+    if (player.onGround){
+      player.vy = -16;
+      player.onGround = false;
     }
   }
-}
 
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // ground
-  ctx.strokeStyle="gold";
-  ctx.beginPath();
-  ctx.moveTo(0,260);
-  ctx.lineTo(canvas.width,260);
-  ctx.stroke();
-
-  // player
-  ctx.fillStyle="#ffd700";
-  ctx.fillRect(player.x,player.y,player.w,player.h);
-
-  // gold
-  for(const g of golds){
-    ctx.fillStyle="#ffcc00";
-    ctx.fillRect(g.x,g.y,g.w,g.h);
+  function spawnGold(){
+    golds.push({
+      x: W + 20,
+      y: groundY - 34,
+      w: 34,
+      h: 34
+    });
   }
 
-  // score
-  ctx.fillStyle="#fff";
-  ctx.font="18px sans-serif";
-  ctx.fillText("Score: "+score,20,30);
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-// click / tap = jump
-function jump(){
-  if(player.onGround){
-    player.vy = -16;
-    player.onGround = false;
+  function hit(a,b){
+    return a.x < b.x + b.w &&
+           a.x + a.w > b.x &&
+           a.y < b.y + b.h &&
+           a.y + a.h > b.y;
   }
-}
 
-canvas.addEventListener("mousedown", jump);
-canvas.addEventListener("touchstart", (e)=>{
-  e.preventDefault();
-  jump();
-},{pass
+  function end(){
+    running = false;
+    gameOver = true;
+    stateEl.textContent = "จบเกม";
+    if (score > best){
+      best = Math.floor(score);
+      localStorage.setItem(BEST_KEY, String(best));
+      bestEl.textContent = best.toLocaleString();
+    }
+  }
+
+  function start(){
+    if (gameOver) return;
+    running = true;
+    stateEl.textContent = "กำลังเล่น";
+    loop();
+  }
+
+  function restart(){
+    reset();
+    running = true;
+    stateEl.textContent = "กำลังเล่น";
+    loop();
+  }
+
+  function update(){
+    if (!running) return;
+
+    frame++;
+    speed += 0.0009;      // เร็วขึ้นเรื่อย ๆ
+    score += 0.6;         // คะแนนเพิ่มตามเวลา
+
+    // ฟิสิกส์
+    player.vy += 0.95;
+    player.y += player.vy;
+
+    if (player.y >= groundY - player.h){
+      player.y = groundY - player.h;
+      player.vy = 0;
+      player.onGround = true;
+    }
+
+    // สุ่มทอง (ความถี่จะมากขึ้นตามความเร็ว)
+    spawnTick++;
+    const every = Math.max(50, 95 - Math.floor(speed * 6)); // ยิ่งเร็ว ยิ่งถี่
+    if (spawnTick >= every){
+      spawnGold();
+      spawnTick = 0;
+    }
+
+    // ขยับทอง
+    for (let i = golds.length - 1; i >= 0; i--){
+      golds[i].x -= speed;
+      if (golds[i].x + golds[i].w < -50) golds.splice(i,1);
+    }
+
+    // ชน = จบเกม
+    for (const g of golds){
+      if (hit(player, g)){
+        end();
+        break;
+      }
+    }
+
+    scoreEl.textContent = Math.floor(score).toLocaleString();
+  }
+
+  function draw(){
+    // ฉากหลัง
+    ctx.clearRect(0,0,W,H);
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0, "rgba(255,255,255,0.02)");
+    bg.addColorStop(0.35, "rgba(255,0,0,0.10)");
+    bg.addColorStop(1, "rgba(0,0,0,0.45)");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // พื้น
+    ctx.strokeStyle = "rgba(255,215,0,.75)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, groundY+1);
+    ctx.lineTo(W, groundY+1);
+    ctx.stroke();
+
+    // ตัวละคร
+    ctx.fillStyle = "#ffd700";
+    roundRect(player.x, player.y, player.w, player.h, 10);
+    ctx.fill();
+
+    // ทอง (สิ่งกีดขวาง)
+    for (const g of golds){
+      const grad = ctx.createLinearGradient(g.x, g.y, g.x+g.w, g.y+g.h);
+      grad.addColorStop(0, "#d4af37");
+      grad.addColorStop(0.55, "#ffcc00");
+      grad.addColorStop(1, "#b8860b");
+      ctx.fillStyle = grad;
+      roundRect(g.x, g.y, g.w, g.h, 8);
+      ctx.fill();
+
+      // เส้นเงาวาว ๆ
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(g.x+5, g.y+6);
+      ctx.lineTo(g.x+5, g.y+g.h-6);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // Overlay ตอนยังไม่เริ่ม / จบเกม
+    if (!running){
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.fillRect(0,0,W,H);
+
+      ctx.fillStyle = "#ffd700";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "700 34px system-ui, sans-serif";
+      ctx.fillText(gameOver ? "GAME OVER" : "คลิก/แตะ เพื่อกระโดด", W/2, H*0.42);
+
+      ctx.font = "600 18px system-ui, sans-serif";
+      ctx.fillStyle = "#ddd";
+      ctx.fillText(gameOver ? "กด เริ่มใหม่ หรือคลิกปุ่ม" : "กด เริ่มเกม แล้วเล่นได้เลย", W/2, H*0.55);
+    }
+  }
+
+  function roundRect(x,y,w,h,r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  function loop(){
+    if (!running) { draw(); return; }
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ควบคุมด้วย “คลิก/แตะ” แน่นอนด้วย pointerdown
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (!running && !gameOver) start();
+    jump();
+  });
+
+  startBtn.addEventListener("click", start);
+  restartBtn.addEventListener("click", restart);
+
+  reset();
+})();
+</script>
+</body>
+</html>
