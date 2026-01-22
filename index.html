@@ -1,577 +1,164 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gold Runner 🪙</title>
-  <style>
-    :root{
-      --bg1:#111;
-      --bg2:#300;
-      --gold:#ffd700;
-      --mint:#00ff99;
-      --danger:#ff6666;
-      --line:#ffcc00;
-      --panel: rgba(0,0,0,.35);
-    }
-    body{
-      margin:0;
-      font-family: "Prompt", system-ui, sans-serif;
-      background: radial-gradient(circle at top, var(--bg1), var(--bg2));
-      color: var(--gold);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      padding:16px;
-    }
-    .wrap{
-      width:min(920px, 100%);
-      text-align:center;
-    }
-    h1{
-      margin:0 0 8px;
-      font-size: clamp(22px, 3.2vw, 34px);
-      text-shadow: 0 0 10px rgba(255,215,0,.65);
-    }
-    .hint{
-      margin:0 0 12px;
-      color:#ddd;
-      font-size: 14px;
-      opacity:.9;
-    }
-    .hud{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin: 10px 0 10px;
-    }
-    .chip{
-      background: var(--panel);
-      border:1px solid rgba(255,215,0,.25);
-      border-radius: 999px;
-      padding:8px 12px;
-      font-size: 14px;
-      color:#eee;
-      backdrop-filter: blur(6px);
-    }
-    .chip b{ color: var(--mint); }
-    canvas{
-      width: 100%;
-      max-width: 920px;
-      aspect-ratio: 16 / 6;
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,0,0,.05));
-      border-radius: 18px;
-      border: 1px solid rgba(255,215,0,.25);
-      box-shadow: 0 0 18px rgba(255,215,0,.12);
-      display:block;
-      margin: 0 auto;
-    }
-    .btns{
-      margin-top: 12px;
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    button{
-      font-size: 16px;
-      padding: 10px 18px;
-      border:none;
-      border-radius: 12px;
-      cursor:pointer;
-      color:#111;
-      background: linear-gradient(45deg, #d4af37, #ffcc00);
-      box-shadow: 0 0 10px rgba(255,204,0,.45);
-      transition: transform .15s;
-    }
-    button:hover{ transform: scale(1.04); }
-    .small{
-      font-size: 13px;
-      opacity: .85;
-      margin-top: 8px;
-      color:#cfcfcf;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Runner 🪙</title>
+<style>
+  body{
+    margin:0;
+    font-family: Prompt, sans-serif;
+    background:#111;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#ffd700;
+  }
+  canvas{
+    background:#222;
+    border-radius:16px;
+    box-shadow:0 0 20px gold;
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>🪙 Gold Runner — วิ่งหลบทอง! 🪙</h1>
-    <p class="hint">กด <b>Space</b> / <b>↑</b> / แตะจอ เพื่อกระโดด • กด <b>R</b> เริ่มใหม่</p>
 
-    <div class="hud">
-      <div class="chip">คะแนน: <b id="score">0</b></div>
-      <div class="chip">สถิติสูงสุด: <b id="best">0</b></div>
-      <div class="chip">ความเร็ว: <b id="speed">1.0x</b></div>
-      <div class="chip" id="stateChip">สถานะ: <b id="state">พร้อมเล่น</b></div>
-    </div>
-
-    <canvas id="game" width="960" height="360" aria-label="Gold Runner game"></canvas>
-
-    <div class="btns">
-      <button id="startBtn">เริ่ม / เล่นต่อ</button>
-      <button id="restartBtn">เริ่มใหม่</button>
-    </div>
-    <div class="small">ทิป: เล่นไปนาน ๆ ความเร็วจะเพิ่มขึ้นเอง เหมือนไดโนเสาร์เลย 🔥</div>
-  </div>
+<canvas id="game" width="900" height="300"></canvas>
 
 <script>
-(() => {
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  const scoreEl = document.getElementById("score");
-  const bestEl  = document.getElementById("best");
-  const speedEl = document.getElementById("speed");
-  const stateEl = document.getElementById("state");
+let frame = 0;
+let speed = 6;
+let score = 0;
+let isNight = false;
 
-  const startBtn   = document.getElementById("startBtn");
-  const restartBtn = document.getElementById("restartBtn");
+// player
+const player = {
+  x:80,
+  y:200,
+  w:40,
+  h:50,
+  vy:0,
+  duck:false,
+  onGround:true
+};
 
-  // Hi-score
-  const BEST_KEY = "goldrunner_best";
-  let best = Number(localStorage.getItem(BEST_KEY) || 0);
-  bestEl.textContent = best.toLocaleString();
+// obstacles
+const obs = [];
 
-  // World constants
-  const W = canvas.width, H = canvas.height;
-  const groundY = Math.floor(H * 0.78);
-  const gravity = 0.95;
-
-  // Game state
-  let running = false;
-  let gameOver = false;
-  let rafId = null;
-
-  let t = 0;                 // time counter
-  let score = 0;
-  let baseSpeed = 7.0;       // base scrolling speed
-  let speedMul = 1.0;
-
-  // Player (the "runner")
-  const player = {
-    x: Math.floor(W * 0.12),
-    y: groundY - 48,
-    w: 34,
-    h: 48,
-    vy: 0,
-    jumping: false,
-    color: "#ffd700"
-  };
-
-  // Obstacles
-  const obstacles = [];
-  let spawnTimer = 0;
-  let nextSpawn = rand(55, 95); // frames between spawns (will vary)
-
-  // Particles (sparkles)
-  const sparkles = [];
-
-  function rand(min, max){ return Math.random() * (max - min) + min; }
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-  function resetGame() {
-    t = 0;
-    score = 0;
-    baseSpeed = 7.0;
-    speedMul = 1.0;
-    player.y = groundY - player.h;
-    player.vy = 0;
-    player.jumping = false;
-    obstacles.length = 0;
-    sparkles.length = 0;
-    spawnTimer = 0;
-    nextSpawn = rand(55, 95);
-    gameOver = false;
-    updateHUD();
-    stateEl.textContent = "พร้อมเล่น";
-  }
-
-  function updateHUD(){
-    scoreEl.textContent = Math.floor(score).toLocaleString();
-    bestEl.textContent = best.toLocaleString();
-    speedEl.textContent = speedMul.toFixed(1) + "x";
-  }
-
-  function jump(){
-    if (!running || gameOver) return;
-    if (!player.jumping){
-      player.vy = -16.5; // jump strength
-      player.jumping = true;
-      puff(player.x + player.w/2, groundY, 18);
-    }
-  }
-
-  function puff(x, y, n){
-    for(let i=0;i<n;i++){
-      sparkles.push({
-        x: x + rand(-10, 10),
-        y: y + rand(-4, 4),
-        vx: rand(-1.8, 1.2),
-        vy: rand(-2.5, -0.5),
-        life: rand(18, 36),
-        r: rand(1, 3),
-        a: rand(0.4, 1)
-      });
-    }
-  }
-
-  function spawnObstacle(){
-    // Two types: "bar" (low) and "tower" (taller)
-    const type = Math.random() < 0.7 ? "bar" : "tower";
-    const o = {
-      x: W + 20,
-      y: 0,
-      w: type === "bar" ? rand(22, 34) : rand(22, 30),
-      h: type === "bar" ? rand(26, 38) : rand(44, 68),
-      type,
-      passed: false
-    };
-    o.y = groundY - o.h;
-    obstacles.push(o);
-  }
-
-  function rectsHit(a,b){
-    return a.x < b.x + b.w &&
-           a.x + a.w > b.x &&
-           a.y < b.y + b.h &&
-           a.y + a.h > b.y;
-  }
-
-  function endGame(){
-    gameOver = true;
-    running = false;
-    stateEl.textContent = "เกมจบ — กด R เพื่อเริ่มใหม่";
-    if (score > best){
-      best = Math.floor(score);
-      localStorage.setItem(BEST_KEY, String(best));
-    }
-    updateHUD();
-  }
-
-  function start(){
-    if (gameOver) return; // use restart
-    if (!running){
-      running = true;
-      stateEl.textContent = "กำลังเล่น";
-      loop();
-    }
-  }
-
-  function restart(){
-    resetGame();
-    running = true;
-    stateEl.textContent = "กำลังเล่น";
-    loop();
-  }
-
-  function stopLoop(){
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-
-  function loop(){
-    stopLoop();
-    const step = () => {
-      rafId = requestAnimationFrame(step);
-      update();
-      draw();
-    };
-    rafId = requestAnimationFrame(step);
-  }
-
-  function update(){
-    if (!running) return;
-
-    t++;
-
-    // Increase difficulty over time
-    // speedMul grows slowly (like dino)
-    speedMul = 1 + (t / 2400); // ~ +0.1 every 240 frames
-    speedMul = clamp(speedMul, 1, 2.4);
-
-    const speed = baseSpeed * speedMul;
-
-    // Score increases with time + speed
-    score += 0.35 * speedMul;
-
-    // Player physics
-    player.vy += gravity;
-    player.y += player.vy;
-
-    if (player.y >= groundY - player.h){
-      player.y = groundY - player.h;
-      player.vy = 0;
-      player.jumping = false;
-    }
-
-    // Spawn obstacles
-    spawnTimer++;
-    // Slightly faster spawns over time
-    const spawnFactor = clamp(1 - (t / 9000), 0.65, 1);
-    if (spawnTimer >= nextSpawn * spawnFactor){
-      spawnObstacle();
-      spawnTimer = 0;
-      nextSpawn = rand(50, 95);
-    }
-
-    // Move obstacles
-    for (let i = obstacles.length - 1; i >= 0; i--){
-      const o = obstacles[i];
-      o.x -= speed;
-
-      // Score bonus when passing
-      if (!o.passed && o.x + o.w < player.x){
-        o.passed = true;
-        score += 5;
-        puff(player.x + player.w/2, player.y + player.h/2, 8);
-      }
-
-      // Remove off-screen
-      if (o.x + o.w < -40){
-        obstacles.splice(i, 1);
-      }
-    }
-
-    // Collisions
-    for (const o of obstacles){
-      if (rectsHit(player, o)){
-        endGame();
-        break;
-      }
-    }
-
-    // Sparkles
-    for (let i = sparkles.length - 1; i >= 0; i--){
-      const p = sparkles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.12;
-      p.life -= 1;
-      p.a *= 0.98;
-      if (p.life <= 0 || p.a < 0.02) sparkles.splice(i, 1);
-    }
-
-    updateHUD();
-  }
-
-  function drawBackground(){
-    // red cloth vibe gradient
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "rgba(255,255,255,0.02)");
-    g.addColorStop(0.4, "rgba(255,0,0,0.07)");
-    g.addColorStop(1, "rgba(0,0,0,0.35)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    // subtle moving lines (like cloth)
-    ctx.save();
-    ctx.globalAlpha = 0.12;
-    ctx.strokeStyle = "#ffcc00";
-    ctx.lineWidth = 2;
-    for(let i=0;i<6;i++){
-      const y = (i*70 + (t*0.6)%70) - 40;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.bezierCurveTo(W*0.25, y+20, W*0.6, y-10, W, y+18);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawGround(){
-    // ground line
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,204,0,.7)";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(0, groundY+1);
-    ctx.lineTo(W, groundY+1);
-    ctx.stroke();
-
-    // ground dashes scrolling
-    ctx.globalAlpha = 0.65;
-    const speed = baseSpeed * speedMul;
-    ctx.strokeStyle = "rgba(255,215,0,.55)";
-    ctx.lineWidth = 2;
-    const dashW = 18, gap = 14;
-    const offset = -((t * speed) % (dashW + gap));
-    for(let x = offset; x < W; x += (dashW + gap)){
-      ctx.beginPath();
-      ctx.moveTo(x, groundY+18);
-      ctx.lineTo(x + dashW, groundY+18);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawPlayer(){
-    // simple "gold runner" block with crown
-    ctx.save();
-    // body
-    ctx.fillStyle = "#ffd700";
-    roundRect(ctx, player.x, player.y, player.w, player.h, 8);
-    ctx.fill();
-
-    // face visor
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    roundRect(ctx, player.x+6, player.y+10, player.w-12, 14, 7);
-    ctx.fill();
-
-    // crown
-    ctx.fillStyle = "#ffcc00";
-    ctx.beginPath();
-    ctx.moveTo(player.x+6, player.y);
-    ctx.lineTo(player.x+12, player.y-10);
-    ctx.lineTo(player.x+17, player.y);
-    ctx.lineTo(player.x+22, player.y-10);
-    ctx.lineTo(player.x+28, player.y);
-    ctx.closePath();
-    ctx.fill();
-
-    // legs animation
-    ctx.strokeStyle = "rgba(0,0,0,0.35)";
-    ctx.lineWidth = 3;
-    const phase = running && !gameOver ? Math.sin(t*0.35) : 0;
-    ctx.beginPath();
-    ctx.moveTo(player.x+10, player.y+player.h);
-    ctx.lineTo(player.x+10 + phase*4, player.y+player.h+10);
-    ctx.moveTo(player.x+24, player.y+player.h);
-    ctx.lineTo(player.x+24 - phase*4, player.y+player.h+10);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  function drawObstacles(){
-    ctx.save();
-    for (const o of obstacles){
-      // Gold-ish obstacle with shine
-      const grad = ctx.createLinearGradient(o.x, o.y, o.x+o.w, o.y+o.h);
-      grad.addColorStop(0, "#d4af37");
-      grad.addColorStop(0.5, "#ffcc00");
-      grad.addColorStop(1, "#b8860b");
-      ctx.fillStyle = grad;
-
-      roundRect(ctx, o.x, o.y, o.w, o.h, 6);
-      ctx.fill();
-
-      // highlight line
-      ctx.globalAlpha = 0.35;
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(o.x+4, o.y+6);
-      ctx.lineTo(o.x+4, o.y+o.h-6);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-    ctx.restore();
-  }
-
-  function drawSparkles(){
-    ctx.save();
-    for (const p of sparkles){
-      ctx.globalAlpha = p.a;
-      ctx.fillStyle = "#ffd700";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function drawOverlay(){
-    if (!gameOver && running) return;
-
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    ctx.fillRect(0,0,W,H);
-
-    ctx.fillStyle = "#ffd700";
-    ctx.font = "700 34px Prompt, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    if (gameOver){
-      ctx.fillText("GAME OVER", W/2, H*0.40);
-      ctx.font = "600 18px Prompt, system-ui, sans-serif";
-      ctx.fillStyle = "#ddd";
-      ctx.fillText("กด R เพื่อเริ่มใหม่ • กด Space เพื่อกระโดด", W/2, H*0.52);
-    } else {
-      ctx.fillText("กด เริ่ม / เล่นต่อ", W/2, H*0.45);
-      ctx.font = "600 18px Prompt, system-ui, sans-serif";
-      ctx.fillStyle = "#ddd";
-      ctx.fillText("กด Space / ↑ / แตะจอ เพื่อกระโดด", W/2, H*0.55);
-    }
-
-    ctx.restore();
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    drawBackground();
-    drawGround();
-    drawObstacles();
-    drawPlayer();
-    drawSparkles();
-    drawOverlay();
-  }
-
-  function roundRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
-
-  // Controls
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp") {
-      e.preventDefault();
-      if (!running && !gameOver) start();
-      jump();
-    }
-    if (e.key?.toLowerCase() === "r") {
-      e.preventDefault();
-      restart();
-    }
-    if (e.key?.toLowerCase() === "p") {
-      e.preventDefault();
-      // pause toggle
-      if (running){
-        running = false;
-        stateEl.textContent = "หยุดชั่วคราว (กด เริ่ม/Space เพื่อเล่นต่อ)";
-      } else if (!gameOver){
-        start();
-      }
-    }
-  }, { passive:false });
-
-  // Tap / Click to jump
-  const tap = () => {
-    if (!running && !gameOver) start();
-    jump();
-  };
-  canvas.addEventListener("mousedown", tap);
-  canvas.addEventListener("touchstart", (e)=>{ e.preventDefault(); tap(); }, { passive:false });
-
-  startBtn.addEventListener("click", () => {
-    if (gameOver) return;
-    start();
+function spawnObstacle(){
+  const isBird = Math.random() < 0.35;
+  obs.push({
+    x:canvas.width,
+    y:isBird ? 160 : 220,
+    w:isBird ? 35 : 30,
+    h:isBird ? 20 : 40,
+    bird:isBird
   });
-  restartBtn.addEventListener("click", restart);
+}
 
-  // Init
-  resetGame();
+function update(){
+  frame++;
+  speed += 0.0005;
+  score++;
+
+  // day / night
+  if(frame % 600 === 0) isNight = !isNight;
+
+  // gravity
+  player.vy += 1;
+  player.y += player.vy;
+  if(player.y >= 200){
+    player.y = 200;
+    player.vy = 0;
+    player.onGround = true;
+  }
+
+  // spawn
+  if(frame % 90 === 0) spawnObstacle();
+
+  // move obstacles
+  for(let i=obs.length-1;i>=0;i--){
+    obs[i].x -= speed;
+    if(obs[i].x < -50) obs.splice(i,1);
+  }
+
+  // collision
+  for(const o of obs){
+    if(
+      player.x < o.x + o.w &&
+      player.x + player.w > o.x &&
+      player.y < o.y + o.h &&
+      player.y + player.h > o.y
+    ){
+      alert("GAME OVER\nคะแนน: "+score);
+      location.reload();
+    }
+  }
+}
+
+function draw(){
+  // background
+  ctx.fillStyle = isNight ? "#050505" : "#222";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // moon / sun
+  ctx.fillStyle = isNight ? "#ccc" : "#ffcc00";
+  ctx.beginPath();
+  ctx.arc(750,60,25,0,Math.PI*2);
+  ctx.fill();
+
+  // ground
+  ctx.strokeStyle = "#ffd700";
+  ctx.beginPath();
+  ctx.moveTo(0,260);
+  ctx.lineTo(canvas.width,260);
+  ctx.stroke();
+
+  // player
+  ctx.fillStyle = "#ffd700";
+  let h = player.duck ? 30 : 50;
+  ctx.fillRect(player.x, player.y + (50-h), player.w, h);
+
+  // obstacles
+  for(const o of obs){
+    ctx.fillStyle = o.bird ? "#ff6666" : "#d4af37";
+    ctx.fillRect(o.x,o.y,o.w,o.h);
+  }
+
+  // score
+  ctx.fillStyle="#fff";
+  ctx.font="18px sans-serif";
+  ctx.fillText("Score: "+score,20,30);
+}
+
+function loop(){
+  update();
   draw();
-})();
+  requestAnimationFrame(loop);
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space" && player.onGround){
+    player.vy = -16;
+    player.onGround = false;
+  }
+  if(e.code==="ArrowDown"){
+    player.duck = true;
+  }
+});
+
+document.addEventListener("keyup",e=>{
+  if(e.code==="ArrowDown"){
+    player.duck = false;
+  }
+});
+
+loop();
 </script>
+
 </body>
 </html>
