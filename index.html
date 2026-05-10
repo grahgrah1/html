@@ -1,299 +1,324 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Knife Hit 🔪</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบเก็บสต็อกผัก 🥬</title>
   <style>
+    *{ box-sizing:border-box; }
     body{
       margin:0;
-      background:#111;
-      overflow:hidden;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      font-family:system-ui,sans-serif;
+      font-family:system-ui,-apple-system,"Prompt",sans-serif;
+      background:#f4f8f1;
+      color:#1d2b1f;
+    }
+    header{
+      background:linear-gradient(135deg,#1f7a3a,#74b72e);
       color:white;
-    }
-
-    .wrap{
+      padding:24px 18px;
       text-align:center;
-      width:100%;
-      max-width:900px;
+      box-shadow:0 6px 20px rgba(0,0,0,.15);
     }
-
-    canvas{
-      background:radial-gradient(circle at center,#2a2a2a,#090909);
+    header h1{ margin:0; font-size:28px; }
+    header p{ margin:8px 0 0; opacity:.95; }
+    .container{
+      max-width:1100px;
+      margin:24px auto;
+      padding:0 16px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .card{
+      background:white;
       border-radius:18px;
-      box-shadow:0 0 25px rgba(255,215,0,.25);
+      padding:18px;
+      box-shadow:0 8px 24px rgba(0,0,0,.08);
+      border:1px solid #e1ecd9;
+    }
+    .stat-title{ color:#6a7b67; font-size:14px; }
+    .stat-value{ font-size:28px; font-weight:900; margin-top:4px; }
+    .form-card{ margin-bottom:18px; }
+    form{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr .8fr .8fr auto;
+      gap:10px;
+      align-items:end;
+    }
+    label{ font-size:13px; color:#5c6b59; font-weight:700; }
+    input,select{
       width:100%;
-      max-width:900px;
+      padding:11px 12px;
+      border:1px solid #cfddc7;
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+      background:#fbfff8;
     }
-
-    h1{
-      color:#ffd700;
-      margin-bottom:10px;
-      text-shadow:0 0 12px rgba(255,215,0,.5);
-    }
-
-    .hud{
-      margin-top:12px;
-      font-size:18px;
-    }
-
-    b{
-      color:#00ff99;
-    }
-
+    input:focus,select:focus{ border-color:#3fa35b; box-shadow:0 0 0 3px rgba(63,163,91,.15); }
     button{
-      margin-top:12px;
-      padding:10px 18px;
       border:none;
       border-radius:12px;
-      background:linear-gradient(45deg,#ffcc00,#d4af37);
-      color:#111;
-      font-weight:800;
+      padding:12px 14px;
       cursor:pointer;
-      font-size:16px;
+      font-weight:800;
+      font-size:14px;
+    }
+    .btn-main{ background:#1f7a3a; color:white; }
+    .btn-main:hover{ background:#155d2b; }
+    .btn-edit{ background:#ffe08a; color:#4d3900; }
+    .btn-delete{ background:#ffb3b3; color:#730000; }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .toolbar input{ max-width:340px; }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:14px;
+    }
+    th,td{
+      padding:13px 10px;
+      border-bottom:1px solid #eef3ea;
+      text-align:left;
+      font-size:14px;
+    }
+    th{ background:#edf7e8; color:#335c35; }
+    tr:hover{ background:#fbfff7; }
+    .status{
+      display:inline-block;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .ok{ background:#dff7df; color:#1d6b26; }
+    .low{ background:#fff0b8; color:#806000; }
+    .empty{ background:#ffd6d6; color:#9b0000; }
+    .actions{ display:flex; gap:6px; flex-wrap:wrap; }
+    .note{ color:#6c7868; font-size:13px; margin-top:10px; }
+    @media(max-width:900px){
+      .grid{ grid-template-columns:repeat(2,1fr); }
+      form{ grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:620px){
+      .grid{ grid-template-columns:1fr; }
+      form{ grid-template-columns:1fr; }
+      table{ display:block; overflow-x:auto; }
+      header h1{ font-size:23px; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>🔪 เกมปามีด</h1>
+  <header>
+    <h1>🥬 ระบบเก็บสต็อกผัก</h1>
+    <p>บันทึกจำนวนผัก ต้นทุน วันรับเข้า และสถานะคงเหลือ</p>
+  </header>
 
-    <canvas id="game" width="900" height="600"></canvas>
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <div class="stat-title">รายการผักทั้งหมด</div>
+        <div class="stat-value" id="totalItems">0</div>
+      </div>
+      <div class="card">
+        <div class="stat-title">จำนวนรวม</div>
+        <div class="stat-value" id="totalQty">0</div>
+      </div>
+      <div class="card">
+        <div class="stat-title">มูลค่าสต็อก</div>
+        <div class="stat-value" id="totalValue">฿0</div>
+      </div>
+      <div class="card">
+        <div class="stat-title">ใกล้หมด / หมด</div>
+        <div class="stat-value" id="lowItems">0</div>
+      </div>
+    </section>
 
-    <div class="hud">
-      คะแนน: <b id="score">0</b>
-      • มีดเหลือ: <b id="knives">10</b>
-      • ด่าน: <b id="level">1</b>
-    </div>
+    <section class="card form-card">
+      <form id="stockForm">
+        <div>
+          <label>ชื่อผัก</label>
+          <input id="name" placeholder="เช่น ผักกาด / คะน้า" required />
+        </div>
+        <div>
+          <label>จำนวน</label>
+          <input id="qty" type="number" min="0" step="0.01" placeholder="10" required />
+        </div>
+        <div>
+          <label>หน่วย</label>
+          <select id="unit">
+            <option>กก.</option>
+            <option>มัด</option>
+            <option>ถุง</option>
+            <option>ลัง</option>
+            <option>ชิ้น</option>
+          </select>
+        </div>
+        <div>
+          <label>ต้นทุน/หน่วย</label>
+          <input id="cost" type="number" min="0" step="0.01" placeholder="25" required />
+        </div>
+        <div>
+          <label>วันรับเข้า</label>
+          <input id="date" type="date" required />
+        </div>
+        <button class="btn-main" type="submit" id="submitBtn">เพิ่มสต็อก</button>
+      </form>
+      <div class="note">ข้อมูลจะถูกเก็บในเครื่องนี้ด้วย LocalStorage เปิดใหม่แล้วยังอยู่ ✅</div>
+    </section>
 
-    <button id="restartBtn">เริ่มใหม่</button>
-  </div>
+    <section class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">📦 รายการสต็อกผัก</h2>
+        <input id="search" placeholder="ค้นหาชื่อผัก..." />
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ชื่อผัก</th>
+            <th>จำนวน</th>
+            <th>ต้นทุน/หน่วย</th>
+            <th>มูลค่า</th>
+            <th>วันรับเข้า</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="stockTable"></tbody>
+      </table>
+    </section>
+  </main>
 
 <script>
-(() => {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+  const form = document.getElementById('stockForm');
+  const nameInput = document.getElementById('name');
+  const qtyInput = document.getElementById('qty');
+  const unitInput = document.getElementById('unit');
+  const costInput = document.getElementById('cost');
+  const dateInput = document.getElementById('date');
+  const submitBtn = document.getElementById('submitBtn');
+  const table = document.getElementById('stockTable');
+  const searchInput = document.getElementById('search');
 
-  const scoreEl = document.getElementById('score');
-  const knivesEl = document.getElementById('knives');
-  const levelEl = document.getElementById('level');
-  const restartBtn = document.getElementById('restartBtn');
+  let stocks = JSON.parse(localStorage.getItem('vegetable_stocks') || '[]');
+  let editId = null;
 
-  const W = canvas.width;
-  const H = canvas.height;
+  dateInput.valueAsDate = new Date();
 
-  let score = 0;
-  let level = 1;
-  let knivesLeft = 10;
-  let gameOver = false;
-
-  const target = {
-    x: W/2,
-    y: 200,
-    radius: 90,
-    angle: 0,
-    speed: 0.03
-  };
-
-  const stuckKnives = [];
-  const flyingKnives = [];
-
-  function reset(){
-    score = 0;
-    level = 1;
-    knivesLeft = 10;
-    gameOver = false;
-
-    target.speed = 0.03;
-    stuckKnives.length = 0;
-    flyingKnives.length = 0;
-
-    updateHUD();
-    loop();
+  function save(){
+    localStorage.setItem('vegetable_stocks', JSON.stringify(stocks));
   }
 
-  function updateHUD(){
-    scoreEl.textContent = score;
-    knivesEl.textContent = knivesLeft;
-    levelEl.textContent = level;
+  function money(n){
+    return '฿' + Number(n).toLocaleString('th-TH', { maximumFractionDigits:2 });
   }
 
-  function throwKnife(){
-    if(gameOver || knivesLeft <= 0) return;
-
-    flyingKnives.push({
-      x: W/2,
-      y: H - 80,
-      speed: 14
-    });
-
-    knivesLeft--;
-    updateHUD();
+  function getStatus(qty){
+    if(qty <= 0) return { text:'หมด', cls:'empty' };
+    if(qty <= 5) return { text:'ใกล้หมด', cls:'low' };
+    return { text:'ปกติ', cls:'ok' };
   }
 
-  function nextLevel(){
-    level++;
-    knivesLeft = 10;
-    stuckKnives.length = 0;
-    flyingKnives.length = 0;
+  function render(){
+    const keyword = searchInput.value.trim().toLowerCase();
+    const filtered = stocks.filter(item => item.name.toLowerCase().includes(keyword));
 
-    target.speed += 0.01;
+    table.innerHTML = filtered.map(item => {
+      const status = getStatus(Number(item.qty));
+      const value = Number(item.qty) * Number(item.cost);
+      return `
+        <tr>
+          <td><b>${item.name}</b></td>
+          <td>${item.qty} ${item.unit}</td>
+          <td>${money(item.cost)}</td>
+          <td>${money(value)}</td>
+          <td>${item.date}</td>
+          <td><span class="status ${status.cls}">${status.text}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn-edit" onclick="editItem('${item.id}')">แก้ไข</button>
+              <button class="btn-delete" onclick="deleteItem('${item.id}')">ลบ</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('') || `<tr><td colspan="7" style="text-align:center;color:#777">ยังไม่มีรายการสต็อก</td></tr>`;
 
-    updateHUD();
+    updateStats();
   }
 
-  function endGame(){
-    gameOver = true;
+  function updateStats(){
+    const totalItems = stocks.length;
+    const totalQty = stocks.reduce((sum,item) => sum + Number(item.qty), 0);
+    const totalValue = stocks.reduce((sum,item) => sum + Number(item.qty) * Number(item.cost), 0);
+    const lowItems = stocks.filter(item => Number(item.qty) <= 5).length;
+
+    document.getElementById('totalItems').textContent = totalItems;
+    document.getElementById('totalQty').textContent = totalQty.toLocaleString('th-TH');
+    document.getElementById('totalValue').textContent = money(totalValue);
+    document.getElementById('lowItems').textContent = lowItems;
   }
 
-  function update(){
-    target.angle += target.speed;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    for(let i = flyingKnives.length - 1; i >= 0; i--){
-      const k = flyingKnives[i];
-      k.y -= k.speed;
+    const item = {
+      id: editId || Date.now().toString(),
+      name: nameInput.value.trim(),
+      qty: Number(qtyInput.value),
+      unit: unitInput.value,
+      cost: Number(costInput.value),
+      date: dateInput.value
+    };
 
-      if(k.y <= target.y + target.radius){
-
-        const hitAngle = (Math.PI * 1.5 - target.angle) % (Math.PI * 2);
-
-        for(const s of stuckKnives){
-          let diff = Math.abs(hitAngle - s.angle);
-          diff = Math.min(diff, Math.PI * 2 - diff);
-
-          if(diff < 0.25){
-            endGame();
-            return;
-          }
-        }
-
-        stuckKnives.push({ angle: hitAngle });
-        flyingKnives.splice(i,1);
-
-        score += 10;
-
-        if(knivesLeft <= 0){
-          nextLevel();
-        }
-
-        updateHUD();
-      }
-    }
-  }
-
-  function drawTarget(){
-    ctx.save();
-    ctx.translate(target.x, target.y);
-    ctx.rotate(target.angle);
-
-    const grad = ctx.createRadialGradient(0,0,20,0,0,target.radius);
-    grad.addColorStop(0,'#8b5a2b');
-    grad.addColorStop(1,'#3d220f');
-
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(0,0,target.radius,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 5;
-    ctx.stroke();
-
-    for(const k of stuckKnives){
-      ctx.save();
-      ctx.rotate(k.angle);
-
-      ctx.fillStyle = '#ddd';
-      ctx.fillRect(-4,-target.radius-45,8,50);
-
-      ctx.fillStyle = '#8b0000';
-      ctx.beginPath();
-      ctx.moveTo(-10,-target.radius+5);
-      ctx.lineTo(0,-target.radius-15);
-      ctx.lineTo(10,-target.radius+5);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.restore();
+    if(editId){
+      stocks = stocks.map(s => s.id === editId ? item : s);
+      editId = null;
+      submitBtn.textContent = 'เพิ่มสต็อก';
+    }else{
+      stocks.push(item);
     }
 
-    ctx.restore();
-  }
-
-  function drawFlyingKnives(){
-    for(const k of flyingKnives){
-      ctx.fillStyle = '#ddd';
-      ctx.fillRect(k.x - 4, k.y - 40, 8, 50);
-
-      ctx.fillStyle = '#8b0000';
-      ctx.beginPath();
-      ctx.moveTo(k.x - 10, k.y - 40);
-      ctx.lineTo(k.x, k.y - 60);
-      ctx.lineTo(k.x + 10, k.y - 40);
-      ctx.closePath();
-      ctx.fill();
-    }
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-
-    const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,'#1d0000');
-    bg.addColorStop(1,'#050505');
-
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
-
-    drawTarget();
-    drawFlyingKnives();
-
-    if(gameOver){
-      ctx.fillStyle = 'rgba(0,0,0,.55)';
-      ctx.fillRect(0,0,W,H);
-
-      ctx.fillStyle = '#ff4444';
-      ctx.font = 'bold 52px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', W/2, H/2);
-
-      ctx.fillStyle = '#fff';
-      ctx.font = '24px sans-serif';
-      ctx.fillText('กดปุ่มเริ่มใหม่เพื่อเล่นอีกครั้ง', W/2, H/2 + 50);
-    }
-  }
-
-  function loop(){
-    if(gameOver){
-      draw();
-      return;
-    }
-
-    update();
-    draw();
-    requestAnimationFrame(loop);
-  }
-
-  window.addEventListener('keydown', (e) => {
-    if(e.code === 'Space'){
-      e.preventDefault();
-      throwKnife();
-    }
+    save();
+    form.reset();
+    dateInput.valueAsDate = new Date();
+    render();
   });
 
-  canvas.addEventListener('pointerdown', () => {
-    throwKnife();
-  });
+  window.editItem = function(id){
+    const item = stocks.find(s => s.id === id);
+    if(!item) return;
 
-  restartBtn.onclick = () => reset();
+    editId = id;
+    nameInput.value = item.name;
+    qtyInput.value = item.qty;
+    unitInput.value = item.unit;
+    costInput.value = item.cost;
+    dateInput.value = item.date;
+    submitBtn.textContent = 'บันทึกแก้ไข';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
 
-  reset();
-})();
+  window.deleteItem = function(id){
+    if(confirm('ต้องการลบรายการนี้ใช่ไหม?')){
+      stocks = stocks.filter(s => s.id !== id);
+      save();
+      render();
+    }
+  }
+
+  searchInput.addEventListener('input', render);
+  render();
 </script>
 </body>
 </html>
