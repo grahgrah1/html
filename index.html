@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เด็กชายวิ่งวิบากเปิดเทอม 🧒🎒</title>
+  <title>เด็กชายวิ่งวิบากเปิดเทอม 3 เลน 🧒🎒</title>
   <style>
     body{
       margin:0;
@@ -26,28 +26,25 @@
       width:100%;
       max-width:920px;
       aspect-ratio: 16 / 6;
-      background: linear-gradient(#300, #111);
+      background:#111;
       border-radius:16px;
       box-shadow:0 0 20px rgba(255,215,0,.35);
       border:1px solid rgba(255,215,0,.25);
       display:block;
       margin:0 auto;
-      touch-action: none;
+      touch-action:none;
     }
-    .bar{
-      display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
-      margin: 10px 0 0;
-    }
+    .bar{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0 0; }
     button{
       font-size:16px;
       padding:10px 16px;
       border:none;
       border-radius:12px;
       cursor:pointer;
-      background: linear-gradient(45deg, #d4af37, #ffcc00);
+      background:linear-gradient(45deg, #d4af37, #ffcc00);
       color:#111;
       box-shadow:0 0 12px rgba(255,204,0,.35);
-      font-weight:700;
+      font-weight:800;
     }
     .hud{ margin-top:10px; color:#eee; font-size:14px; }
     .hud b{ color:#00ff99; }
@@ -55,8 +52,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>🧒 เกมวิบากเปิดเทอม: เด็กชายฝ่าค่าใช้จ่าย 🎒</h1>
-    <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
+    <h1>🧒 เกมวิบากเปิดเทอม: เด็กชายวิ่ง 3 เลน 🎒</h1>
+    <p class="hint">คอม: ← → เปลี่ยนเลน / Space กระโดด • มือถือ: แตะซ้าย-ขวาเปลี่ยนเลน / แตะกลางกระโดด</p>
 
     <canvas id="game" width="960" height="360"></canvas>
 
@@ -84,9 +81,12 @@
   const restartBtn = document.getElementById("restartBtn");
   const autostartBtn = document.getElementById("autostartBtn");
 
-  const W = canvas.width, H = canvas.height;
-  const groundY = Math.floor(H * 0.78);
-  const BEST_KEY = "boy_obstacle_school_best";
+  const W = canvas.width;
+  const H = canvas.height;
+  const horizonY = 108;
+  const playerBaseY = 278;
+  const lanes = [-1, 0, 1];
+  const BEST_KEY = "boy_subway_runner_best_v2";
 
   let best = Number(localStorage.getItem(BEST_KEY) || 0);
   bestEl.textContent = best.toLocaleString();
@@ -94,117 +94,131 @@
   let running = false;
   let gameOver = false;
   let autoStart = false;
-  let pressing = false;
-
   let frame = 0;
   let score = 0;
   let coins = 0;
-  let speed = 6.0;
+  let speed = 6;
   let spawnTick = 0;
   let coinTick = 0;
-
-  const lanes = [W * 0.32, W * 0.5, W * 0.68];
+  let loopStarted = false;
 
   const player = {
-    lane: 1,
-    x: lanes[1],
-    y: groundY - 44,
-    w: 64,
-    h: 44,
+    lane: 0,
+    laneX: 0,
+    jumpY: 0,
     vy: 0,
-    onGround: true
+    onGround: true,
+    w: 54,
+    h: 86
   };
 
   const obstacles = [];
-  const roadLines = [];
   const collectibles = [];
-
   const obstacleTypes = ["gold", "bag", "bill", "cone", "pit"];
+
+  function laneToX(lane, y){
+    const t = (y - horizonY) / (H - horizonY);
+    return W / 2 + lane * (55 + 135 * t);
+  }
+
+  function roadWidthAt(y){
+    const t = (y - horizonY) / (H - horizonY);
+    return 150 + 520 * t;
+  }
 
   function reset(){
     running = autoStart;
     gameOver = false;
-    pressing = false;
+    loopStarted = false;
     frame = 0;
     score = 0;
     coins = 0;
-    speed = 6.0;
+    speed = 6;
     spawnTick = 0;
     coinTick = 0;
-    obstacles.length = 0;
-    collectibles.length = 0;
-    player.y = groundY - player.h;
+    player.lane = 0;
+    player.laneX = 0;
+    player.jumpY = 0;
     player.vy = 0;
     player.onGround = true;
+    obstacles.length = 0;
+    collectibles.length = 0;
     scoreEl.textContent = "0";
     coinsEl.textContent = "0";
     stateEl.textContent = running ? "กำลังเล่น" : "พร้อม";
     draw();
-    if (running) requestAnimationFrame(loop);
+    if (running) startLoop();
+  }
+
+  function startLoop(){
+    if (loopStarted) return;
+    loopStarted = true;
+    requestAnimationFrame(loop);
   }
 
   function start(){
     if (gameOver) return;
-    if (!running){
-      running = true;
-      stateEl.textContent = "กำลังเล่น";
-      requestAnimationFrame(loop);
-    }
+    running = true;
+    stateEl.textContent = "กำลังเล่น";
+    startLoop();
+  }
+
+  function moveLeft(){
+    if (!running && !gameOver) start();
+    if (player.lane > -1) player.lane--;
+  }
+
+  function moveRight(){
+    if (!running && !gameOver) start();
+    if (player.lane < 1) player.lane++;
   }
 
   function jump(){
     if (!running && !gameOver) start();
     if (!running || gameOver) return;
     if (player.onGround){
-      player.vy = -15.8;
+      player.vy = 17;
       player.onGround = false;
     }
   }
 
   function spawnObstacle(){
     const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-    const lane = Math.floor(Math.random() * 3);
-
-    let o = {
-      type,
-      lane,
-      z: 0,
-      x: lanes[lane],
-      y: 0,
-      w: 40,
-      h: 40
-    };
-
-    obstacles.push(o);
+    const lane = lanes[Math.floor(Math.random() * lanes.length)];
+    obstacles.push({ type, lane, z: 0.08 });
   }
 
   function spawnCoin(){
-    collectibles.push({
-      x: W + 20,
-      y: groundY - 88 - Math.random() * 90,
-      r: 13,
-      got: false
-    });
+    const lane = lanes[Math.floor(Math.random() * lanes.length)];
+    collectibles.push({ lane, z: 0.08, r: 10 });
   }
 
-  function hitRect(a,b){
-    return a.x < b.x + b.w &&
-           a.x + a.w > b.x &&
-           a.y < b.y + b.h &&
-           a.y + a.h > b.y;
+  function project(obj){
+    const y = horizonY + obj.z * (H - horizonY);
+    const x = laneToX(obj.lane, y);
+    const scale = 0.35 + obj.z * 1.55;
+    return { x, y, scale };
   }
 
-  function hitCircleRect(c, r){
-    const closestX = Math.max(r.x, Math.min(c.x, r.x + r.w));
-    const closestY = Math.max(r.y, Math.min(c.y, r.y + r.h));
-    const dx = c.x - closestX;
-    const dy = c.y - closestY;
-    return dx * dx + dy * dy < c.r * c.r;
+  function playerBox(){
+    const x = laneToX(player.laneX, playerBaseY);
+    const y = playerBaseY - player.jumpY;
+    return {
+      x: x - player.w / 2,
+      y: y - player.h,
+      w: player.w,
+      h: player.h
+    };
+  }
+
+  function rectsHit(a,b){
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
 
   function end(){
     running = false;
     gameOver = true;
+    loopStarted = false;
     stateEl.textContent = "จบเกม";
     const finalScore = Math.floor(score + coins * 10);
     if (finalScore > best){
@@ -214,77 +228,58 @@
     }
   }
 
-  function moveLeft(){
-    if (player.lane > 0) player.lane--;
-  }
-
-  function moveRight(){
-    if (player.lane < 2) player.lane++;
-  }
-
   function update(){
-    if (!running) return;
-
     frame++;
-    speed += 0.0012;
-    score += 0.7;
+    speed += 0.003;
+    score += 0.75;
 
-    // gravity + float control
-    player.x += (lanes[player.lane] - player.x) * 0.18;
+    player.laneX += (player.lane - player.laneX) * 0.22;
 
-    player.vy += pressing && !player.onGround && player.vy > -2 ? 0.42 : 0.92;
-    player.y += player.vy;
-
-    if (player.y >= groundY - player.h){
-      player.y = groundY - player.h;
-      player.vy = 0;
-      player.onGround = true;
+    if (!player.onGround){
+      player.jumpY += player.vy;
+      player.vy -= 0.92;
+      if (player.jumpY <= 0){
+        player.jumpY = 0;
+        player.vy = 0;
+        player.onGround = true;
+      }
     }
 
     spawnTick++;
-    const every = Math.max(45, 92 - Math.floor(speed * 6));
+    const every = Math.max(42, 90 - Math.floor(speed * 5));
     if (spawnTick >= every){
       spawnObstacle();
       spawnTick = 0;
     }
 
     coinTick++;
-    if (coinTick >= 58){
+    if (coinTick >= 55){
       spawnCoin();
       coinTick = 0;
     }
 
     for (let i = obstacles.length - 1; i >= 0; i--){
-      const o = obstacles[i];
-      o.z += speed * 0.012;
-
-      const scale = 0.25 + o.z;
-      o.w = 30 * scale;
-      o.h = 40 * scale;
-      o.y = 90 + o.z * 230;
-
-      if (o.type === "pit") {
-        o.w = 70 * scale;
-        o.h = 18 * scale;
-      }
-
-      if (o.z > 3.4) obstacles.splice(i,1);
+      obstacles[i].z += speed * 0.0045;
+      if (obstacles[i].z > 1.18) obstacles.splice(i, 1);
     }
 
     for (let i = collectibles.length - 1; i >= 0; i--){
-      collectibles[i].x -= speed * 0.95;
-      if (collectibles[i].x + collectibles[i].r < -50) collectibles.splice(i,1);
+      collectibles[i].z += speed * 0.0045;
+      if (collectibles[i].z > 1.18) collectibles.splice(i, 1);
     }
 
-    for (const o of obstacles){
-      const collisionBox = {
-        x: o.x - o.w/2,
-        y: o.y,
-        w: o.w,
-        h: o.h
-      };
+    const p = playerBox();
 
-      if (hitRect(player, collisionBox)){
+    for (const o of obstacles){
+      const pr = project(o);
+      const ow = (o.type === "pit" ? 84 : 42) * pr.scale;
+      const oh = (o.type === "pit" ? 22 : 50) * pr.scale;
+      const box = { x: pr.x - ow / 2, y: pr.y - oh, w: ow, h: oh };
+      const sameLane = Math.abs(o.lane - player.laneX) < 0.55;
+      const close = o.z > 0.72;
+      const jumpingOver = player.jumpY > 45 && o.type !== "bill";
+
+      if (sameLane && close && !jumpingOver && rectsHit(p, box)){
         end();
         break;
       }
@@ -292,7 +287,10 @@
 
     for (let i = collectibles.length - 1; i >= 0; i--){
       const c = collectibles[i];
-      if (hitCircleRect(c, player)){
+      const pr = project(c);
+      const cr = c.r * pr.scale;
+      const box = { x: pr.x - cr, y: pr.y - cr - 50, w: cr * 2, h: cr * 2 };
+      if (Math.abs(c.lane - player.laneX) < 0.55 && c.z > 0.68 && rectsHit(p, box)){
         coins++;
         collectibles.splice(i,1);
       }
@@ -304,239 +302,210 @@
 
   function drawBackground(){
     const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0, "#6d0000");
-    bg.addColorStop(0.5, "#2a0000");
-    bg.addColorStop(1, "#090909");
+    bg.addColorStop(0, "#7b0000");
+    bg.addColorStop(0.5, "#2b0000");
+    bg.addColorStop(1, "#060606");
     ctx.fillStyle = bg;
     ctx.fillRect(0,0,W,H);
 
-    // city glow
     ctx.save();
     ctx.globalAlpha = 0.18;
-    for(let i=0;i<20;i++){
-      ctx.fillStyle = i % 2 ? "#ffd700" : "#ff3b3b";
-      ctx.fillRect(i * 60, 40 + Math.sin(i) * 10, 30, 90 + (i%3)*40);
+    for(let i=0;i<24;i++){
+      ctx.fillStyle = i % 2 ? "#ffd700" : "#ff4444";
+      ctx.fillRect(i * 45, 34 + (i%4)*11, 25, 70 + (i%5)*16);
     }
     ctx.restore();
+  }
 
-    // road perspective
-    ctx.fillStyle = "#1a1a1a";
+  function drawRoad(){
+    ctx.fillStyle = "#171717";
     ctx.beginPath();
-    ctx.moveTo(W*0.2, H);
-    ctx.lineTo(W*0.42, H*0.32);
-    ctx.lineTo(W*0.58, H*0.32);
-    ctx.lineTo(W*0.8, H);
+    ctx.moveTo(W * 0.18, H);
+    ctx.lineTo(W * 0.42, horizonY);
+    ctx.lineTo(W * 0.58, horizonY);
+    ctx.lineTo(W * 0.82, H);
     ctx.closePath();
     ctx.fill();
 
-    // lane lines
-    ctx.strokeStyle = "rgba(255,255,255,.5)";
-    ctx.lineWidth = 4;
-
-    for(let lane=1; lane<=2; lane++){
+    ctx.strokeStyle = "rgba(255,215,0,.72)";
+    ctx.lineWidth = 3;
+    for (const lx of [-0.5, 0.5]){
       ctx.beginPath();
-      ctx.moveTo(W*(0.2 + lane*0.2), H);
-      ctx.lineTo(W*(0.42 + lane*0.08), H*0.32);
+      ctx.moveTo(laneToX(lx, H), H);
+      ctx.lineTo(laneToX(lx, horizonY), horizonY);
       ctx.stroke();
     }
 
-    // moving stripes
     for(let i=0;i<12;i++){
-      const z = ((i * 0.22) + (frame * speed * 0.003)) % 2;
-      const y = H*0.34 + z * 240;
-      const width = 10 + z * 18;
+      const z = ((i / 12) + (frame * speed * 0.0009)) % 1;
+      const y = horizonY + z * (H - horizonY);
+      const rw = roadWidthAt(y);
+      const stripeW = 8 + z * 22;
+      const stripeH = 8 + z * 18;
+      ctx.fillStyle = "rgba(255,255,255,.62)";
+      ctx.fillRect(W/2 - stripeW/2, y, stripeW, stripeH);
 
-      ctx.fillStyle = "rgba(255,215,0,.75)";
-      ctx.fillRect(W/2 - width/2, y, width, 18 + z * 8);
+      ctx.strokeStyle = "rgba(255,215,0,.22)";
+      ctx.lineWidth = 1 + z * 4;
+      ctx.beginPath();
+      ctx.moveTo(W/2 - rw/2, y);
+      ctx.lineTo(W/2 + rw/2, y);
+      ctx.stroke();
     }
   }
 
-  function drawGround(){
-    ctx.save();
-    ctx.globalAlpha = 0.15;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, groundY, W, H-groundY);
-    ctx.restore();
-  }
-
   function drawBoy(){
-    ctx.save();
-    const x = player.x, y = player.y, w = player.w, h = player.h;
-    const run = running ? Math.sin(frame * 0.42) : 0;
+    const p = playerBox();
+    const x = p.x;
+    const y = p.y;
+    const run = running ? Math.sin(frame * 0.45) : 0;
 
     ctx.save();
-    ctx.globalAlpha = 0.22;
+    ctx.globalAlpha = 0.25;
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.ellipse(x + w/2, groundY + 11, 28, 8, 0, 0, Math.PI*2);
+    ctx.ellipse(p.x + p.w/2, playerBaseY + 6, 32, 9, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.restore();
 
+    ctx.save();
     ctx.fillStyle = "#ffd1a3";
     ctx.beginPath();
-    ctx.arc(x + 34, y + 13, 13, 0, Math.PI*2);
+    ctx.arc(x + 27, y + 14, 14, 0, Math.PI*2);
     ctx.fill();
 
-    ctx.fillStyle = "#181818";
+    ctx.fillStyle = "#171717";
     ctx.beginPath();
-    ctx.arc(x + 34, y + 6, 12, Math.PI, Math.PI*2);
+    ctx.arc(x + 27, y + 7, 13, Math.PI, Math.PI*2);
     ctx.fill();
 
     ctx.fillStyle = "#222";
     ctx.beginPath();
-    ctx.arc(x + 39, y + 12, 1.8, 0, Math.PI*2);
+    ctx.arc(x + 32, y + 13, 2, 0, Math.PI*2);
     ctx.fill();
-    ctx.strokeStyle = "#b65";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(x + 39, y + 18, 4, 0, Math.PI);
-    ctx.stroke();
 
-    ctx.fillStyle = "#ffffff";
-    roundRect(x + 22, y + 28, 27, 32, 7);
+    ctx.fillStyle = "#fff";
+    roundRect(x + 16, y + 30, 28, 34, 7);
     ctx.fill();
     ctx.strokeStyle = "rgba(0,0,0,.25)";
     ctx.lineWidth = 2;
-    roundRect(x + 22, y + 28, 27, 32, 7);
+    roundRect(x + 16, y + 30, 28, 34, 7);
     ctx.stroke();
 
     ctx.fillStyle = "#d60000";
     ctx.beginPath();
-    ctx.moveTo(x + 35, y + 30);
-    ctx.lineTo(x + 40, y + 45);
-    ctx.lineTo(x + 35, y + 55);
-    ctx.lineTo(x + 30, y + 45);
+    ctx.moveTo(x + 30, y + 32);
+    ctx.lineTo(x + 35, y + 49);
+    ctx.lineTo(x + 30, y + 59);
+    ctx.lineTo(x + 25, y + 49);
     ctx.closePath();
     ctx.fill();
 
     ctx.fillStyle = "#c40000";
-    roundRect(x + 12, y + 31, 17, 28, 7);
+    roundRect(x + 6, y + 34, 17, 30, 7);
     ctx.fill();
-    ctx.strokeStyle = "#ffd700";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(x + 28, y + 40, 9, Math.PI/2, Math.PI*1.5);
-    ctx.stroke();
 
     ctx.strokeStyle = "#ffd1a3";
     ctx.lineWidth = 6;
     ctx.lineCap = "round";
     ctx.beginPath();
-    ctx.moveTo(x + 24, y + 36);
-    ctx.lineTo(x + 13 + run * 5, y + 49);
-    ctx.moveTo(x + 48, y + 36);
-    ctx.lineTo(x + 58 - run * 5, y + 48);
+    ctx.moveTo(x + 17, y + 38);
+    ctx.lineTo(x + 8 + run * 5, y + 54);
+    ctx.moveTo(x + 44, y + 38);
+    ctx.lineTo(x + 55 - run * 5, y + 52);
     ctx.stroke();
 
     ctx.fillStyle = "#1b1b1b";
-    roundRect(x + 23, y + 56, 26, 13, 4);
+    roundRect(x + 17, y + 63, 28, 13, 4);
     ctx.fill();
 
     ctx.strokeStyle = "#ffd1a3";
     ctx.lineWidth = 7;
     ctx.beginPath();
-    ctx.moveTo(x + 29, y + 67);
-    ctx.lineTo(x + 22 + run * 9, y + 84);
-    ctx.moveTo(x + 43, y + 67);
-    ctx.lineTo(x + 52 - run * 9, y + 84);
+    ctx.moveTo(x + 23, y + 75);
+    ctx.lineTo(x + 15 + run * 10, y + 93);
+    ctx.moveTo(x + 39, y + 75);
+    ctx.lineTo(x + 50 - run * 10, y + 93);
     ctx.stroke();
 
     ctx.strokeStyle = "#111";
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(x + 19 + run * 9, y + 85);
-    ctx.lineTo(x + 31 + run * 9, y + 85);
-    ctx.moveTo(x + 49 - run * 9, y + 85);
-    ctx.lineTo(x + 61 - run * 9, y + 85);
+    ctx.moveTo(x + 12 + run * 10, y + 94);
+    ctx.lineTo(x + 27 + run * 10, y + 94);
+    ctx.moveTo(x + 47 - run * 10, y + 94);
+    ctx.lineTo(x + 62 - run * 10, y + 94);
     ctx.stroke();
-
     ctx.restore();
   }
 
   function drawObstacles(){
     const sorted = [...obstacles].sort((a,b) => a.z - b.z);
-
     for (const o of sorted){
-      const drawObj = {
-        x: o.x - o.w/2,
-        y: o.y,
-        w: o.w,
-        h: o.h
-      };
-
-      if (o.type === "gold") drawGold(drawObj);
-      if (o.type === "bag") drawBag(drawObj);
-      if (o.type === "bill") drawBill(drawObj);
-      if (o.type === "cone") drawCone(drawObj);
-      if (o.type === "pit") drawPit(drawObj);
+      const pr = project(o);
+      const scale = pr.scale;
+      const w = (o.type === "pit" ? 84 : 42) * scale;
+      const h = (o.type === "pit" ? 22 : 50) * scale;
+      const x = pr.x - w / 2;
+      const y = pr.y - h;
+      if (o.type === "gold") drawGold(x,y,w,h);
+      if (o.type === "bag") drawBag(x,y,w,h);
+      if (o.type === "bill") drawBill(x,y,w,h);
+      if (o.type === "cone") drawCone(x,y,w,h);
+      if (o.type === "pit") drawPit(x,y,w,h);
     }
   }
-  }
 
-  function drawGold(o){
-    const grad = ctx.createLinearGradient(o.x, o.y, o.x+o.w, o.y+o.h);
+  function drawGold(x,y,w,h){
+    const grad = ctx.createLinearGradient(x, y, x+w, y+h);
     grad.addColorStop(0, "#b8860b");
     grad.addColorStop(0.45, "#ffd700");
     grad.addColorStop(1, "#d4af37");
     ctx.fillStyle = grad;
-    roundRect(o.x, o.y, o.w, o.h, 8);
+    roundRect(x, y, w, h, 8);
     ctx.fill();
-    ctx.fillStyle = "rgba(0,0,0,.48)";
-    ctx.font = "800 10px system-ui";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("GOLD", o.x + o.w/2, o.y + o.h/2);
   }
 
-  function drawBag(o){
+  function drawBag(x,y,w,h){
     ctx.fillStyle = "#ca1d1d";
-    roundRect(o.x, o.y+12, o.w, o.h-12, 9);
+    roundRect(x, y + h*0.18, w, h*0.82, 8);
     ctx.fill();
     ctx.strokeStyle = "#ffd700";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = Math.max(2, w * 0.08);
     ctx.beginPath();
-    ctx.arc(o.x+o.w/2, o.y+16, 13, Math.PI, 0);
+    ctx.arc(x+w/2, y+h*0.25, w*0.25, Math.PI, 0);
     ctx.stroke();
-    ctx.fillStyle = "#fff";
-    ctx.font = "700 10px system-ui";
-    ctx.textAlign = "center";
-    ctx.fillText("BAG", o.x+o.w/2, o.y+35);
   }
 
-  function drawBill(o){
+  function drawBill(x,y,w,h){
     ctx.fillStyle = "#f4f4f4";
-    roundRect(o.x, o.y, o.w, o.h, 8);
+    roundRect(x, y, w, h, 8);
     ctx.fill();
     ctx.strokeStyle = "#d00";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(o.x+8, o.y+8, o.w-16, o.h-16);
-    ctx.fillStyle = "#d00";
-    ctx.font = "800 12px system-ui";
-    ctx.textAlign = "center";
-    ctx.fillText("ค่า", o.x+o.w/2, o.y+28);
-    ctx.fillText("เทอม", o.x+o.w/2, o.y+45);
+    ctx.lineWidth = Math.max(2, w * 0.05);
+    ctx.strokeRect(x+w*.18, y+h*.15, w*.64, h*.7);
   }
 
-  function drawCone(o){
+  function drawCone(x,y,w,h){
     ctx.fillStyle = "#ff7a00";
     ctx.beginPath();
-    ctx.moveTo(o.x + o.w/2, o.y);
-    ctx.lineTo(o.x, o.y + o.h);
-    ctx.lineTo(o.x + o.w, o.y + o.h);
+    ctx.moveTo(x + w/2, y);
+    ctx.lineTo(x, y + h);
+    ctx.lineTo(x + w, y + h);
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = Math.max(2, w*.08);
     ctx.beginPath();
-    ctx.moveTo(o.x + 12, o.y + 28);
-    ctx.lineTo(o.x + o.w - 12, o.y + 28);
+    ctx.moveTo(x+w*.25, y+h*.55);
+    ctx.lineTo(x+w*.75, y+h*.55);
     ctx.stroke();
   }
 
-  function drawPit(o){
+  function drawPit(x,y,w,h){
     ctx.fillStyle = "#050505";
     ctx.beginPath();
-    ctx.ellipse(o.x + o.w/2, o.y + 8, o.w/2, 15, 0, 0, Math.PI*2);
+    ctx.ellipse(x+w/2, y+h/2, w/2, h, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.strokeStyle = "rgba(255,215,0,.55)";
     ctx.lineWidth = 2;
@@ -544,46 +513,49 @@
   }
 
   function drawCollectibles(){
-    for (const c of collectibles){
-      const pulse = Math.sin(frame * 0.18) * 2;
-      const grad = ctx.createRadialGradient(c.x-4, c.y-4, 2, c.x, c.y, c.r + pulse);
+    const sorted = [...collectibles].sort((a,b) => a.z - b.z);
+    for (const c of sorted){
+      const pr = project(c);
+      const r = c.r * pr.scale;
+      const y = pr.y - 50 * pr.scale;
+      const grad = ctx.createRadialGradient(pr.x-r*.3, y-r*.3, 2, pr.x, y, r);
       grad.addColorStop(0, "#fff9bd");
       grad.addColorStop(0.45, "#ffd700");
       grad.addColorStop(1, "#b87900");
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(c.x, c.y, c.r + pulse, 0, Math.PI*2);
+      ctx.arc(pr.x, y, r, 0, Math.PI*2);
       ctx.fill();
-      ctx.fillStyle = "rgba(0,0,0,.45)";
-      ctx.font = "800 13px system-ui";
+      ctx.fillStyle = "rgba(0,0,0,.5)";
+      ctx.font = `${Math.max(10, r)}px system-ui`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("฿", c.x, c.y+1);
+      ctx.fillText("฿", pr.x, y+1);
     }
   }
 
   function drawOverlay(){
     if (running) return;
     ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.42)";
+    ctx.fillStyle = "rgba(0,0,0,0.48)";
     ctx.fillRect(0,0,W,H);
 
     ctx.fillStyle = "#ffd700";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "900 34px system-ui";
-    ctx.fillText(gameOver ? "GAME OVER" : "คลิก/แตะ เพื่อเริ่มวิ่งวิบาก", W/2, H*0.40);
+    ctx.fillText(gameOver ? "GAME OVER" : "แตะ / กดปุ่ม เพื่อเริ่ม", W/2, H*0.40);
 
     ctx.font = "700 18px system-ui";
     ctx.fillStyle = "#fff";
-    ctx.fillText(gameOver ? "กด เริ่มใหม่ เพื่อเล่นอีกครั้ง" : "หลบค่าเทอม กระเป๋า บิล กรวย หลุม แล้วเก็บเหรียญ", W/2, H*0.55);
+    ctx.fillText(gameOver ? "กด เริ่มใหม่ เพื่อเล่นอีกครั้ง" : "หลบสิ่งกีดขวาง 3 เลน แล้วเก็บเหรียญ", W/2, H*0.55);
     ctx.restore();
   }
 
   function draw(){
     ctx.clearRect(0,0,W,H);
     drawBackground();
-    drawGround();
+    drawRoad();
     drawCollectibles();
     drawObstacles();
     drawBoy();
@@ -602,7 +574,11 @@
   }
 
   function loop(){
-    if (!running) { draw(); return; }
+    if (!running){
+      loopStarted = false;
+      draw();
+      return;
+    }
     update();
     draw();
     requestAnimationFrame(loop);
@@ -610,27 +586,26 @@
 
   canvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    pressing = true;
-    jump();
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x < rect.width * 0.33) moveLeft();
+    else if (x > rect.width * 0.67) moveRight();
+    else jump();
   });
-
-  canvas.addEventListener("pointerup", () => pressing = false);
-  canvas.addEventListener("pointerleave", () => pressing = false);
 
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space"){
+    if (e.code === "ArrowLeft"){
       e.preventDefault();
-      pressing = true;
+      moveLeft();
+    }
+    if (e.code === "ArrowRight"){
+      e.preventDefault();
+      moveRight();
+    }
+    if (e.code === "Space" || e.code === "ArrowUp"){
+      e.preventDefault();
       jump();
     }
-
-    if (e.code === "ArrowLeft") moveLeft();
-    if (e.code === "ArrowRight") moveRight();
-    if (e.code === "ArrowUp") jump();
-  });
-
-  window.addEventListener("keyup", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp") pressing = false;
   });
 
   startBtn.addEventListener("click", start);
