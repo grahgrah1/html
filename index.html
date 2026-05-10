@@ -148,11 +148,45 @@
       <form id="stockForm">
         <div>
           <label>ชื่อผัก</label>
-          <input id="name" placeholder="เช่น ผักกาด / คะน้า" required />
+          <select id="name" required>
+            <option value="">เลือกชนิดผัก</option>
+            <option>คะน้า</option>
+            <option>ผักกาดขาว</option>
+            <option>ผักบุ้ง</option>
+            <option>กะหล่ำปลี</option>
+            <option>กวางตุ้ง</option>
+            <option>แตงกวา</option>
+            <option>พริก</option>
+            <option>มะเขือเทศ</option>
+            <option>ต้นหอม</option>
+            <option>ผักชี</option>
+            <option>แครอท</option>
+            <option>ฟักทอง</option>
+            <option>ถั่วฝักยาว</option>
+            <option>บรอกโคลี</option>
+            <option>เห็ด</option>
+            <option>ข้าวโพดอ่อน</option>
+            <option>ใบโหระพา</option>
+            <option>กะเพรา</option>
+            <option>ขึ้นฉ่าย</option>
+          </select>
         </div>
         <div>
           <label>จำนวน</label>
-          <input id="qty" type="number" min="0" step="0.01" placeholder="10" required />
+          <select id="qty" required>
+            <option value="">เลือกจำนวน</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>5</option>
+            <option>10</option>
+            <option>15</option>
+            <option>20</option>
+            <option>25</option>
+            <option>30</option>
+            <option>50</option>
+            <option>100</option>
+          </select>
         </div>
         <div>
           <label>หน่วย</label>
@@ -166,11 +200,28 @@
         </div>
         <div>
           <label>ต้นทุน/หน่วย</label>
-          <input id="cost" type="number" min="0" step="0.01" placeholder="25" required />
+          <select id="cost" required>
+            <option value="">เลือกต้นทุน/หน่วย</option>
+            <option>5</option>
+            <option>10</option>
+            <option>15</option>
+            <option>20</option>
+            <option>25</option>
+            <option>30</option>
+            <option>35</option>
+            <option>40</option>
+            <option>50</option>
+            <option>80</option>
+            <option>100</option>
+          </select>
         </div>
         <div>
           <label>วันรับเข้า</label>
-          <input id="date" type="date" required />
+          <select id="date" required>
+            <option value="2026-05-10">วันนี้</option>
+            <option value="2026-05-09">เมื่อวาน</option>
+            <option value="2026-05-08">2 วันที่แล้ว</option>
+          </select>
         </div>
         <button class="btn-main" type="submit" id="submitBtn">เพิ่มสต็อก</button>
       </form>
