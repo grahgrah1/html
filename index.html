@@ -1,338 +1,275 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เด็กชายวิ่งวิบากเปิดเทอม 3 เลน 🧒🎒</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knife Hit 🔪</title>
   <style>
     body{
       margin:0;
       background:#111;
+      overflow:hidden;
       display:flex;
       justify-content:center;
       align-items:center;
-      min-height:100vh;
-      font-family: system-ui, -apple-system, "Prompt", sans-serif;
-      color:#ffd700;
-      padding:16px;
-      user-select:none;
-      -webkit-user-select:none;
-      touch-action: manipulation;
+      height:100vh;
+      font-family:system-ui,sans-serif;
+      color:white;
     }
-    .wrap{ width:min(920px, 100%); text-align:center; }
-    h1{ margin:0 0 8px; text-shadow:0 0 10px rgba(255,215,0,.6); font-size:22px; }
-    .hint{ margin:0 0 12px; color:#ddd; font-size:14px; }
-    canvas{
+
+    .wrap{
+      text-align:center;
       width:100%;
-      max-width:920px;
-      aspect-ratio: 16 / 6;
-      background:#111;
-      border-radius:16px;
-      box-shadow:0 0 20px rgba(255,215,0,.35);
-      border:1px solid rgba(255,215,0,.25);
-      display:block;
-      margin:0 auto;
-      touch-action:none;
+      max-width:900px;
     }
-    .bar{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0 0; }
+
+    canvas{
+      background:radial-gradient(circle at center,#2a2a2a,#090909);
+      border-radius:18px;
+      box-shadow:0 0 25px rgba(255,215,0,.25);
+      width:100%;
+      max-width:900px;
+    }
+
+    h1{
+      color:#ffd700;
+      margin-bottom:10px;
+      text-shadow:0 0 12px rgba(255,215,0,.5);
+    }
+
+    .hud{
+      margin-top:12px;
+      font-size:18px;
+    }
+
+    b{
+      color:#00ff99;
+    }
+
     button{
-      font-size:16px;
-      padding:10px 16px;
+      margin-top:12px;
+      padding:10px 18px;
       border:none;
       border-radius:12px;
-      cursor:pointer;
-      background:linear-gradient(45deg, #d4af37, #ffcc00);
+      background:linear-gradient(45deg,#ffcc00,#d4af37);
       color:#111;
-      box-shadow:0 0 12px rgba(255,204,0,.35);
       font-weight:800;
+      cursor:pointer;
+      font-size:16px;
     }
-    .hud{ margin-top:10px; color:#eee; font-size:14px; }
-    .hud b{ color:#00ff99; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>🧒 เกมวิบากเปิดเทอม: เด็กชายวิ่ง 3 เลน 🎒</h1>
-    <p class="hint">คอม: ← → เปลี่ยนเลน / Space กระโดด • มือถือ: แตะซ้าย-ขวาเปลี่ยนเลน / แตะกลางกระโดด</p>
+    <h1>🔪 เกมปามีด</h1>
 
-    <canvas id="game" width="960" height="360"></canvas>
-
-    <div class="bar">
-      <button id="startBtn">เริ่มเกม</button>
-      <button id="restartBtn">เริ่มใหม่</button>
-      <button id="autostartBtn">เปิดแล้ววิ่งทันที</button>
-    </div>
+    <canvas id="game" width="900" height="600"></canvas>
 
     <div class="hud">
-      คะแนน: <b id="score">0</b> • เหรียญ: <b id="coins">0</b> • สถิติสูงสุด: <b id="best">0</b> • สถานะ: <b id="state">พร้อม</b>
+      คะแนน: <b id="score">0</b>
+      • มีดเหลือ: <b id="knives">10</b>
+      • ด่าน: <b id="level">1</b>
     </div>
+
+    <button id="restartBtn">เริ่มใหม่</button>
   </div>
 
 <script>
 (() => {
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
 
-  const scoreEl = document.getElementById("score");
-  const coinsEl = document.getElementById("coins");
-  const bestEl = document.getElementById("best");
-  const stateEl = document.getElementById("state");
+  const scoreEl = document.getElementById('score');
+  const knivesEl = document.getElementById('knives');
+  const levelEl = document.getElementById('level');
+  const restartBtn = document.getElementById('restartBtn');
 
   const W = canvas.width;
   const H = canvas.height;
-  const horizon = 90;
-  const roadBottom = H;
 
-  let running = false;
   let score = 0;
-  let coins = 0;
-  let speed = 0.012;
-  let frame = 0;
-  let best = Number(localStorage.getItem("runner_best") || 0);
-  bestEl.textContent = best;
+  let level = 1;
+  let knivesLeft = 10;
+  let gameOver = false;
 
-  const player = {
-    lane: 0,
-    x: 0,
-    y: 0,
-    jump: 0,
-    vy: 0,
-    width: 52,
-    height: 88,
-    onGround: true
+  const target = {
+    x: W/2,
+    y: 200,
+    radius: 90,
+    angle: 0,
+    speed: 0.03
   };
 
-  const obstacles = [];
-  const obstacleTypes = ["gold", "cone", "bag"];
-
-  function laneX(lane, y){
-    const t = (y - horizon) / (roadBottom - horizon);
-    return W / 2 + lane * (70 + t * 120);
-  }
-
-  function spawnObstacle(){
-    obstacles.push({
-      lane: [-1,0,1][Math.floor(Math.random() * 3)],
-      z: 0.05,
-      type: obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)]
-    });
-  }
-
-  function jump(){
-    if (!running) start();
-    if (player.onGround){
-      player.vy = 18;
-      player.onGround = false;
-    }
-  }
-
-  function moveLeft(){
-    player.lane = Math.max(-1, player.lane - 1);
-  }
-
-  function moveRight(){
-    player.lane = Math.min(1, player.lane + 1);
-  }
-
-  function start(){
-    if (running) return;
-    running = true;
-    stateEl.textContent = "กำลังเล่น";
-    requestAnimationFrame(loop);
-  }
+  const stuckKnives = [];
+  const flyingKnives = [];
 
   function reset(){
-    running = false;
     score = 0;
-    coins = 0;
-    frame = 0;
-    obstacles.length = 0;
-    player.lane = 0;
-    player.jump = 0;
-    player.vy = 0;
-    player.onGround = true;
-    scoreEl.textContent = 0;
-    coinsEl.textContent = 0;
-    stateEl.textContent = "พร้อม";
-    draw();
+    level = 1;
+    knivesLeft = 10;
+    gameOver = false;
+
+    target.speed = 0.03;
+    stuckKnives.length = 0;
+    flyingKnives.length = 0;
+
+    updateHUD();
+    loop();
   }
 
-  function gameOver(){
-    running = false;
-    stateEl.textContent = "จบเกม";
+  function updateHUD(){
+    scoreEl.textContent = score;
+    knivesEl.textContent = knivesLeft;
+    levelEl.textContent = level;
+  }
 
-    if (score > best){
-      best = Math.floor(score);
-      localStorage.setItem("runner_best", best);
-      bestEl.textContent = best;
-    }
+  function throwKnife(){
+    if(gameOver || knivesLeft <= 0) return;
+
+    flyingKnives.push({
+      x: W/2,
+      y: H - 80,
+      speed: 14
+    });
+
+    knivesLeft--;
+    updateHUD();
+  }
+
+  function nextLevel(){
+    level++;
+    knivesLeft = 10;
+    stuckKnives.length = 0;
+    flyingKnives.length = 0;
+
+    target.speed += 0.01;
+
+    updateHUD();
+  }
+
+  function endGame(){
+    gameOver = true;
   }
 
   function update(){
-    frame++;
-    score += 0.6;
-    scoreEl.textContent = Math.floor(score);
+    target.angle += target.speed;
 
-    if (frame % 70 === 0){
-      spawnObstacle();
-    }
+    for(let i = flyingKnives.length - 1; i >= 0; i--){
+      const k = flyingKnives[i];
+      k.y -= k.speed;
 
-    if (!player.onGround){
-      player.jump += player.vy;
-      player.vy -= 1;
+      if(k.y <= target.y + target.radius){
 
-      if (player.jump <= 0){
-        player.jump = 0;
-        player.vy = 0;
-        player.onGround = true;
-      }
-    }
+        const hitAngle = (Math.PI * 1.5 - target.angle) % (Math.PI * 2);
 
-    for(let i = obstacles.length - 1; i >= 0; i--){
-      const o = obstacles[i];
-      o.z += speed;
+        for(const s of stuckKnives){
+          let diff = Math.abs(hitAngle - s.angle);
+          diff = Math.min(diff, Math.PI * 2 - diff);
 
-      if (o.z > 1.1){
-        obstacles.splice(i,1);
-        continue;
-      }
+          if(diff < 0.25){
+            endGame();
+            return;
+          }
+        }
 
-      if (o.z > 0.82 && Math.abs(o.lane - player.lane) < 0.1 && player.jump < 40){
-        gameOver();
+        stuckKnives.push({ angle: hitAngle });
+        flyingKnives.splice(i,1);
+
+        score += 10;
+
+        if(knivesLeft <= 0){
+          nextLevel();
+        }
+
+        updateHUD();
       }
     }
   }
 
-  function drawBackground(){
-    const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,"#7a0000");
-    bg.addColorStop(1,"#0a0a0a");
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
-
-    ctx.fillStyle = "#1a1a1a";
-    ctx.beginPath();
-    ctx.moveTo(W*0.18, H);
-    ctx.lineTo(W*0.42, horizon);
-    ctx.lineTo(W*0.58, horizon);
-    ctx.lineTo(W*0.82, H);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.strokeStyle = "rgba(255,255,255,.5)";
-    ctx.lineWidth = 3;
-
-    ctx.beginPath();
-    ctx.moveTo(W*0.38, H);
-    ctx.lineTo(W*0.47, horizon);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(W*0.62, H);
-    ctx.lineTo(W*0.53, horizon);
-    ctx.stroke();
-  }
-
-  function drawPlayer(){
-    const px = laneX(player.lane, 300);
-    const py = 300 - player.jump;
-
-    // shadow
-    ctx.fillStyle = "rgba(0,0,0,.3)";
-    ctx.beginPath();
-    ctx.ellipse(px, 312, 28, 8, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // head
-    ctx.fillStyle = "#ffd1a3";
-    ctx.beginPath();
-    ctx.arc(px, py - 60, 14, 0, Math.PI*2);
-    ctx.fill();
-
-    // hair
-    ctx.fillStyle = "#111";
-    ctx.beginPath();
-    ctx.arc(px, py - 65, 13, Math.PI, Math.PI*2);
-    ctx.fill();
-
-    // body
-    ctx.fillStyle = "white";
-    ctx.fillRect(px - 14, py - 45, 28, 35);
-
-    // tie
-    ctx.fillStyle = "red";
-    ctx.fillRect(px - 2, py - 40, 4, 20);
-
-    // shorts
-    ctx.fillStyle = "#111";
-    ctx.fillRect(px - 14, py - 10, 28, 12);
-
-    // legs
-    ctx.strokeStyle = "#ffd1a3";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(px - 8, py + 2);
-    ctx.lineTo(px - 12, py + 20);
-    ctx.moveTo(px + 8, py + 2);
-    ctx.lineTo(px + 12, py + 20);
-    ctx.stroke();
-  }
-
-  function drawObstacle(o){
-    const y = horizon + o.z * 230;
-    const x = laneX(o.lane, y);
-    const scale = 0.2 + o.z * 1.2;
-
+  function drawTarget(){
     ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
+    ctx.translate(target.x, target.y);
+    ctx.rotate(target.angle);
 
-    if (o.type === "gold"){
-      ctx.fillStyle = "gold";
-      ctx.fillRect(-25,-18,50,28);
-    }
+    const grad = ctx.createRadialGradient(0,0,20,0,0,target.radius);
+    grad.addColorStop(0,'#8b5a2b');
+    grad.addColorStop(1,'#3d220f');
 
-    if (o.type === "cone"){
-      ctx.fillStyle = "orange";
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0,0,target.radius,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    for(const k of stuckKnives){
+      ctx.save();
+      ctx.rotate(k.angle);
+
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(-4,-target.radius-45,8,50);
+
+      ctx.fillStyle = '#8b0000';
       ctx.beginPath();
-      ctx.moveTo(0,-25);
-      ctx.lineTo(-20,15);
-      ctx.lineTo(20,15);
+      ctx.moveTo(-10,-target.radius+5);
+      ctx.lineTo(0,-target.radius-15);
+      ctx.lineTo(10,-target.radius+5);
       ctx.closePath();
       ctx.fill();
-    }
 
-    if (o.type === "bag"){
-      ctx.fillStyle = "#c40000";
-      ctx.fillRect(-20,-25,40,40);
+      ctx.restore();
     }
 
     ctx.restore();
   }
 
+  function drawFlyingKnives(){
+    for(const k of flyingKnives){
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(k.x - 4, k.y - 40, 8, 50);
+
+      ctx.fillStyle = '#8b0000';
+      ctx.beginPath();
+      ctx.moveTo(k.x - 10, k.y - 40);
+      ctx.lineTo(k.x, k.y - 60);
+      ctx.lineTo(k.x + 10, k.y - 40);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
   function draw(){
     ctx.clearRect(0,0,W,H);
-    drawBackground();
 
-    for(const o of obstacles){
-      drawObstacle(o);
-    }
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#1d0000');
+    bg.addColorStop(1,'#050505');
 
-    drawPlayer();
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
 
-    if (!running){
-      ctx.fillStyle = "rgba(0,0,0,.4)";
+    drawTarget();
+    drawFlyingKnives();
+
+    if(gameOver){
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
       ctx.fillRect(0,0,W,H);
 
-      ctx.fillStyle = "#ffd700";
-      ctx.font = "bold 34px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("กดเริ่มเกม", W/2, H/2);
+      ctx.fillStyle = '#ff4444';
+      ctx.font = 'bold 52px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', W/2, H/2);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px sans-serif';
+      ctx.fillText('กดปุ่มเริ่มใหม่เพื่อเล่นอีกครั้ง', W/2, H/2 + 50);
     }
   }
 
   function loop(){
-    if (!running){
+    if(gameOver){
       draw();
       return;
     }
@@ -342,27 +279,18 @@
     requestAnimationFrame(loop);
   }
 
-  document.getElementById("startBtn").onclick = () => start();
-  document.getElementById("restartBtn").onclick = () => reset();
-  document.getElementById("autostartBtn").onclick = () => {
-    reset();
-    start();
-  };
-
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "ArrowLeft") moveLeft();
-    if (e.code === "ArrowRight") moveRight();
-    if (e.code === "Space" || e.code === "ArrowUp") jump();
+  window.addEventListener('keydown', (e) => {
+    if(e.code === 'Space'){
+      e.preventDefault();
+      throwKnife();
+    }
   });
 
-  canvas.addEventListener("pointerdown", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-
-    if (x < rect.width * 0.33) moveLeft();
-    else if (x > rect.width * 0.66) moveRight();
-    else jump();
+  canvas.addEventListener('pointerdown', () => {
+    throwKnife();
   });
+
+  restartBtn.onclick = () => reset();
 
   reset();
 })();
