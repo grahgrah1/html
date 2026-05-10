@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cash Jump x Gold Bar 🧾🪙</title>
+  <title>Cash Jump วิ่งวิบากเปิดเทอม 🧾🎒</title>
   <style>
     body{
       margin:0;
@@ -47,6 +47,7 @@
       background: linear-gradient(45deg, #d4af37, #ffcc00);
       color:#111;
       box-shadow:0 0 12px rgba(255,204,0,.35);
+      font-weight:700;
     }
     .hud{ margin-top:10px; color:#eee; font-size:14px; }
     .hud b{ color:#00ff99; }
@@ -54,8 +55,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>🧾 เงินกระดาษกระโดดข้ามทองคำแท่ง 🪙</h1>
-    <p class="hint">คลิก/แตะที่เกม = กระโดด • ชนทองแท่ง = จบเกม</p>
+    <h1>🧾 เกมวิบากเปิดเทอม: เงินสดฝ่าค่าใช้จ่าย 🎒</h1>
+    <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
 
     <canvas id="game" width="960" height="360"></canvas>
 
@@ -66,7 +67,7 @@
     </div>
 
     <div class="hud">
-      คะแนน: <b id="score">0</b> • สถิติสูงสุด: <b id="best">0</b> • สถานะ: <b id="state">พร้อม</b>
+      คะแนน: <b id="score">0</b> • เหรียญ: <b id="coins">0</b> • สถิติสูงสุด: <b id="best">0</b> • สถานะ: <b id="state">พร้อม</b>
     </div>
   </div>
 
@@ -76,6 +77,7 @@
   const ctx = canvas.getContext("2d");
 
   const scoreEl = document.getElementById("score");
+  const coinsEl = document.getElementById("coins");
   const bestEl  = document.getElementById("best");
   const stateEl = document.getElementById("state");
   const startBtn = document.getElementById("startBtn");
@@ -84,20 +86,23 @@
 
   const W = canvas.width, H = canvas.height;
   const groundY = Math.floor(H * 0.78);
+  const BEST_KEY = "cashjump_obstacle_best";
 
-  const BEST_KEY = "cashjump_best";
   let best = Number(localStorage.getItem(BEST_KEY) || 0);
   bestEl.textContent = best.toLocaleString();
 
   let running = false;
   let gameOver = false;
   let autoStart = false;
+  let pressing = false;
 
   let frame = 0;
   let score = 0;
+  let coins = 0;
   let speed = 6.0;
+  let spawnTick = 0;
+  let coinTick = 0;
 
-  // 🧾 Player = banknote
   const player = {
     x: Math.floor(W * 0.12),
     y: groundY - 44,
@@ -107,88 +112,115 @@
     onGround: true
   };
 
-  // 🪙 Obstacles = gold bars
-  const goldBars = [];
-  let spawnTick = 0;
+  const obstacles = [];
+  const collectibles = [];
+
+  const obstacleTypes = ["gold", "bag", "bill", "cone", "pit"];
 
   function reset(){
-    running = autoStart;          // ถ้าเปิด autostart จะวิ่งทันที
+    running = autoStart;
     gameOver = false;
+    pressing = false;
     frame = 0;
     score = 0;
+    coins = 0;
     speed = 6.0;
+    spawnTick = 0;
+    coinTick = 0;
+    obstacles.length = 0;
+    collectibles.length = 0;
     player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
-    goldBars.length = 0;
-    spawnTick = 0;
     scoreEl.textContent = "0";
+    coinsEl.textContent = "0";
     stateEl.textContent = running ? "กำลังเล่น" : "พร้อม";
     draw();
-    if (running) loop();
+    if (running) requestAnimationFrame(loop);
+  }
+
+  function start(){
+    if (gameOver) return;
+    if (!running){
+      running = true;
+      stateEl.textContent = "กำลังเล่น";
+      requestAnimationFrame(loop);
+    }
   }
 
   function jump(){
+    if (!running && !gameOver) start();
     if (!running || gameOver) return;
     if (player.onGround){
-      player.vy = -15.5;
+      player.vy = -15.8;
       player.onGround = false;
     }
   }
 
-  function spawnGoldBar(){
-    const scale = 1 + Math.min(0.25, speed / 50);
-    const w = 56 * scale;
-    const h = 26 * scale;
+  function spawnObstacle(){
+    const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+    let o = { type, x: W + 30, y: groundY, w: 50, h: 40 };
 
-    goldBars.push({
-      x: W + 30,
-      y: groundY - h,
-      w, h
+    if (type === "gold") {
+      o.w = 58; o.h = 28; o.y = groundY - o.h;
+    } else if (type === "bag") {
+      o.w = 44; o.h = 52; o.y = groundY - o.h;
+    } else if (type === "bill") {
+      o.w = 42; o.h = 64; o.y = groundY - o.h;
+    } else if (type === "cone") {
+      o.w = 42; o.h = 48; o.y = groundY - o.h;
+    } else if (type === "pit") {
+      o.w = 84; o.h = 18; o.y = groundY + 2;
+    }
+
+    obstacles.push(o);
+  }
+
+  function spawnCoin(){
+    collectibles.push({
+      x: W + 20,
+      y: groundY - 88 - Math.random() * 90,
+      r: 13,
+      got: false
     });
   }
 
-  function hit(a,b){
+  function hitRect(a,b){
     return a.x < b.x + b.w &&
            a.x + a.w > b.x &&
            a.y < b.y + b.h &&
            a.y + a.h > b.y;
   }
 
+  function hitCircleRect(c, r){
+    const closestX = Math.max(r.x, Math.min(c.x, r.x + r.w));
+    const closestY = Math.max(r.y, Math.min(c.y, r.y + r.h));
+    const dx = c.x - closestX;
+    const dy = c.y - closestY;
+    return dx * dx + dy * dy < c.r * c.r;
+  }
+
   function end(){
     running = false;
     gameOver = true;
     stateEl.textContent = "จบเกม";
-    if (score > best){
-      best = Math.floor(score);
+    const finalScore = Math.floor(score + coins * 10);
+    if (finalScore > best){
+      best = finalScore;
       localStorage.setItem(BEST_KEY, String(best));
       bestEl.textContent = best.toLocaleString();
     }
-  }
-
-  function start(){
-    if (gameOver) return;
-    running = true;
-    stateEl.textContent = "กำลังเล่น";
-    loop();
-  }
-
-  function restart(){
-    // รีเซ็ตโดยไม่ auto-start
-    const keepAuto = autoStart;
-    autoStart = keepAuto;
-    reset();
   }
 
   function update(){
     if (!running) return;
 
     frame++;
-    speed += 0.0010;
-    score += 0.65;
+    speed += 0.0012;
+    score += 0.7;
 
-    // gravity
-    player.vy += 0.92;
+    // gravity + float control
+    player.vy += pressing && !player.onGround && player.vy > -2 ? 0.42 : 0.92;
     player.y += player.vy;
 
     if (player.y >= groundY - player.h){
@@ -197,188 +229,260 @@
       player.onGround = true;
     }
 
-    // spawn gold bars (ถี่ขึ้นตามความเร็ว)
     spawnTick++;
-    const every = Math.max(52, 95 - Math.floor(speed * 6));
+    const every = Math.max(45, 92 - Math.floor(speed * 6));
     if (spawnTick >= every){
-      spawnGoldBar();
+      spawnObstacle();
       spawnTick = 0;
     }
 
-    // move gold bars
-    for (let i = goldBars.length - 1; i >= 0; i--){
-      goldBars[i].x -= speed;
-      if (goldBars[i].x + goldBars[i].w < -70) goldBars.splice(i,1);
+    coinTick++;
+    if (coinTick >= 58){
+      spawnCoin();
+      coinTick = 0;
     }
 
-    // collision
-    for (const g of goldBars){
-      if (hit(player, g)){
+    for (let i = obstacles.length - 1; i >= 0; i--){
+      obstacles[i].x -= speed;
+      if (obstacles[i].x + obstacles[i].w < -100) obstacles.splice(i,1);
+    }
+
+    for (let i = collectibles.length - 1; i >= 0; i--){
+      collectibles[i].x -= speed * 0.95;
+      if (collectibles[i].x + collectibles[i].r < -50) collectibles.splice(i,1);
+    }
+
+    for (const o of obstacles){
+      if (hitRect(player, o)){
         end();
         break;
       }
     }
 
+    for (let i = collectibles.length - 1; i >= 0; i--){
+      const c = collectibles[i];
+      if (hitCircleRect(c, player)){
+        coins++;
+        collectibles.splice(i,1);
+      }
+    }
+
     scoreEl.textContent = Math.floor(score).toLocaleString();
+    coinsEl.textContent = coins.toLocaleString();
   }
 
-  // ---------- Drawing ----------
   function drawBackground(){
-    // base gradient (แดง-ดำ)
     const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0, "rgba(255,255,255,0.02)");
-    bg.addColorStop(0.35, "rgba(255,0,0,0.10)");
-    bg.addColorStop(1, "rgba(0,0,0,0.50)");
+    bg.addColorStop(0, "#df0000");
+    bg.addColorStop(0.55, "#7b0505");
+    bg.addColorStop(1, "#160202");
     ctx.fillStyle = bg;
     ctx.fillRect(0,0,W,H);
 
-    // subtle sparkles
     ctx.save();
-    ctx.globalAlpha = 0.08;
+    ctx.globalAlpha = 0.12;
     ctx.fillStyle = "#ffd700";
-    for(let i=0;i<40;i++){
-      const x = (i*97 + frame*3) % W;
+    for(let i=0;i<54;i++){
+      const x = (i*97 + frame*2.6) % W;
       const y = (i*53 + 30) % H;
       ctx.fillRect(x, y, 2, 2);
     }
     ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = "#fff3a6";
+    ctx.font = "700 28px system-ui";
+    ctx.fillText("ค่าเทอม", (W - frame * 0.7) % W, 78);
+    ctx.fillText("ค่าชุด", (W + 280 - frame * 0.55) % W, 135);
+    ctx.fillText("ค่าอุปกรณ์", (W + 560 - frame * 0.5) % W, 95);
+    ctx.restore();
   }
 
   function drawGround(){
-    ctx.strokeStyle = "rgba(255,215,0,.75)";
-    ctx.lineWidth = 3;
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    ctx.fillRect(0, groundY + 2, W, H - groundY);
+
+    ctx.strokeStyle = "rgba(255,215,0,.85)";
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(0, groundY+1);
-    ctx.lineTo(W, groundY+1);
+    ctx.moveTo(0, groundY + 1);
+    ctx.lineTo(W, groundY + 1);
     ctx.stroke();
 
-    // dashes
     ctx.save();
-    ctx.globalAlpha = 0.45;
-    ctx.strokeStyle = "rgba(255,215,0,.6)";
+    ctx.globalAlpha = 0.5;
+    ctx.strokeStyle = "rgba(255,215,0,.7)";
     ctx.lineWidth = 2;
-    const dashW = 18, gap = 14;
+    const dashW = 22, gap = 14;
     const offset = -((frame * speed) % (dashW + gap));
-    for(let x = offset; x < W; x += (dashW + gap)){
+    for(let x = offset; x < W; x += dashW + gap){
       ctx.beginPath();
-      ctx.moveTo(x, groundY+18);
-      ctx.lineTo(x + dashW, groundY+18);
+      ctx.moveTo(x, groundY + 20);
+      ctx.lineTo(x + dashW, groundY + 20);
       ctx.stroke();
     }
     ctx.restore();
   }
 
-  // 🧾 วาดเงินกระดาษ
   function drawBanknote(){
     ctx.save();
-
     const x = player.x, y = player.y, w = player.w, h = player.h;
+    const tilt = player.onGround ? Math.sin(frame * 0.18) * 0.05 : -0.15;
+    ctx.translate(x + w/2, y + h/2);
+    ctx.rotate(tilt);
+    ctx.translate(-w/2, -h/2);
 
-    // note body gradient (เขียวอ่อน-เขียวเข้ม)
-    const g = ctx.createLinearGradient(x, y, x+w, y+h);
-    g.addColorStop(0, "#bff5cf");
-    g.addColorStop(0.5, "#5be39a");
-    g.addColorStop(1, "#1aa86a");
-
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#c7ffd8");
+    g.addColorStop(0.5, "#4dea91");
+    g.addColorStop(1, "#148f5a");
     ctx.fillStyle = g;
-    roundRect(x, y, w, h, 10);
+    roundRect(0, 0, w, h, 10);
     ctx.fill();
 
-    // border
     ctx.strokeStyle = "rgba(0,0,0,0.35)";
     ctx.lineWidth = 2;
-    roundRect(x+1, y+1, w-2, h-2, 9);
+    roundRect(1, 1, w-2, h-2, 9);
     ctx.stroke();
 
-    // center oval
     ctx.fillStyle = "rgba(255,255,255,0.35)";
     ctx.beginPath();
-    ctx.ellipse(x + w*0.52, y + h*0.55, w*0.22, h*0.28, 0, 0, Math.PI*2);
+    ctx.ellipse(w*0.52, h*0.55, w*0.22, h*0.28, 0, 0, Math.PI*2);
     ctx.fill();
 
-    // "฿" symbol
     ctx.fillStyle = "rgba(0,0,0,0.45)";
-    ctx.font = "700 18px system-ui, sans-serif";
+    ctx.font = "800 19px system-ui";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("฿", x + w*0.52, y + h*0.55);
+    ctx.fillText("฿", w*0.52, h*0.55);
 
-    // serial lines
-    ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = "#0b5";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x + w*0.10, y + h*0.20);
-    ctx.lineTo(x + w*0.35, y + h*0.20);
-    ctx.moveTo(x + w*0.65, y + h*0.80);
-    ctx.lineTo(x + w*0.90, y + h*0.80);
-    ctx.stroke();
-
-    // simple "legs" vibe (วิ่ง)
-    ctx.globalAlpha = 1;
     ctx.strokeStyle = "rgba(0,0,0,0.35)";
     ctx.lineWidth = 3;
-    const phase = running ? Math.sin(frame*0.35) : 0;
+    const phase = running ? Math.sin(frame*0.42) : 0;
     ctx.beginPath();
-    ctx.moveTo(x + w*0.25, y + h);
-    ctx.lineTo(x + w*0.25 + phase*4, y + h + 10);
-    ctx.moveTo(x + w*0.75, y + h);
-    ctx.lineTo(x + w*0.75 - phase*4, y + h + 10);
+    ctx.moveTo(w*0.25, h);
+    ctx.lineTo(w*0.25 + phase*4, h + 10);
+    ctx.moveTo(w*0.75, h);
+    ctx.lineTo(w*0.75 - phase*4, h + 10);
     ctx.stroke();
-
     ctx.restore();
   }
 
-  // 🪙 วาดทองคำแท่ง
-  function drawGoldBars(){
-    for (const b of goldBars){
-      const grad = ctx.createLinearGradient(b.x, b.y, b.x+b.w, b.y+b.h);
-      grad.addColorStop(0, "#b8860b");
+  function drawObstacles(){
+    for (const o of obstacles){
+      if (o.type === "gold") drawGold(o);
+      if (o.type === "bag") drawBag(o);
+      if (o.type === "bill") drawBill(o);
+      if (o.type === "cone") drawCone(o);
+      if (o.type === "pit") drawPit(o);
+    }
+  }
+
+  function drawGold(o){
+    const grad = ctx.createLinearGradient(o.x, o.y, o.x+o.w, o.y+o.h);
+    grad.addColorStop(0, "#b8860b");
+    grad.addColorStop(0.45, "#ffd700");
+    grad.addColorStop(1, "#d4af37");
+    ctx.fillStyle = grad;
+    roundRect(o.x, o.y, o.w, o.h, 8);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,.48)";
+    ctx.font = "800 10px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("GOLD", o.x + o.w/2, o.y + o.h/2);
+  }
+
+  function drawBag(o){
+    ctx.fillStyle = "#ca1d1d";
+    roundRect(o.x, o.y+12, o.w, o.h-12, 9);
+    ctx.fill();
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(o.x+o.w/2, o.y+16, 13, Math.PI, 0);
+    ctx.stroke();
+    ctx.fillStyle = "#fff";
+    ctx.font = "700 10px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("BAG", o.x+o.w/2, o.y+35);
+  }
+
+  function drawBill(o){
+    ctx.fillStyle = "#f4f4f4";
+    roundRect(o.x, o.y, o.w, o.h, 8);
+    ctx.fill();
+    ctx.strokeStyle = "#d00";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(o.x+8, o.y+8, o.w-16, o.h-16);
+    ctx.fillStyle = "#d00";
+    ctx.font = "800 12px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("ค่า", o.x+o.w/2, o.y+28);
+    ctx.fillText("เทอม", o.x+o.w/2, o.y+45);
+  }
+
+  function drawCone(o){
+    ctx.fillStyle = "#ff7a00";
+    ctx.beginPath();
+    ctx.moveTo(o.x + o.w/2, o.y);
+    ctx.lineTo(o.x, o.y + o.h);
+    ctx.lineTo(o.x + o.w, o.y + o.h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(o.x + 12, o.y + 28);
+    ctx.lineTo(o.x + o.w - 12, o.y + 28);
+    ctx.stroke();
+  }
+
+  function drawPit(o){
+    ctx.fillStyle = "#050505";
+    ctx.beginPath();
+    ctx.ellipse(o.x + o.w/2, o.y + 8, o.w/2, 15, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,215,0,.55)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function drawCollectibles(){
+    for (const c of collectibles){
+      const pulse = Math.sin(frame * 0.18) * 2;
+      const grad = ctx.createRadialGradient(c.x-4, c.y-4, 2, c.x, c.y, c.r + pulse);
+      grad.addColorStop(0, "#fff9bd");
       grad.addColorStop(0.45, "#ffd700");
-      grad.addColorStop(1, "#d4af37");
+      grad.addColorStop(1, "#b87900");
       ctx.fillStyle = grad;
-
-      roundRect(b.x, b.y, b.w, b.h, 8);
-      ctx.fill();
-
-      // top shine
-      ctx.save();
-      ctx.globalAlpha = 0.35;
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(b.x+6, b.y+6);
-      ctx.lineTo(b.x+b.w-10, b.y+6);
-      ctx.stroke();
-      ctx.restore();
-
-      // small label
-      ctx.save();
-      ctx.globalAlpha = 0.55;
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.font = "700 10px system-ui, sans-serif";
+      ctx.arc(c.x, c.y, c.r + pulse, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(0,0,0,.45)";
+      ctx.font = "800 13px system-ui";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("GOLD", b.x + b.w/2, b.y + b.h/2);
-      ctx.restore();
+      ctx.fillText("฿", c.x, c.y+1);
     }
   }
 
   function drawOverlay(){
     if (running) return;
     ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillStyle = "rgba(0,0,0,0.42)";
     ctx.fillRect(0,0,W,H);
 
     ctx.fillStyle = "#ffd700";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "800 32px system-ui, sans-serif";
-    ctx.fillText(gameOver ? "GAME OVER" : "คลิก/แตะ เพื่อเริ่ม + กระโดด", W/2, H*0.42);
+    ctx.font = "900 34px system-ui";
+    ctx.fillText(gameOver ? "GAME OVER" : "คลิก/แตะ เพื่อเริ่มวิ่งวิบาก", W/2, H*0.40);
 
-    ctx.font = "600 18px system-ui, sans-serif";
-    ctx.fillStyle = "#ddd";
-    ctx.fillText(gameOver ? "กด เริ่มใหม่ ได้เลย" : "เป้าหมาย: กระโดดข้ามทองคำแท่ง", W/2, H*0.55);
+    ctx.font = "700 18px system-ui";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(gameOver ? "กด เริ่มใหม่ เพื่อเล่นอีกครั้ง" : "หลบค่าเทอม กระเป๋า บิล กรวย หลุม แล้วเก็บเหรียญ", W/2, H*0.55);
     ctx.restore();
   }
 
@@ -386,7 +490,8 @@
     ctx.clearRect(0,0,W,H);
     drawBackground();
     drawGround();
-    drawGoldBars();
+    drawCollectibles();
+    drawObstacles();
     drawBanknote();
     drawOverlay();
   }
@@ -409,11 +514,25 @@
     requestAnimationFrame(loop);
   }
 
-  // Controls: click/tap only
   canvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    if (!running && !gameOver) start();
+    pressing = true;
     jump();
+  });
+
+  canvas.addEventListener("pointerup", () => pressing = false);
+  canvas.addEventListener("pointerleave", () => pressing = false);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp"){
+      e.preventDefault();
+      pressing = true;
+      jump();
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp") pressing = false;
   });
 
   startBtn.addEventListener("click", start);
