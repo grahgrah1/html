@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cash Jump วิ่งวิบากเปิดเทอม 🧾🎒</title>
-  <style>
+  <title>เด็กชายวิ่งวิบากเปิดเทอม 🧒🎒</title><style>
     body{
       margin:0;
       background:#111;
@@ -55,8 +54,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>🧾 เกมวิบากเปิดเทอม: เงินสดฝ่าค่าใช้จ่าย 🎒</h1>
-    <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
+    <h1<h1>🧒 เกมวิบากเปิดเทอม: เด็กชายฝ่าค่าใช้จ่าย 🎒</h1>   <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
 
     <canvas id="game" width="960" height="360"></canvas>
 
@@ -86,7 +84,7 @@
 
   const W = canvas.width, H = canvas.height;
   const groundY = Math.floor(H * 0.78);
-  const BEST_KEY = "cashjump_obstacle_best";
+  coconst BEST_KEY = "boy_obstacle_school_best";
 
   let best = Number(localStorage.getItem(BEST_KEY) || 0);
   bestEl.textContent = best.toLocaleString();
@@ -325,51 +323,151 @@
     ctx.restore();
   }
 
-  function drawBanknote(){
+  function drawBoy(){
     ctx.save();
     const x = player.x, y = player.y, w = player.w, h = player.h;
-    const tilt = player.onGround ? Math.sin(frame * 0.18) * 0.05 : -0.15;
-    ctx.translate(x + w/2, y + h/2);
-    ctx.rotate(tilt);
-    ctx.translate(-w/2, -h/2);
+    const run = running ? Math.sin(frame * 0.42) : 0;
 
-    const g = ctx.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, "#c7ffd8");
-    g.addColorStop(0.5, "#4dea91");
-    g.addColorStop(1, "#148f5a");
-    ctx.fillStyle = g;
-    roundRect(0, 0, w, h, 10);
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(x + w/2, groundY + 11, 28, 8, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = "#ffd1a3";
+    ctx.beginPath();
+    ctx.arc(x + 34, y + 13, 13, 0, Math.PI*2);
     ctx.fill();
 
-    ctx.strokeStyle = "rgba(0,0,0,0.35)";
+    ctx.fillStyle = "#181818";
+    ctx.beginPath();
+    ctx.arc(x + 34, y + 6, 12, Math.PI, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "#222";
+    ctx.beginPath();
+    ctx.arc(x + 39, y + 12, 1.8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = "#b65";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x + 39, y + 18, 4, 0, Math.PI);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    roundRect(x + 22, y + 28, 27, 32, 7);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,.25)";
     ctx.lineWidth = 2;
-    roundRect(1, 1, w-2, h-2, 9);
+    roundRect(x + 22, y + 28, 27, 32, 7);
     ctx.stroke();
 
-    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.fillStyle = "#d60000";
     ctx.beginPath();
-    ctx.ellipse(w*0.52, h*0.55, w*0.22, h*0.28, 0, 0, Math.PI*2);
+    ctx.moveTo(x + 35, y + 30);
+    ctx.lineTo(x + 40, y + 45);
+    ctx.lineTo(x + 35, y + 55);
+    ctx.lineTo(x + 30, y + 45);
+    ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    ctx.font = "800 19px system-ui";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("฿", w*0.52, h*0.55);
-
-    ctx.strokeStyle = "rgba(0,0,0,0.35)";
-    ctx.lineWidth = 3;
-    const phase = running ? Math.sin(frame*0.42) : 0;
+    ctx.fillStyle = "#c40000";
+    roundRect(x + 12, y + 31, 17, 28, 7);
+    ctx.fill();
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(w*0.25, h);
-    ctx.lineTo(w*0.25 + phase*4, h + 10);
-    ctx.moveTo(w*0.75, h);
-    ctx.lineTo(w*0.75 - phase*4, h + 10);
+    ctx.arc(x + 28, y + 40, 9, Math.PI/2, Math.PI*1.5);
     ctx.stroke();
+
+    ctx.strokeStyle = "#ffd1a3";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x + 24, y + 36);
+    ctx.lineTo(x + 13 + run * 5, y + 49);
+    ctx.moveTo(x + 48, y + 36);
+    ctx.lineTo(x + 58 - run * 5, y + 48);
+    ctx.stroke();
+
+    ctx.fillStyle = "#1b1b1b";
+    roundRect(x + 23, y + 56, 26, 13, 4);
+    ctx.fill();
+
+    ctx.strokeStyle = "#ffd1a3";
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(x + 29, y + 67);
+    ctx.lineTo(x + 22 + run * 9, y + 84);
+    ctx.moveTo(x + 43, y + 67);
+    ctx.lineTo(x + 52 - run * 9, y + 84);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(x + 19 + run * 9, y + 85);
+    ctx.lineTo(x + 31 + run * 9, y + 85);
+    ctx.moveTo(x + 49 - run * 9, y + 85);
+    ctx.lineTo(x + 61 - run * 9, y + 85);
+    ctx.stroke();
+
     ctx.restore();
   }
 
-  function drawObstacles(){
+  function drawObstacles(){x + 30, y + 45);
+    ctx.closePath();
+    ctx.fill();
+
+    // backpack
+    ctx.fillStyle = "#c40000";
+    roundRect(x + 12, y + 31, 17, 28, 7);
+    ctx.fill();
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x + 28, y + 40, 9, Math.PI/2, Math.PI*1.5);
+    ctx.stroke();
+
+    // arms
+    ctx.strokeStyle = "#ffd1a3";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x + 24, y + 36);
+    ctx.lineTo(x + 13 + run * 5, y + 49);
+    ctx.moveTo(x + 48, y + 36);
+    ctx.lineTo(x + 58 - run * 5, y + 48);
+    ctx.stroke();
+
+    // shorts
+    ctx.fillStyle = "#1b1b1b";
+    roundRect(x + 23, y + 56, 26, 13, 4);
+    ctx.fill();
+
+    // legs
+    ctx.strokeStyle = "#ffd1a3";
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(x + 29, y + 67);
+    ctx.lineTo(x + 22 + run * 9, y + 84);
+    ctx.moveTo(x + 43, y + 67);
+    ctx.lineTo(x + 52 - run * 9, y + 84);
+    ctx.stroke();
+
+    // shoes
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(x + 19 + run * 9, y + 85);
+    ctx.lineTo(x + 31 + run * 9, y + 85);
+    ctx.moveTo(x + 49 - run * 9, y + 85);
+    ctx.lineTo(x + 61 - run * 9, y + 85);
+    ctx.stroke();
+
+    ctx.restore()
     for (const o of obstacles){
       if (o.type === "gold") drawGold(o);
       if (o.type === "bag") drawBag(o);
@@ -451,7 +549,7 @@
 
   function drawCollectibles(){
     for (const c of collectibles){
-      const pulse = Math.sin(frame * 0.18) * 2;
+      const pulse = Math.sin(frdrawBoy();;
       const grad = ctx.createRadialGradient(c.x-4, c.y-4, 2, c.x, c.y, c.r + pulse);
       grad.addColorStop(0, "#fff9bd");
       grad.addColorStop(0.45, "#ffd700");
@@ -493,10 +591,7 @@
     drawCollectibles();
     drawObstacles();
     drawBanknote();
-    drawOverlay();
-  }
-
-  function roundRect(x,y,w,h,r){
+    drawOverlay();n round,r){
     const rr = Math.min(r, w/2, h/2);
     ctx.beginPath();
     ctx.moveTo(x+rr, y);
