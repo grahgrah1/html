@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เด็กชายวิ่งวิบากเปิดเทอม 🧒🎒</title><style>
+  <title>เด็กชายวิ่งวิบากเปิดเทอม 🧒🎒</title>
+  <style>
     body{
       margin:0;
       background:#111;
@@ -54,7 +55,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1<h1>🧒 เกมวิบากเปิดเทอม: เด็กชายฝ่าค่าใช้จ่าย 🎒</h1>   <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
+    <h1>🧒 เกมวิบากเปิดเทอม: เด็กชายฝ่าค่าใช้จ่าย 🎒</h1>
+    <p class="hint">คลิก/แตะ = กระโดด • กดค้างกลางอากาศ = ลอยนิด ๆ • ชนสิ่งกีดขวาง = จบเกม</p>
 
     <canvas id="game" width="960" height="360"></canvas>
 
@@ -84,7 +86,7 @@
 
   const W = canvas.width, H = canvas.height;
   const groundY = Math.floor(H * 0.78);
-  coconst BEST_KEY = "boy_obstacle_school_best";
+  const BEST_KEY = "boy_obstacle_school_best";
 
   let best = Number(localStorage.getItem(BEST_KEY) || 0);
   bestEl.textContent = best.toLocaleString();
@@ -101,8 +103,11 @@
   let spawnTick = 0;
   let coinTick = 0;
 
+  const lanes = [W * 0.32, W * 0.5, W * 0.68];
+
   const player = {
-    x: Math.floor(W * 0.12),
+    lane: 1,
+    x: lanes[1],
     y: groundY - 44,
     w: 64,
     h: 44,
@@ -111,6 +116,7 @@
   };
 
   const obstacles = [];
+  const roadLines = [];
   const collectibles = [];
 
   const obstacleTypes = ["gold", "bag", "bill", "cone", "pit"];
@@ -157,19 +163,17 @@
 
   function spawnObstacle(){
     const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-    let o = { type, x: W + 30, y: groundY, w: 50, h: 40 };
+    const lane = Math.floor(Math.random() * 3);
 
-    if (type === "gold") {
-      o.w = 58; o.h = 28; o.y = groundY - o.h;
-    } else if (type === "bag") {
-      o.w = 44; o.h = 52; o.y = groundY - o.h;
-    } else if (type === "bill") {
-      o.w = 42; o.h = 64; o.y = groundY - o.h;
-    } else if (type === "cone") {
-      o.w = 42; o.h = 48; o.y = groundY - o.h;
-    } else if (type === "pit") {
-      o.w = 84; o.h = 18; o.y = groundY + 2;
-    }
+    let o = {
+      type,
+      lane,
+      z: 0,
+      x: lanes[lane],
+      y: 0,
+      w: 40,
+      h: 40
+    };
 
     obstacles.push(o);
   }
@@ -210,6 +214,14 @@
     }
   }
 
+  function moveLeft(){
+    if (player.lane > 0) player.lane--;
+  }
+
+  function moveRight(){
+    if (player.lane < 2) player.lane++;
+  }
+
   function update(){
     if (!running) return;
 
@@ -218,6 +230,8 @@
     score += 0.7;
 
     // gravity + float control
+    player.x += (lanes[player.lane] - player.x) * 0.18;
+
     player.vy += pressing && !player.onGround && player.vy > -2 ? 0.42 : 0.92;
     player.y += player.vy;
 
@@ -241,8 +255,20 @@
     }
 
     for (let i = obstacles.length - 1; i >= 0; i--){
-      obstacles[i].x -= speed;
-      if (obstacles[i].x + obstacles[i].w < -100) obstacles.splice(i,1);
+      const o = obstacles[i];
+      o.z += speed * 0.012;
+
+      const scale = 0.25 + o.z;
+      o.w = 30 * scale;
+      o.h = 40 * scale;
+      o.y = 90 + o.z * 230;
+
+      if (o.type === "pit") {
+        o.w = 70 * scale;
+        o.h = 18 * scale;
+      }
+
+      if (o.z > 3.4) obstacles.splice(i,1);
     }
 
     for (let i = collectibles.length - 1; i >= 0; i--){
@@ -251,7 +277,14 @@
     }
 
     for (const o of obstacles){
-      if (hitRect(player, o)){
+      const collisionBox = {
+        x: o.x - o.w/2,
+        y: o.y,
+        w: o.w,
+        h: o.h
+      };
+
+      if (hitRect(player, collisionBox)){
         end();
         break;
       }
@@ -271,55 +304,58 @@
 
   function drawBackground(){
     const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0, "#df0000");
-    bg.addColorStop(0.55, "#7b0505");
-    bg.addColorStop(1, "#160202");
+    bg.addColorStop(0, "#6d0000");
+    bg.addColorStop(0.5, "#2a0000");
+    bg.addColorStop(1, "#090909");
     ctx.fillStyle = bg;
     ctx.fillRect(0,0,W,H);
 
+    // city glow
     ctx.save();
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = "#ffd700";
-    for(let i=0;i<54;i++){
-      const x = (i*97 + frame*2.6) % W;
-      const y = (i*53 + 30) % H;
-      ctx.fillRect(x, y, 2, 2);
+    ctx.globalAlpha = 0.18;
+    for(let i=0;i<20;i++){
+      ctx.fillStyle = i % 2 ? "#ffd700" : "#ff3b3b";
+      ctx.fillRect(i * 60, 40 + Math.sin(i) * 10, 30, 90 + (i%3)*40);
     }
     ctx.restore();
 
-    ctx.save();
-    ctx.globalAlpha = 0.16;
-    ctx.fillStyle = "#fff3a6";
-    ctx.font = "700 28px system-ui";
-    ctx.fillText("ค่าเทอม", (W - frame * 0.7) % W, 78);
-    ctx.fillText("ค่าชุด", (W + 280 - frame * 0.55) % W, 135);
-    ctx.fillText("ค่าอุปกรณ์", (W + 560 - frame * 0.5) % W, 95);
-    ctx.restore();
+    // road perspective
+    ctx.fillStyle = "#1a1a1a";
+    ctx.beginPath();
+    ctx.moveTo(W*0.2, H);
+    ctx.lineTo(W*0.42, H*0.32);
+    ctx.lineTo(W*0.58, H*0.32);
+    ctx.lineTo(W*0.8, H);
+    ctx.closePath();
+    ctx.fill();
+
+    // lane lines
+    ctx.strokeStyle = "rgba(255,255,255,.5)";
+    ctx.lineWidth = 4;
+
+    for(let lane=1; lane<=2; lane++){
+      ctx.beginPath();
+      ctx.moveTo(W*(0.2 + lane*0.2), H);
+      ctx.lineTo(W*(0.42 + lane*0.08), H*0.32);
+      ctx.stroke();
+    }
+
+    // moving stripes
+    for(let i=0;i<12;i++){
+      const z = ((i * 0.22) + (frame * speed * 0.003)) % 2;
+      const y = H*0.34 + z * 240;
+      const width = 10 + z * 18;
+
+      ctx.fillStyle = "rgba(255,215,0,.75)";
+      ctx.fillRect(W/2 - width/2, y, width, 18 + z * 8);
+    }
   }
 
   function drawGround(){
-    ctx.fillStyle = "rgba(0,0,0,.28)";
-    ctx.fillRect(0, groundY + 2, W, H - groundY);
-
-    ctx.strokeStyle = "rgba(255,215,0,.85)";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, groundY + 1);
-    ctx.lineTo(W, groundY + 1);
-    ctx.stroke();
-
     ctx.save();
-    ctx.globalAlpha = 0.5;
-    ctx.strokeStyle = "rgba(255,215,0,.7)";
-    ctx.lineWidth = 2;
-    const dashW = 22, gap = 14;
-    const offset = -((frame * speed) % (dashW + gap));
-    for(let x = offset; x < W; x += dashW + gap){
-      ctx.beginPath();
-      ctx.moveTo(x, groundY + 20);
-      ctx.lineTo(x + dashW, groundY + 20);
-      ctx.stroke();
-    }
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, groundY, W, H-groundY);
     ctx.restore();
   }
 
@@ -417,64 +453,24 @@
     ctx.restore();
   }
 
-  function drawObstacles(){x + 30, y + 45);
-    ctx.closePath();
-    ctx.fill();
+  function drawObstacles(){
+    const sorted = [...obstacles].sort((a,b) => a.z - b.z);
 
-    // backpack
-    ctx.fillStyle = "#c40000";
-    roundRect(x + 12, y + 31, 17, 28, 7);
-    ctx.fill();
-    ctx.strokeStyle = "#ffd700";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(x + 28, y + 40, 9, Math.PI/2, Math.PI*1.5);
-    ctx.stroke();
+    for (const o of sorted){
+      const drawObj = {
+        x: o.x - o.w/2,
+        y: o.y,
+        w: o.w,
+        h: o.h
+      };
 
-    // arms
-    ctx.strokeStyle = "#ffd1a3";
-    ctx.lineWidth = 6;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(x + 24, y + 36);
-    ctx.lineTo(x + 13 + run * 5, y + 49);
-    ctx.moveTo(x + 48, y + 36);
-    ctx.lineTo(x + 58 - run * 5, y + 48);
-    ctx.stroke();
-
-    // shorts
-    ctx.fillStyle = "#1b1b1b";
-    roundRect(x + 23, y + 56, 26, 13, 4);
-    ctx.fill();
-
-    // legs
-    ctx.strokeStyle = "#ffd1a3";
-    ctx.lineWidth = 7;
-    ctx.beginPath();
-    ctx.moveTo(x + 29, y + 67);
-    ctx.lineTo(x + 22 + run * 9, y + 84);
-    ctx.moveTo(x + 43, y + 67);
-    ctx.lineTo(x + 52 - run * 9, y + 84);
-    ctx.stroke();
-
-    // shoes
-    ctx.strokeStyle = "#111";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(x + 19 + run * 9, y + 85);
-    ctx.lineTo(x + 31 + run * 9, y + 85);
-    ctx.moveTo(x + 49 - run * 9, y + 85);
-    ctx.lineTo(x + 61 - run * 9, y + 85);
-    ctx.stroke();
-
-    ctx.restore()
-    for (const o of obstacles){
-      if (o.type === "gold") drawGold(o);
-      if (o.type === "bag") drawBag(o);
-      if (o.type === "bill") drawBill(o);
-      if (o.type === "cone") drawCone(o);
-      if (o.type === "pit") drawPit(o);
+      if (o.type === "gold") drawGold(drawObj);
+      if (o.type === "bag") drawBag(drawObj);
+      if (o.type === "bill") drawBill(drawObj);
+      if (o.type === "cone") drawCone(drawObj);
+      if (o.type === "pit") drawPit(drawObj);
     }
+  }
   }
 
   function drawGold(o){
@@ -549,7 +545,7 @@
 
   function drawCollectibles(){
     for (const c of collectibles){
-      const pulse = Math.sin(frdrawBoy();;
+      const pulse = Math.sin(frame * 0.18) * 2;
       const grad = ctx.createRadialGradient(c.x-4, c.y-4, 2, c.x, c.y, c.r + pulse);
       grad.addColorStop(0, "#fff9bd");
       grad.addColorStop(0.45, "#ffd700");
@@ -590,8 +586,11 @@
     drawGround();
     drawCollectibles();
     drawObstacles();
-    drawBanknote();
-    drawOverlay();n round,r){
+    drawBoy();
+    drawOverlay();
+  }
+
+  function roundRect(x,y,w,h,r){
     const rr = Math.min(r, w/2, h/2);
     ctx.beginPath();
     ctx.moveTo(x+rr, y);
@@ -619,11 +618,15 @@
   canvas.addEventListener("pointerleave", () => pressing = false);
 
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp"){
+    if (e.code === "Space"){
       e.preventDefault();
       pressing = true;
       jump();
     }
+
+    if (e.code === "ArrowLeft") moveLeft();
+    if (e.code === "ArrowRight") moveRight();
+    if (e.code === "ArrowUp") jump();
   });
 
   window.addEventListener("keyup", (e) => {
