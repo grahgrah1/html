@@ -370,6 +370,36 @@
 
   searchInput.addEventListener('input', render);
   render();
+
+  // ===== Google Sheet Sync =====
+  // วาง URL จาก Google Apps Script Web App ตรงนี้
+  const SHEET_WEBHOOK_URL = "PASTE_YOUR_GOOGLE_SCRIPT_WEBAPP_URL_HERE";
+
+  async function syncToGoogleSheet(item){
+    if(SHEET_WEBHOOK_URL.includes("PASTE_YOUR")) return;
+
+    try{
+      await fetch(SHEET_WEBHOOK_URL, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify(item)
+      });
+    }catch(err){
+      console.error('Sync Error:', err);
+    }
+  }
+
+  // ===== Override submit save =====
+  const oldSubmit = form.onsubmit;
+
+  form.addEventListener('submit', async () => {
+    const latest = stocks[stocks.length - 1];
+    if(latest){
+      await syncToGoogleSheet(latest);
+    }
+  });
 </script>
 </body>
 </html>
