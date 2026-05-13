@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ระบบเก็บสต็อกผัก 🥬</title>
+
   <style>
     *{ box-sizing:border-box; }
     body{
@@ -58,7 +59,10 @@
       outline:none;
       background:#fbfff8;
     }
-    input:focus,select:focus{ border-color:#3fa35b; box-shadow:0 0 0 3px rgba(63,163,91,.15); }
+    input:focus,select:focus{
+      border-color:#3fa35b;
+      box-shadow:0 0 0 3px rgba(63,163,91,.15);
+    }
     button{
       border:none;
       border-radius:12px;
@@ -106,6 +110,7 @@
     .empty{ background:#ffd6d6; color:#9b0000; }
     .actions{ display:flex; gap:6px; flex-wrap:wrap; }
     .note{ color:#6c7868; font-size:13px; margin-top:10px; }
+
     @media(max-width:900px){
       .grid{ grid-template-columns:repeat(2,1fr); }
       form{ grid-template-columns:1fr 1fr; }
@@ -118,6 +123,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>🥬 ระบบเก็บสต็อกผัก</h1>
@@ -171,6 +177,7 @@
             <option>ขึ้นฉ่าย</option>
           </select>
         </div>
+
         <div>
           <label>จำนวน</label>
           <select id="qty" required>
@@ -188,6 +195,7 @@
             <option>100</option>
           </select>
         </div>
+
         <div>
           <label>หน่วย</label>
           <select id="unit">
@@ -198,6 +206,7 @@
             <option>ชิ้น</option>
           </select>
         </div>
+
         <div>
           <label>ต้นทุน/หน่วย</label>
           <select id="cost" required>
@@ -215,17 +224,18 @@
             <option>100</option>
           </select>
         </div>
+
         <div>
           <label>วันรับเข้า</label>
-          <select id="date" required>
-            <option value="2026-05-10">วันนี้</option>
-            <option value="2026-05-09">เมื่อวาน</option>
-            <option value="2026-05-08">2 วันที่แล้ว</option>
-          </select>
+          <input type="date" id="date" required>
         </div>
+
         <button class="btn-main" type="submit" id="submitBtn">เพิ่มสต็อก</button>
       </form>
-      <div class="note">ข้อมูลจะถูกเก็บในเครื่องนี้ด้วย LocalStorage เปิดใหม่แล้วยังอยู่ ✅</div>
+
+      <div class="note">
+        ข้อมูลจะถูกเก็บในเครื่องนี้ด้วย LocalStorage และส่งเข้า Google Sheet ✅
+      </div>
     </section>
 
     <section class="card">
@@ -233,6 +243,7 @@
         <h2 style="margin:0">📦 รายการสต็อกผัก</h2>
         <input id="search" placeholder="ค้นหาชื่อผัก..." />
       </div>
+
       <table>
         <thead>
           <tr>
@@ -261,6 +272,9 @@
   const table = document.getElementById('stockTable');
   const searchInput = document.getElementById('search');
 
+  const SHEET_WEBHOOK_URL =
+    "https://script.google.com/macros/s/AKfycbx-7OvuXMxi8jwI187d_ExDFX9WwFwbceWTOy7ihom6kjddopVApmwrtBciyBmZNa7_/exec";
+
   let stocks = JSON.parse(localStorage.getItem('vegetable_stocks') || '[]');
   let editId = null;
 
@@ -271,7 +285,9 @@
   }
 
   function money(n){
-    return '฿' + Number(n).toLocaleString('th-TH', { maximumFractionDigits:2 });
+    return '฿' + Number(n).toLocaleString('th-TH', {
+      maximumFractionDigits: 2
+    });
   }
 
   function getStatus(qty){
@@ -280,13 +296,32 @@
     return { text:'ปกติ', cls:'ok' };
   }
 
+  async function syncToGoogleSheet(item){
+    try{
+      await fetch(SHEET_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(item)
+      });
+
+      console.log("ส่งข้อมูลไป Google Sheet แล้ว:", item);
+
+    }catch(err){
+      console.error("Sync Error:", err);
+    }
+  }
+
   function render(){
     const keyword = searchInput.value.trim().toLowerCase();
-    const filtered = stocks.filter(item => item.name.toLowerCase().includes(keyword));
+
+    const filtered = stocks.filter(item =>
+      item.name.toLowerCase().includes(keyword)
+    );
 
     table.innerHTML = filtered.map(item => {
       const status = getStatus(Number(item.qty));
       const value = Number(item.qty) * Number(item.cost);
+
       return `
         <tr>
           <td><b>${item.name}</b></td>
@@ -294,33 +329,57 @@
           <td>${money(item.cost)}</td>
           <td>${money(value)}</td>
           <td>${item.date}</td>
-          <td><span class="status ${status.cls}">${status.text}</span></td>
+          <td>
+            <span class="status ${status.cls}">
+              ${status.text}
+            </span>
+          </td>
           <td>
             <div class="actions">
-              <button class="btn-edit" onclick="editItem('${item.id}')">แก้ไข</button>
-              <button class="btn-delete" onclick="deleteItem('${item.id}')">ลบ</button>
+              <button class="btn-edit" onclick="editItem('${item.id}')">
+                แก้ไข
+              </button>
+              <button class="btn-delete" onclick="deleteItem('${item.id}')">
+                ลบ
+              </button>
             </div>
           </td>
         </tr>
       `;
-    }).join('') || `<tr><td colspan="7" style="text-align:center;color:#777">ยังไม่มีรายการสต็อก</td></tr>`;
+    }).join('') || `
+      <tr>
+        <td colspan="7" style="text-align:center;color:#777">
+          ยังไม่มีรายการสต็อก
+        </td>
+      </tr>
+    `;
 
     updateStats();
   }
 
   function updateStats(){
     const totalItems = stocks.length;
-    const totalQty = stocks.reduce((sum,item) => sum + Number(item.qty), 0);
-    const totalValue = stocks.reduce((sum,item) => sum + Number(item.qty) * Number(item.cost), 0);
-    const lowItems = stocks.filter(item => Number(item.qty) <= 5).length;
+
+    const totalQty = stocks.reduce((sum,item) =>
+      sum + Number(item.qty), 0
+    );
+
+    const totalValue = stocks.reduce((sum,item) =>
+      sum + Number(item.qty) * Number(item.cost), 0
+    );
+
+    const lowItems = stocks.filter(item =>
+      Number(item.qty) <= 5
+    ).length;
 
     document.getElementById('totalItems').textContent = totalItems;
-    document.getElementById('totalQty').textContent = totalQty.toLocaleString('th-TH');
+    document.getElementById('totalQty').textContent =
+      totalQty.toLocaleString('th-TH');
     document.getElementById('totalValue').textContent = money(totalValue);
     document.getElementById('lowItems').textContent = lowItems;
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const item = {
@@ -333,16 +392,24 @@
     };
 
     if(editId){
-      stocks = stocks.map(s => s.id === editId ? item : s);
+      stocks = stocks.map(s =>
+        s.id === editId ? item : s
+      );
+
       editId = null;
       submitBtn.textContent = 'เพิ่มสต็อก';
+
     }else{
       stocks.push(item);
     }
 
     save();
+
+    await syncToGoogleSheet(item);
+
     form.reset();
     dateInput.valueAsDate = new Date();
+
     render();
   });
 
@@ -356,8 +423,13 @@
     unitInput.value = item.unit;
     costInput.value = item.cost;
     dateInput.value = item.date;
+
     submitBtn.textContent = 'บันทึกแก้ไข';
-    window.scrollTo({ top:0, behavior:'smooth' });
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
   window.deleteItem = function(id){
@@ -369,37 +441,9 @@
   }
 
   searchInput.addEventListener('input', render);
+
   render();
-
-  // ===== Google Sheet Sync =====
-  // วาง URL จาก Google Apps Script Web App ตรงนี้
-  const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbx-7OvuXMxi8jwI187d_ExDFX9WwFwbceWTOy7ihom6kjddopVApmwrtBciyBmZNa7_/exec";
-
-  async function syncToGoogleSheet(item){
-    if(SHEET_WEBHOOK_URL.includes("PASTE_YOUR")) return;
-
-    try{
-      await fetch(SHEET_WEBHOOK_URL, {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify(item)
-      });
-    }catch(err){
-      console.error('Sync Error:', err);
-    }
-  }
-
-  // ===== Override submit save =====
-  const oldSubmit = form.onsubmit;
-
-  form.addEventListener('submit', async () => {
-    const latest = stocks[stocks.length - 1];
-    if(latest){
-      await syncToGoogleSheet(latest);
-    }
-  });
 </script>
+
 </body>
 </html>
