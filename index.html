@@ -3,447 +3,568 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบเก็บสต็อกผัก 🥬</title>
-
+  <title>🥬 สต็อกผักสด</title>
   <style>
-    *{ box-sizing:border-box; }
+    *{ box-sizing:border-box; margin:0; padding:0; }
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,"Prompt",sans-serif;
-      background:#f4f8f1;
-      color:#1d2b1f;
+      font-family: system-ui,-apple-system,"Prompt",sans-serif;
+      background: #0d1f0f;
+      color: #e8f5e9;
+      min-height: 100vh;
     }
-    header{
-      background:linear-gradient(135deg,#1f7a3a,#74b72e);
-      color:white;
-      padding:24px 18px;
-      text-align:center;
-      box-shadow:0 6px 20px rgba(0,0,0,.15);
-    }
-    header h1{ margin:0; font-size:28px; }
-    header p{ margin:8px 0 0; opacity:.95; }
-    .container{
-      max-width:1100px;
-      margin:24px auto;
-      padding:0 16px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:14px;
-      margin-bottom:18px;
-    }
-    .card{
-      background:white;
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 8px 24px rgba(0,0,0,.08);
-      border:1px solid #e1ecd9;
-    }
-    .stat-title{ color:#6a7b67; font-size:14px; }
-    .stat-value{ font-size:28px; font-weight:900; margin-top:4px; }
-    .form-card{ margin-bottom:18px; }
-    form{
-      display:grid;
-      grid-template-columns:1.2fr .8fr .8fr .8fr .8fr auto;
-      gap:10px;
-      align-items:end;
-    }
-    label{ font-size:13px; color:#5c6b59; font-weight:700; }
-    input,select{
-      width:100%;
-      padding:11px 12px;
-      border:1px solid #cfddc7;
-      border-radius:12px;
-      font-size:15px;
-      outline:none;
-      background:#fbfff8;
-    }
-    input:focus,select:focus{
-      border-color:#3fa35b;
-      box-shadow:0 0 0 3px rgba(63,163,91,.15);
-    }
-    button{
-      border:none;
-      border-radius:12px;
-      padding:12px 14px;
-      cursor:pointer;
-      font-weight:800;
-      font-size:14px;
-    }
-    .btn-main{ background:#1f7a3a; color:white; }
-    .btn-main:hover{ background:#155d2b; }
-    .btn-edit{ background:#ffe08a; color:#4d3900; }
-    .btn-delete{ background:#ffb3b3; color:#730000; }
-    .toolbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:12px;
-    }
-    .toolbar input{ max-width:340px; }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      overflow:hidden;
-      border-radius:14px;
-    }
-    th,td{
-      padding:13px 10px;
-      border-bottom:1px solid #eef3ea;
-      text-align:left;
-      font-size:14px;
-    }
-    th{ background:#edf7e8; color:#335c35; }
-    tr:hover{ background:#fbfff7; }
-    .status{
-      display:inline-block;
-      padding:5px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-    }
-    .ok{ background:#dff7df; color:#1d6b26; }
-    .low{ background:#fff0b8; color:#806000; }
-    .empty{ background:#ffd6d6; color:#9b0000; }
-    .actions{ display:flex; gap:6px; flex-wrap:wrap; }
-    .note{ color:#6c7868; font-size:13px; margin-top:10px; }
 
-    @media(max-width:900px){
-      .grid{ grid-template-columns:repeat(2,1fr); }
-      form{ grid-template-columns:1fr 1fr; }
+    /* ===== HEADER ===== */
+    header{
+      background: linear-gradient(135deg,#0d3318 0%,#1a5c2a 60%,#0d3318 100%);
+      border-bottom: 1px solid #2a5c35;
+      padding: 28px 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    @media(max-width:620px){
-      .grid{ grid-template-columns:1fr; }
-      form{ grid-template-columns:1fr; }
-      table{ display:block; overflow-x:auto; }
-      header h1{ font-size:23px; }
+    header::before{
+      content:'';
+      position:absolute;inset:0;
+      background: radial-gradient(ellipse at 50% -20%, rgba(74,163,91,.25) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    header h1{
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #a5d6a7;
+      text-shadow: 0 0 40px rgba(74,163,91,.4);
+    }
+    header p{
+      font-size: 14px;
+      color: #66bb6a;
+      margin-top: 6px;
+      opacity: .8;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container{ max-width:1200px; margin:0 auto; padding:24px 20px; }
+
+    /* ===== STATS ===== */
+    .stats{
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card{
+      background: #0f2a12;
+      border: 1px solid #1e4d22;
+      border-radius: 16px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+    .stat-card:hover{ transform: translateY(-3px); border-color: #2e7d32; }
+    .stat-card::after{
+      content:'';
+      position:absolute;
+      bottom:-30px;right:-30px;
+      width:80px;height:80px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(74,163,91,.12) 0%, transparent 70%);
+    }
+    .stat-label{ font-size:12px; color:#81c784; text-transform:uppercase; letter-spacing:.8px; }
+    .stat-value{ font-size:30px; font-weight:700; margin-top:6px; color:#e8f5e9; }
+    .stat-value.warn{ color:#ffb74d; }
+    .stat-value.danger{ color:#ef5350; }
+    .stat-value.accent{ color:#69f0ae; }
+
+    /* ===== FORM ===== */
+    .form-section{
+      background: #0f2a12;
+      border: 1px solid #1e4d22;
+      border-radius: 20px;
+      padding: 22px 24px;
+      margin-bottom: 28px;
+    }
+    .form-section h2{
+      font-size:15px; font-weight:600; color:#81c784;
+      margin-bottom:16px; display:flex; align-items:center; gap:8px;
+    }
+    .form-grid{
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .field label{
+      display:block;
+      font-size:12px; color:#66bb6a; margin-bottom:6px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.5px;
+    }
+    .field select, .field input{
+      width:100%;
+      background: #0d1f0f;
+      border: 1px solid #2e4d30;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size:14px;
+      color: #e8f5e9;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field select:focus, .field input:focus{
+      border-color: #43a047;
+      box-shadow: 0 0 0 3px rgba(67,160,71,.2);
+    }
+    .field select option{ background:#0d1f0f; color:#e8f5e9; }
+    .btn-submit{
+      background: linear-gradient(135deg,#2e7d32,#43a047);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 20px;
+      font-size:14px; font-weight:700;
+      cursor:pointer;
+      transition: opacity .2s, transform .1s;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(46,125,50,.4);
+    }
+    .btn-submit:hover{ opacity:.9; transform:translateY(-1px); }
+    .btn-cancel{
+      display:none;
+      margin-top:10px;
+      background:transparent;
+      border:1px solid #2e4d30;
+      color:#81c784;
+      border-radius:10px;
+      padding:8px 16px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .btn-cancel:hover{ background:#1e4d22; }
+
+    /* ===== SHELF / 3D CRATES ===== */
+    .shelf-section{ margin-top:4px; }
+    .shelf-toolbar{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:20px; flex-wrap:wrap; gap:12px;
+    }
+    .shelf-toolbar h2{ font-size:16px; font-weight:600; color:#a5d6a7; }
+    .search-input{
+      background:#0f2a12;
+      border:1px solid #2e4d30;
+      border-radius:10px;
+      padding:9px 14px;
+      font-size:13px;
+      color:#e8f5e9;
+      width:220px;
+      outline:none;
+    }
+    .search-input:focus{ border-color:#43a047; }
+    .search-input::placeholder{ color:#4a7c4e; }
+
+    /* 3D perspective container */
+    .shelf-3d{
+      perspective: 1200px;
+    }
+    .shelf-inner{
+      transform-style: preserve-3d;
+      transform: rotateX(4deg);
+    }
+    .crates-grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 18px;
+    }
+
+    /* Individual crate */
+    .crate{ position:relative; cursor:default; }
+    .crate-body{
+      border-radius: 16px 16px 10px 10px;
+      padding: 16px 14px 14px;
+      position: relative;
+      overflow: hidden;
+      border-top: 3px solid rgba(255,255,255,.15);
+      box-shadow:
+        0 10px 0 rgba(0,0,0,.35),
+        0 14px 20px rgba(0,0,0,.3),
+        inset 0 1px 0 rgba(255,255,255,.15);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+    }
+    .crate:hover .crate-body{
+      transform: translateY(-10px) scale(1.04);
+      box-shadow:
+        0 18px 0 rgba(0,0,0,.3),
+        0 24px 32px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    .crate-body::before{
+      content:'';
+      position:absolute;top:0;left:0;right:0;height:8px;
+      background:rgba(255,255,255,.12);
+      border-radius:16px 16px 0 0;
+    }
+    /* wood grain lines */
+    .crate-body::after{
+      content:'';
+      position:absolute;inset:0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(0,0,0,.06) 18px,
+        rgba(0,0,0,.06) 19px
+      );
+      border-radius:inherit;
+      pointer-events:none;
+    }
+    .crate-shadow{
+      height:10px;
+      margin:0 14px;
+      background:rgba(0,0,0,.25);
+      border-radius:0 0 16px 16px;
+      filter:blur(4px);
+      transition:margin .25s, filter .25s;
+    }
+    .crate:hover .crate-shadow{
+      margin:6px 20px 0;
+      filter:blur(8px);
+    }
+
+    /* Crate content */
+    .crate-badge{
+      position:absolute;top:10px;right:10px;
+      font-size:10px;font-weight:700;
+      padding:3px 8px;border-radius:999px;
+      background:rgba(0,0,0,.25);
+    }
+    .crate-icon{ font-size:28px; margin-bottom:6px; }
+    .crate-name{ font-size:14px; font-weight:700; margin-bottom:2px; }
+    .crate-qty{
+      font-size:28px; font-weight:800;
+      line-height:1; margin-bottom:2px;
+    }
+    .crate-unit{ font-size:11px; opacity:.65; margin-bottom:10px; }
+    .crate-bar-bg{
+      height:4px; border-radius:999px;
+      background:rgba(0,0,0,.2);
+      margin-bottom:8px;
+    }
+    .crate-bar{
+      height:4px; border-radius:999px;
+      background:rgba(255,255,255,.6);
+      transition:width .5s ease;
+    }
+    .crate-cost{ font-size:11px; opacity:.6; margin-bottom:2px; }
+    .crate-date{ font-size:10px; opacity:.45; margin-bottom:10px; }
+    .crate-actions{ display:flex; gap:6px; }
+    .btn-crate{
+      flex:1; border:none; border-radius:8px; padding:6px;
+      font-size:11px; font-weight:700; cursor:pointer;
+      transition:opacity .15s;
+    }
+    .btn-crate:hover{ opacity:.8; }
+    .btn-crate-edit{ background:rgba(255,255,255,.2); color:inherit; }
+    .btn-crate-del{ background:rgba(200,0,0,.25); color:#ffcdd2; }
+
+    /* Crate color themes */
+    .c-forest{ background:#1b5e20; color:#e8f5e9; }
+    .c-teal  { background:#004d40; color:#e0f2f1; }
+    .c-indigo{ background:#1a237e; color:#e8eaf6; }
+    .c-brown { background:#3e2723; color:#efebe9; }
+    .c-slate { background:#263238; color:#eceff1; }
+    .c-olive { background:#33691e; color:#f9fbe7; }
+    .c-grape { background:#4a148c; color:#f3e5f5; }
+    .c-rust  { background:#bf360c; color:#fbe9e7; }
+    .c-ocean { background:#01579b; color:#e1f5fe; }
+    .c-moss  { background:#2e7d32; color:#e8f5e9; }
+
+    /* Empty state */
+    .empty-state{
+      grid-column:1/-1;
+      text-align:center;
+      padding:60px 20px;
+      color:#4a7c4e;
+      font-size:14px;
+    }
+    .empty-state .empty-icon{ font-size:48px; margin-bottom:12px; opacity:.5; }
+
+    /* Toast */
+    .toast{
+      position:fixed;bottom:24px;right:24px;
+      background:#2e7d32;color:white;
+      padding:12px 20px;border-radius:12px;
+      font-size:14px;font-weight:600;
+      box-shadow:0 8px 24px rgba(0,0,0,.4);
+      transform:translateY(80px);opacity:0;
+      transition:all .3s;
+      z-index:999;
+    }
+    .toast.show{ transform:translateY(0);opacity:1; }
+
+    @media(max-width:960px){
+      .stats{ grid-template-columns:repeat(2,1fr); }
+      .form-grid{ grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:580px){
+      .stats{ grid-template-columns:repeat(2,1fr); }
+      .form-grid{ grid-template-columns:1fr; }
+      header h1{ font-size:24px; }
+      .crates-grid{ grid-template-columns:repeat(2,1fr); }
     }
   </style>
 </head>
-
 <body>
-  <header>
-    <h1>🥬 ระบบเก็บสต็อกผัก</h1>
-    <p>บันทึกจำนวนผัก ต้นทุน วันรับเข้า และสถานะคงเหลือ</p>
-  </header>
 
-  <main class="container">
-    <section class="grid">
-      <div class="card">
-        <div class="stat-title">รายการผักทั้งหมด</div>
-        <div class="stat-value" id="totalItems">0</div>
+<header>
+  <h1>🥬 สต็อกผักสด</h1>
+  <p>คลังผักดิจิทัล — บันทึกและติดตามสต็อกของคุณ</p>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">รายการทั้งหมด</div>
+      <div class="stat-value" id="sTotalItems">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">จำนวนรวม</div>
+      <div class="stat-value accent" id="sTotalQty">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">มูลค่าสต็อก</div>
+      <div class="stat-value accent" id="sTotalVal">฿0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ใกล้หมด / หมด</div>
+      <div class="stat-value danger" id="sLow">0</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-section">
+    <h2>➕ เพิ่มสต็อก</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>ชื่อผัก</label>
+        <select id="fName">
+          <option value="">เลือกชนิดผัก</option>
+          <option>คะน้า</option><option>ผักกาดขาว</option><option>ผักบุ้ง</option>
+          <option>กะหล่ำปลี</option><option>กวางตุ้ง</option><option>แตงกวา</option>
+          <option>พริก</option><option>มะเขือเทศ</option><option>ต้นหอม</option>
+          <option>ผักชี</option><option>แครอท</option><option>ฟักทอง</option>
+          <option>ถั่วฝักยาว</option><option>บรอกโคลี</option><option>เห็ด</option>
+          <option>ข้าวโพดอ่อน</option><option>ใบโหระพา</option><option>กะเพรา</option>
+          <option>ขึ้นฉ่าย</option>
+        </select>
       </div>
-      <div class="card">
-        <div class="stat-title">จำนวนรวม</div>
-        <div class="stat-value" id="totalQty">0</div>
+      <div class="field">
+        <label>จำนวน</label>
+        <select id="fQty">
+          <option value="">เลือก</option>
+          <option>1</option><option>2</option><option>3</option><option>5</option>
+          <option>10</option><option>15</option><option>20</option><option>25</option>
+          <option>30</option><option>50</option><option>100</option>
+        </select>
       </div>
-      <div class="card">
-        <div class="stat-title">มูลค่าสต็อก</div>
-        <div class="stat-value" id="totalValue">฿0</div>
+      <div class="field">
+        <label>หน่วย</label>
+        <select id="fUnit">
+          <option>กก.</option><option>มัด</option><option>ถุง</option>
+          <option>ลัง</option><option>ชิ้น</option>
+        </select>
       </div>
-      <div class="card">
-        <div class="stat-title">ใกล้หมด / หมด</div>
-        <div class="stat-value" id="lowItems">0</div>
+      <div class="field">
+        <label>ต้นทุน/หน่วย</label>
+        <select id="fCost">
+          <option value="">เลือก</option>
+          <option>5</option><option>10</option><option>15</option><option>20</option>
+          <option>25</option><option>30</option><option>35</option><option>40</option>
+          <option>50</option><option>80</option><option>100</option>
+        </select>
       </div>
-    </section>
-
-    <section class="card form-card">
-      <form id="stockForm">
-        <div>
-          <label>ชื่อผัก</label>
-          <select id="name" required>
-            <option value="">เลือกชนิดผัก</option>
-            <option>คะน้า</option>
-            <option>ผักกาดขาว</option>
-            <option>ผักบุ้ง</option>
-            <option>กะหล่ำปลี</option>
-            <option>กวางตุ้ง</option>
-            <option>แตงกวา</option>
-            <option>พริก</option>
-            <option>มะเขือเทศ</option>
-            <option>ต้นหอม</option>
-            <option>ผักชี</option>
-            <option>แครอท</option>
-            <option>ฟักทอง</option>
-            <option>ถั่วฝักยาว</option>
-            <option>บรอกโคลี</option>
-            <option>เห็ด</option>
-            <option>ข้าวโพดอ่อน</option>
-            <option>ใบโหระพา</option>
-            <option>กะเพรา</option>
-            <option>ขึ้นฉ่าย</option>
-          </select>
-        </div>
-
-        <div>
-          <label>จำนวน</label>
-          <select id="qty" required>
-            <option value="">เลือกจำนวน</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>5</option>
-            <option>10</option>
-            <option>15</option>
-            <option>20</option>
-            <option>25</option>
-            <option>30</option>
-            <option>50</option>
-            <option>100</option>
-          </select>
-        </div>
-
-        <div>
-          <label>หน่วย</label>
-          <select id="unit">
-            <option>กก.</option>
-            <option>มัด</option>
-            <option>ถุง</option>
-            <option>ลัง</option>
-            <option>ชิ้น</option>
-          </select>
-        </div>
-
-        <div>
-          <label>ต้นทุน/หน่วย</label>
-          <select id="cost" required>
-            <option value="">เลือกต้นทุน/หน่วย</option>
-            <option>5</option>
-            <option>10</option>
-            <option>15</option>
-            <option>20</option>
-            <option>25</option>
-            <option>30</option>
-            <option>35</option>
-            <option>40</option>
-            <option>50</option>
-            <option>80</option>
-            <option>100</option>
-          </select>
-        </div>
-
-        <div>
-          <label>วันรับเข้า</label>
-          <input type="date" id="date" required>
-        </div>
-
-        <button class="btn-main" type="submit" id="submitBtn">เพิ่มสต็อก</button>
-      </form>
-
-      <div class="note">
-        ข้อมูลจะถูกเก็บในเครื่องนี้ด้วย LocalStorage และส่งเข้า Google Sheet ✅
+      <div class="field">
+        <label>วันรับเข้า</label>
+        <input type="date" id="fDate">
       </div>
-    </section>
-
-    <section class="card">
-      <div class="toolbar">
-        <h2 style="margin:0">📦 รายการสต็อกผัก</h2>
-        <input id="search" placeholder="ค้นหาชื่อผัก..." />
+      <div>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">เพิ่มสต็อก</button>
       </div>
+    </div>
+    <button class="btn-cancel" id="cancelBtn" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
+  </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>ชื่อผัก</th>
-            <th>จำนวน</th>
-            <th>ต้นทุน/หน่วย</th>
-            <th>มูลค่า</th>
-            <th>วันรับเข้า</th>
-            <th>สถานะ</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="stockTable"></tbody>
-      </table>
-    </section>
-  </main>
+  <!-- SHELF -->
+  <div class="shelf-section">
+    <div class="shelf-toolbar">
+      <h2>📦 ชั้นวางสต็อก</h2>
+      <input class="search-input" id="searchBox" placeholder="ค้นหาผัก..." oninput="render()">
+    </div>
+    <div class="shelf-3d">
+      <div class="shelf-inner">
+        <div class="crates-grid" id="cratesGrid"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-  const form = document.getElementById('stockForm');
-  const nameInput = document.getElementById('name');
-  const qtyInput = document.getElementById('qty');
-  const unitInput = document.getElementById('unit');
-  const costInput = document.getElementById('cost');
-  const dateInput = document.getElementById('date');
-  const submitBtn = document.getElementById('submitBtn');
-  const table = document.getElementById('stockTable');
-  const searchInput = document.getElementById('search');
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-7OvuXMxi8jwI187d_ExDFX9WwFwbceWTOy7ihom6kjddopVApmwrtBciyBmZNa7_/exec";
 
-  const SHEET_WEBHOOK_URL =
-    "https://script.google.com/macros/s/AKfycbx-7OvuXMxi8jwI187d_ExDFX9WwFwbceWTOy7ihom6kjddopVApmwrtBciyBmZNa7_/exec";
+const VEGGIE_ICONS = {
+  'คะน้า':'🥬','ผักกาดขาว':'🥬','ผักบุ้ง':'🌿','กะหล่ำปลี':'🥦',
+  'กวางตุ้ง':'🥬','แตงกวา':'🥒','พริก':'🌶️','มะเขือเทศ':'🍅',
+  'ต้นหอม':'🧅','ผักชี':'🌿','แครอท':'🥕','ฟักทอง':'🎃',
+  'ถั่วฝักยาว':'🫛','บรอกโคลี':'🥦','เห็ด':'🍄','ข้าวโพดอ่อน':'🌽',
+  'ใบโหระพา':'🌿','กะเพรา':'🌿','ขึ้นฉ่าย':'🌿',
+};
 
-  let stocks = JSON.parse(localStorage.getItem('vegetable_stocks') || '[]');
-  let editId = null;
+const COLORS = [
+  'c-forest','c-teal','c-indigo','c-brown','c-slate',
+  'c-olive','c-grape','c-rust','c-ocean','c-moss'
+];
 
-  dateInput.valueAsDate = new Date();
+function colorFor(name){
+  let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffff;
+  return COLORS[h%COLORS.length];
+}
 
-  function save(){
-    localStorage.setItem('vegetable_stocks', JSON.stringify(stocks));
+let stocks = [];
+try{ stocks = JSON.parse(localStorage.getItem('veg_stocks_3d')||'[]'); }catch(e){}
+
+let editId = null;
+document.getElementById('fDate').valueAsDate = new Date();
+
+function save(){ localStorage.setItem('veg_stocks_3d', JSON.stringify(stocks)); }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+function getStatus(q){
+  q = Number(q);
+  if(q <= 0) return {text:'หมด', pct:0};
+  if(q <= 5) return {text:'ใกล้หมด', pct:Math.round(q/5*40)};
+  return {text:'ปกติ', pct:Math.min(100,Math.round(q/50*100))};
+}
+
+function submitForm(){
+  const name = document.getElementById('fName').value.trim();
+  const qty  = document.getElementById('fQty').value;
+  const unit = document.getElementById('fUnit').value;
+  const cost = document.getElementById('fCost').value;
+  const date = document.getElementById('fDate').value;
+  if(!name||!qty||!cost||!date){ alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  const item = { id: editId||Date.now().toString(), name, qty:Number(qty), unit, cost:Number(cost), date };
+  if(editId){
+    stocks = stocks.map(s=>s.id===editId?item:s);
+    cancelEdit();
+    showToast('✅ แก้ไขสต็อกแล้ว');
+  } else {
+    stocks.push(item);
+    showToast('✅ เพิ่มสต็อกแล้ว');
   }
-
-  function money(n){
-    return '฿' + Number(n).toLocaleString('th-TH', {
-      maximumFractionDigits: 2
-    });
-  }
-
-  function getStatus(qty){
-    if(qty <= 0) return { text:'หมด', cls:'empty' };
-    if(qty <= 5) return { text:'ใกล้หมด', cls:'low' };
-    return { text:'ปกติ', cls:'ok' };
-  }
-
-  async function syncToGoogleSheet(item){
-    try{
-      await fetch(SHEET_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(item)
-      });
-
-      console.log("ส่งข้อมูลไป Google Sheet แล้ว:", item);
-
-    }catch(err){
-      console.error("Sync Error:", err);
-    }
-  }
-
-  function render(){
-    const keyword = searchInput.value.trim().toLowerCase();
-
-    const filtered = stocks.filter(item =>
-      item.name.toLowerCase().includes(keyword)
-    );
-
-    table.innerHTML = filtered.map(item => {
-      const status = getStatus(Number(item.qty));
-      const value = Number(item.qty) * Number(item.cost);
-
-      return `
-        <tr>
-          <td><b>${item.name}</b></td>
-          <td>${item.qty} ${item.unit}</td>
-          <td>${money(item.cost)}</td>
-          <td>${money(value)}</td>
-          <td>${item.date}</td>
-          <td>
-            <span class="status ${status.cls}">
-              ${status.text}
-            </span>
-          </td>
-          <td>
-            <div class="actions">
-              <button class="btn-edit" onclick="editItem('${item.id}')">
-                แก้ไข
-              </button>
-              <button class="btn-delete" onclick="deleteItem('${item.id}')">
-                ลบ
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('') || `
-      <tr>
-        <td colspan="7" style="text-align:center;color:#777">
-          ยังไม่มีรายการสต็อก
-        </td>
-      </tr>
-    `;
-
-    updateStats();
-  }
-
-  function updateStats(){
-    const totalItems = stocks.length;
-
-    const totalQty = stocks.reduce((sum,item) =>
-      sum + Number(item.qty), 0
-    );
-
-    const totalValue = stocks.reduce((sum,item) =>
-      sum + Number(item.qty) * Number(item.cost), 0
-    );
-
-    const lowItems = stocks.filter(item =>
-      Number(item.qty) <= 5
-    ).length;
-
-    document.getElementById('totalItems').textContent = totalItems;
-    document.getElementById('totalQty').textContent =
-      totalQty.toLocaleString('th-TH');
-    document.getElementById('totalValue').textContent = money(totalValue);
-    document.getElementById('lowItems').textContent = lowItems;
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const item = {
-      id: editId || Date.now().toString(),
-      name: nameInput.value.trim(),
-      qty: Number(qtyInput.value),
-      unit: unitInput.value,
-      cost: Number(costInput.value),
-      date: dateInput.value
-    };
-
-    if(editId){
-      stocks = stocks.map(s =>
-        s.id === editId ? item : s
-      );
-
-      editId = null;
-      submitBtn.textContent = 'เพิ่มสต็อก';
-
-    }else{
-      stocks.push(item);
-    }
-
-    save();
-
-    await syncToGoogleSheet(item);
-
-    form.reset();
-    dateInput.valueAsDate = new Date();
-
-    render();
-  });
-
-  window.editItem = function(id){
-    const item = stocks.find(s => s.id === id);
-    if(!item) return;
-
-    editId = id;
-    nameInput.value = item.name;
-    qtyInput.value = item.qty;
-    unitInput.value = item.unit;
-    costInput.value = item.cost;
-    dateInput.value = item.date;
-
-    submitBtn.textContent = 'บันทึกแก้ไข';
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }
-
-  window.deleteItem = function(id){
-    if(confirm('ต้องการลบรายการนี้ใช่ไหม?')){
-      stocks = stocks.filter(s => s.id !== id);
-      save();
-      render();
-    }
-  }
-
-  searchInput.addEventListener('input', render);
-
+  save();
+  syncToSheet(item);
+  document.getElementById('fName').value='';
+  document.getElementById('fQty').value='';
+  document.getElementById('fCost').value='';
+  document.getElementById('fDate').valueAsDate=new Date();
   render();
-</script>
+}
 
+function cancelEdit(){
+  editId=null;
+  document.getElementById('submitBtn').textContent='เพิ่มสต็อก';
+  document.getElementById('cancelBtn').style.display='none';
+  document.getElementById('fName').value='';
+  document.getElementById('fQty').value='';
+  document.getElementById('fCost').value='';
+}
+
+function editItem(id){
+  const s=stocks.find(x=>x.id===id); if(!s)return;
+  editId=id;
+  document.getElementById('fName').value=s.name;
+  document.getElementById('fQty').value=s.qty;
+  document.getElementById('fUnit').value=s.unit;
+  document.getElementById('fCost').value=s.cost;
+  document.getElementById('fDate').value=s.date;
+  document.getElementById('submitBtn').textContent='บันทึกแก้ไข';
+  document.getElementById('cancelBtn').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteItem(id){
+  if(confirm('ลบรายการนี้?')){
+    stocks=stocks.filter(s=>s.id!==id);
+    save(); render();
+    showToast('🗑️ ลบแล้ว');
+  }
+}
+
+async function syncToSheet(item){
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(item)});
+  }catch(e){ console.error('Sync error:',e); }
+}
+
+function render(){
+  const kw = document.getElementById('searchBox').value.toLowerCase();
+  const filtered = stocks.filter(s=>s.name.toLowerCase().includes(kw));
+  const grid = document.getElementById('cratesGrid');
+
+  if(!filtered.length){
+    grid.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">🥬</div>
+        ยังไม่มีสต็อก<br>กรอกข้อมูลด้านบนเพื่อเพิ่มผัก
+      </div>`;
+  } else {
+    grid.innerHTML = filtered.map(s=>{
+      const col = colorFor(s.name);
+      const st  = getStatus(s.qty);
+      const val = s.qty * s.cost;
+      const icon = VEGGIE_ICONS[s.name]||'🌱';
+      return `
+      <div class="crate">
+        <div class="crate-body ${col}">
+          <div class="crate-badge">${st.text}</div>
+          <div class="crate-icon">${icon}</div>
+          <div class="crate-name">${s.name}</div>
+          <div class="crate-qty">${s.qty}</div>
+          <div class="crate-unit">${s.unit}</div>
+          <div class="crate-bar-bg">
+            <div class="crate-bar" style="width:${st.pct}%"></div>
+          </div>
+          <div class="crate-cost">฿${s.cost}/หน่วย · รวม ฿${val.toLocaleString('th-TH')}</div>
+          <div class="crate-date">${s.date}</div>
+          <div class="crate-actions">
+            <button class="btn-crate btn-crate-edit" onclick="editItem('${s.id}')">แก้ไข</button>
+            <button class="btn-crate btn-crate-del" onclick="deleteItem('${s.id}')">ลบ</button>
+          </div>
+        </div>
+        <div class="crate-shadow"></div>
+      </div>`;
+    }).join('');
+  }
+
+  const totalVal = stocks.reduce((a,s)=>a+s.qty*s.cost,0);
+  const totalQty = stocks.reduce((a,s)=>a+s.qty,0);
+  const low = stocks.filter(s=>s.qty<=5).length;
+  document.getElementById('sTotalItems').textContent = stocks.length;
+  document.getElementById('sTotalQty').textContent = totalQty.toLocaleString('th-TH');
+  document.getElementById('sTotalVal').textContent = '฿'+totalVal.toLocaleString('th-TH');
+  document.getElementById('sLow').textContent = low;
+}
+
+render();
+</script>
 </body>
 </html>
