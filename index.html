@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🥬 สต็อกผักสด</title>
+  <title>Toon Fresh Stock</title>
   <style>
     *{ box-sizing:border-box; margin:0; padding:0; }
     body{
@@ -13,39 +13,56 @@
       min-height: 100vh;
     }
 
-    /* ===== HEADER ===== */
     header{
-      background: linear-gradient(135deg,#0d3318 0%,#1a5c2a 60%,#0d3318 100%);
+      background: #1a2e1c;
       border-bottom: 1px solid #2a5c35;
-      padding: 28px 24px 20px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    header::before{
-      content:'';
-      position:absolute;inset:0;
-      background: radial-gradient(ellipse at 50% -20%, rgba(74,163,91,.25) 0%, transparent 70%);
-      pointer-events:none;
-    }
-    header h1{
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #a5d6a7;
-      text-shadow: 0 0 40px rgba(74,163,91,.4);
-    }
-    header p{
-      font-size: 14px;
-      color: #66bb6a;
-      margin-top: 6px;
-      opacity: .8;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* ===== LAYOUT ===== */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+    }
+
+    .logo-text-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-name {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #52c460;
+      line-height: 1;
+    }
+
+    .logo-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 5px;
+      color: #81c784;
+      margin-top: 3px;
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: #5a8a62;
+      margin-top: 2px;
+    }
+
     .container{ max-width:1200px; margin:0 auto; padding:24px 20px; }
 
-    /* ===== STATS ===== */
     .stats{
       display: grid;
       grid-template-columns: repeat(4,1fr);
@@ -76,7 +93,6 @@
     .stat-value.danger{ color:#ef5350; }
     .stat-value.accent{ color:#69f0ae; }
 
-    /* ===== FORM ===== */
     .form-section{
       background: #0f2a12;
       border: 1px solid #1e4d22;
@@ -141,7 +157,6 @@
     }
     .btn-cancel:hover{ background:#1e4d22; }
 
-    /* ===== SHELF / 3D CRATES ===== */
     .shelf-section{ margin-top:4px; }
     .shelf-toolbar{
       display:flex; align-items:center; justify-content:space-between;
@@ -161,10 +176,7 @@
     .search-input:focus{ border-color:#43a047; }
     .search-input::placeholder{ color:#4a7c4e; }
 
-    /* 3D perspective container */
-    .shelf-3d{
-      perspective: 1200px;
-    }
+    .shelf-3d{ perspective: 1200px; }
     .shelf-inner{
       transform-style: preserve-3d;
       transform: rotateX(4deg);
@@ -175,7 +187,6 @@
       gap: 18px;
     }
 
-    /* Individual crate */
     .crate{ position:relative; cursor:default; }
     .crate-body{
       border-radius: 16px 16px 10px 10px;
@@ -202,7 +213,6 @@
       background:rgba(255,255,255,.12);
       border-radius:16px 16px 0 0;
     }
-    /* wood grain lines */
     .crate-body::after{
       content:'';
       position:absolute;inset:0;
@@ -229,7 +239,6 @@
       filter:blur(8px);
     }
 
-    /* Crate content */
     .crate-badge{
       position:absolute;top:10px;right:10px;
       font-size:10px;font-weight:700;
@@ -265,7 +274,6 @@
     .btn-crate-edit{ background:rgba(255,255,255,.2); color:inherit; }
     .btn-crate-del{ background:rgba(200,0,0,.25); color:#ffcdd2; }
 
-    /* Crate color themes */
     .c-forest{ background:#1b5e20; color:#e8f5e9; }
     .c-teal  { background:#004d40; color:#e0f2f1; }
     .c-indigo{ background:#1a237e; color:#e8eaf6; }
@@ -277,7 +285,6 @@
     .c-ocean { background:#01579b; color:#e1f5fe; }
     .c-moss  { background:#2e7d32; color:#e8f5e9; }
 
-    /* Empty state */
     .empty-state{
       grid-column:1/-1;
       text-align:center;
@@ -287,7 +294,6 @@
     }
     .empty-state .empty-icon{ font-size:48px; margin-bottom:12px; opacity:.5; }
 
-    /* Toast */
     .toast{
       position:fixed;bottom:24px;right:24px;
       background:#2e7d32;color:white;
@@ -307,7 +313,7 @@
     @media(max-width:580px){
       .stats{ grid-template-columns:repeat(2,1fr); }
       .form-grid{ grid-template-columns:1fr; }
-      header h1{ font-size:24px; }
+      .logo-name{ font-size:24px; }
       .crates-grid{ grid-template-columns:repeat(2,1fr); }
     }
   </style>
@@ -315,13 +321,28 @@
 <body>
 
 <header>
-  <h1>🥬 สต็อกผักสด</h1>
-  <p>คลังผักดิจิทัล — บันทึกและติดตามสต็อกของคุณ</p>
+  <div class="logo-wrap">
+    <svg class="logo-icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="28" cy="28" r="28" fill="#d4f5dc"/>
+      <circle cx="28" cy="28" r="21" fill="#a8e6b4"/>
+      <ellipse cx="22" cy="20" rx="7" ry="11" fill="#2d7a3a" transform="rotate(-20 22 20)"/>
+      <ellipse cx="30" cy="17" rx="6" ry="9" fill="#3d9e4a" transform="rotate(10 30 17)"/>
+      <ellipse cx="37" cy="22" rx="5" ry="8" fill="#2d7a3a" transform="rotate(30 37 22)"/>
+      <ellipse cx="16" cy="25" rx="4" ry="7" fill="#52c460" transform="rotate(-40 16 25)"/>
+      <line x1="22" y1="31" x2="24" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
+      <line x1="30" y1="26" x2="28" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
+      <line x1="37" y1="30" x2="33" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="logo-text-block">
+      <span class="logo-name">Toon</span>
+      <span class="logo-tag">FRESH &amp; LOCAL</span>
+      <span class="logo-sub">คลังผักดิจิทัล — บันทึกและติดตามสต็อกของคุณ</span>
+    </div>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- STATS -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">รายการทั้งหมด</div>
@@ -341,7 +362,6 @@
     </div>
   </div>
 
-  <!-- FORM -->
   <div class="form-section">
     <h2>➕ เพิ่มสต็อก</h2>
     <div class="form-grid">
@@ -394,7 +414,6 @@
     <button class="btn-cancel" id="cancelBtn" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
   </div>
 
-  <!-- SHELF -->
   <div class="shelf-section">
     <div class="shelf-toolbar">
       <h2>📦 ชั้นวางสต็อก</h2>
