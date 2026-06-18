@@ -230,6 +230,7 @@ select option{background:var(--s2)}
         <option value="">— ว่างทุกหลุม (กำหนดทีหลัง) —</option>
       </select>
     </div>
+    <div class="fr"><label>วันที่เริ่มหยอด</label><input id="nt-sowdate" type="date"></div>
     <div class="fr"><label>โนต</label><input id="nt-note" placeholder="บันทึกเพิ่มเติม"></div>
     <div style="font-size:11px;color:var(--text2);margin-top:4px">💡 หลังสร้างแล้ว ดับเบิลคลิกหลุมเพื่อกำหนดพืชและสถานะแต่ละหลุมได้</div>
   </div>
@@ -379,6 +380,20 @@ function renderTrays(){
   el.innerHTML=trays.map(t=>renderTrayCard(t)).join('');
 }
 
+function elapsedStr(dateStr){
+  if(!dateStr) return null;
+  const start=new Date(dateStr);
+  const now=new Date();
+  const diffMs=now-start;
+  if(diffMs<0) return null;
+  const totalHours=Math.floor(diffMs/(1000*60*60));
+  const days=Math.floor(totalHours/24);
+  const hours=totalHours%24;
+  if(days===0) return `${hours} ชั่วโมงที่ผ่านมา`;
+  if(hours===0) return `${days} วันที่ผ่านมา`;
+  return `${days} วัน ${hours} ชั่วโมง`;
+}
+
 function renderTrayCard(t){
   const cw=Math.min(34,Math.floor(Math.min(window.innerWidth-80,680)/t.cols));
   const cnt={};
@@ -399,13 +414,19 @@ function renderTrayCard(t){
     `<span class="stag ${ST[k].cls}">${ST[k].label} ${v}</span>`
   ).join('');
 
+  const elapsed=t.traySowDate?elapsedStr(t.traySowDate):null;
+
   return `<div class="tcard" id="tcard-${t.id}">
     <div class="tcard-hd">
       <div>
         <div class="tcard-name">${t.name}</div>
         <div class="tcard-sub">${t.rows}×${t.cols} = ${t.holes.length} หลุม${t.note?' · '+t.note:''}</div>
+        ${t.traySowDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--text2);font-family:var(--mono)">📅 เริ่ม ${t.traySowDate}</span>
+          ${elapsed?`<span style="font-size:11px;background:var(--gdim);color:var(--green);border:1px solid rgba(63,185,80,.3);border-radius:20px;padding:2px 9px;font-family:var(--mono)">⏱ ${elapsed}</span>`:''}
+        </div>`:''}
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:flex-start">
         <button class="btn sm" onclick="editTray('${t.id}')">แก้ไข</button>
         <button class="btn sm danger" onclick="delTray('${t.id}')">ลบ</button>
       </div>
@@ -608,6 +629,7 @@ function openNewTray(){
   document.getElementById('nt-rows').value=5;
   document.getElementById('nt-cols').value=10;
   document.getElementById('nt-note').value='';
+  document.getElementById('nt-sowdate').value=td();
   const sel=document.getElementById('nt-plant');
   sel.innerHTML='<option value="">— ว่างทุกหลุม —</option>'+
     plants.map(p=>`<option value="${p.id}">${p.name}${p.variety?' ('+p.variety+')':''}</option>`).join('');
@@ -618,15 +640,17 @@ function saveTray(){
   const rows=parseInt(document.getElementById('nt-rows').value)||5;
   const cols=parseInt(document.getElementById('nt-cols').value)||10;
   const plantId=document.getElementById('nt-plant').value||null;
+  const sowDate=document.getElementById('nt-sowdate').value||td();
   const t={
     id:pid(),
     name:document.getElementById('nt-name').value.trim()||`ถาด ${trays.length+1}`,
     rows,cols,
     note:document.getElementById('nt-note').value.trim(),
+    traySowDate: sowDate,
     holes:Array(rows*cols).fill(null).map(()=>({
       st: plantId?'seed':'empty',
       plantId: plantId||null,
-      sowDate: plantId?td():null,
+      sowDate: plantId?sowDate:null,
       note:''
     })),
     created:Date.now()
@@ -652,16 +676,15 @@ function delTray(id){
 }
 
 function editTray(id){
-  // simple: re-open with current values
   const t=trays.find(x=>x.id===id);
   if(!t) return;
-  // for now just allow rename
   const name=prompt('ชื่อถาด:',t.name);
-  if(name!==null&&name.trim()){
-    t.name=name.trim();
-    sd();
-    render();
-  }
+  if(name===null) return;
+  if(name.trim()) t.name=name.trim();
+  const dateStr=prompt('วันที่เริ่มหยอด (YYYY-MM-DD):',t.traySowDate||td());
+  if(dateStr!==null&&dateStr.trim()) t.traySowDate=dateStr.trim();
+  sd();
+  render();
 }
 
 // ---- PLANT CRUD ----
@@ -840,6 +863,7 @@ if(!plants.length){
   ];
   trays=[{
     id:'t1',name:'ถาด A — มะเขือเทศลูกท้อ',rows:5,cols:10,note:'เพาะ มิ.ย. 2569',
+    traySowDate:'2026-06-01',
     holes:Array(50).fill(null).map((_,i)=>({
       st:i<38?(i<30?'sprout':'seed'):i<45?'seed':'empty',
       plantId:'p1',
@@ -857,6 +881,11 @@ if(!plants.length){
 }
 
 render();
+
+// live timer — อัปเดตทุก 1 นาที
+setInterval(()=>{
+  if(document.getElementById('pg-trays').classList.contains('on')) renderTrays();
+},60000);
 </script>
 <!-- MODAL: EXPORT -->
 <div class="ov" id="ov-export">
