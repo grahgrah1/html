@@ -3,1022 +3,729 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เมล็ดพันธุ์ — บันทึกการเพาะ</title>
+<title>SeedLog — ถาดเพาะกล้า</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-:root {
-  --bg:#0d1117; --s1:#161b22; --s2:#21262d; --s3:#30363d;
-  --border:#30363d; --border2:#484f58;
-  --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
-  --green:#3fb950; --green-dim:rgba(63,185,80,0.15); --green-dk:#0f3d1a;
-  --amber:#d29922; --amber-dim:rgba(210,153,34,0.15);
-  --red:#f85149; --red-dim:rgba(248,81,73,0.15);
-  --blue:#58a6ff; --blue-dim:rgba(88,166,255,0.15);
-  --purple:#bc8cff; --purple-dim:rgba(188,140,255,0.15);
+:root{
+  --bg:#0d1117;--s1:#161b22;--s2:#21262d;--s3:#30363d;
+  --border:#30363d;--border2:#484f58;
+  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
+  --green:#3fb950;--gdim:rgba(63,185,80,.15);--gdk:#0f3d1a;
+  --amber:#d29922;--adim:rgba(210,153,34,.15);
+  --red:#f85149;--rdim:rgba(248,81,73,.15);
+  --blue:#58a6ff;--bdim:rgba(88,166,255,.15);
+  --purple:#bc8cff;--pdim:rgba(188,140,255,.15);
   --mono:'IBM Plex Mono',monospace;
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* NAV */
-nav{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:0;height:52px;position:sticky;top:0;z-index:100}
-.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:24px}
-.nav-logo-icon{width:26px;height:26px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
-.nav-logo-text{font-size:14px;font-weight:600;color:var(--text);font-family:var(--mono)}
-.nav-tabs{display:flex;gap:0;height:100%}
-.nav-tab{padding:0 16px;font-size:13px;color:var(--text2);border:none;background:none;cursor:pointer;font-family:'Sarabun',sans-serif;height:100%;border-bottom:2px solid transparent;transition:all .15s}
-.nav-tab:hover{color:var(--text)}
-.nav-tab.active{color:var(--text);border-bottom-color:var(--green)}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.badge-notify{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-family:var(--mono);font-weight:500}
+nav{background:var(--s1);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;height:52px;position:sticky;top:0;z-index:100;gap:0}
+.logo{display:flex;align-items:center;gap:8px;margin-right:20px}
+.logo-ic{width:26px;height:26px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.logo-tx{font-size:14px;font-weight:600;font-family:var(--mono)}
+.tabs{display:flex;height:100%}
+.tab{padding:0 14px;font-size:13px;color:var(--text2);border:none;background:none;cursor:pointer;font-family:'Sarabun',sans-serif;height:100%;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text);border-bottom-color:var(--green)}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nbadge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-family:var(--mono)}
 
-/* LAYOUT */
-.page{display:none;padding:24px;max-width:1100px;margin:0 auto}
-.page.active{display:block}
+/* PAGES */
+.pg{display:none;padding:20px;max-width:1100px;margin:0 auto}
+.pg.on{display:block}
 
-/* STATS BAR */
-.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.stat-card.g{border-color:rgba(63,185,80,0.3);background:var(--green-dim)}
-.stat-card.a{border-color:rgba(210,153,34,0.3);background:var(--amber-dim)}
-.stat-card.r{border-color:rgba(248,81,73,0.3);background:var(--red-dim)}
-.stat-card.b{border-color:rgba(88,166,255,0.3);background:var(--blue-dim)}
-.stat-lbl{font-size:11px;color:var(--text2);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
-.stat-val{font-size:24px;font-weight:600;color:var(--text);font-family:var(--mono);line-height:1}
-.stat-sub{font-size:11px;color:var(--text2);margin-top:3px}
-
-/* SECTION HEADER */
-.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sec-title{font-size:14px;font-weight:600;color:var(--text)}
+/* BUTTONS */
 .btn{padding:7px 14px;border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer;border:1px solid var(--border2);background:var(--s2);color:var(--text);transition:all .15s}
 .btn:hover{background:var(--s3)}
-.btn.primary{background:var(--green-dk);border-color:var(--green);color:var(--green)}
-.btn.primary:hover{background:rgba(63,185,80,0.25)}
+.btn.pr{background:var(--gdk);border-color:var(--green);color:var(--green)}
+.btn.pr:hover{background:rgba(63,185,80,.25)}
 .btn.sm{padding:4px 10px;font-size:12px}
-.btn.danger{border-color:rgba(248,81,73,0.4);color:var(--red)}
-.btn.danger:hover{background:var(--red-dim)}
-
-/* TABLE */
-.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--s2);padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
-td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,0.02)}
-
-/* STATUS BADGES */
-.status{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--mono)}
-.status::before{content:'';width:6px;height:6px;border-radius:50%}
-.s-seed{background:rgba(88,166,255,0.15);color:var(--blue)}.s-seed::before{background:var(--blue)}
-.s-sprout{background:var(--green-dim);color:var(--green)}.s-sprout::before{background:var(--green)}
-.s-ready{background:var(--amber-dim);color:var(--amber)}.s-ready::before{background:var(--amber)}
-.s-planted{background:var(--purple-dim);color:var(--purple)}.s-planted::before{background:var(--purple)}
-.s-dead{background:var(--red-dim);color:var(--red)}.s-dead::before{background:var(--red)}
-
-/* PROGRESS BAR */
-.prog-wrap{background:var(--s3);border-radius:4px;height:5px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
-.prog-fill{height:100%;border-radius:4px;transition:width .3s}
+.btn.danger{border-color:rgba(248,81,73,.4);color:var(--red)}
+.btn.danger:hover{background:var(--rdim)}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
-.modal{background:var(--s1);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
-.modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:15px;font-weight:600}
-.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px}
-.modal-close:hover{background:var(--s3);color:var(--text)}
-.modal-body{padding:20px}
-.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px}
+.ov.on{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto}
+.mhd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-size:15px;font-weight:600}
+.mclose{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px}
+.mclose:hover{background:var(--s3)}
+.mbody{padding:18px}
+.mfoot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 
 /* FORM */
-.form-row{margin-bottom:14px}
-.form-row label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-family:var(--mono)}
-.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;transition:border .15s;outline:none}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green)}
-.form-row textarea{min-height:70px;resize:vertical}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr{margin-bottom:12px}
+.fr label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase}
+.fr input,.fr select,.fr textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;outline:none;transition:border .15s}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--green)}
+.fr textarea{min-height:60px;resize:vertical}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 select option{background:var(--s2)}
 
-/* NOTIFY CARDS */
-.notify-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
-.notify-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px}
-.notify-card.urgent{border-color:rgba(248,81,73,0.4);background:var(--red-dim)}
-.notify-card.warn{border-color:rgba(210,153,34,0.4);background:var(--amber-dim)}
-.notify-card.info{border-color:rgba(88,166,255,0.4);background:var(--blue-dim)}
-.notify-icon{font-size:20px;flex-shrink:0}
-.notify-text{flex:1}
-.notify-title{font-size:13px;font-weight:500;color:var(--text)}
-.notify-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.notify-days{font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text2)}
+/* STATUS */
+.stag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--mono)}
+.stag::before{content:'';width:5px;height:5px;border-radius:50%}
+.st-empty{background:rgba(255,255,255,.05);color:var(--text3)}.st-empty::before{background:var(--text3)}
+.st-seed{background:var(--bdim);color:var(--blue)}.st-seed::before{background:var(--blue)}
+.st-sprout{background:var(--gdim);color:var(--green)}.st-sprout::before{background:var(--green)}
+.st-ready{background:var(--adim);color:var(--amber)}.st-ready::before{background:var(--amber)}
+.st-planted{background:var(--pdim);color:var(--purple)}.st-planted::before{background:var(--purple)}
+.st-dead{background:var(--rdim);color:var(--red)}.st-dead::before{background:var(--red)}
 
-/* TIMELINE */
-.timeline{display:flex;flex-direction:column;gap:0}
-.tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative}
-.tl-item:not(:last-child)::before{content:'';position:absolute;left:15px;top:28px;bottom:0;width:1px;background:var(--border)}
-.tl-dot{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid var(--border)}
-.tl-dot.done{border-color:var(--green);background:var(--green-dk)}
-.tl-dot.active{border-color:var(--amber);background:var(--amber-dim)}
-.tl-dot.future{border-color:var(--border);background:var(--s2)}
-.tl-content{flex:1;padding-top:4px}
-.tl-title{font-size:13px;font-weight:500;color:var(--text)}
-.tl-date{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px}
-.tl-note{font-size:12px;color:var(--text2);margin-top:4px;background:var(--s2);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border2)}
+/* STATS */
+.sbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.sc.cg{border-color:rgba(63,185,80,.3);background:var(--gdim)}
+.sc.ca{border-color:rgba(210,153,34,.3);background:var(--adim)}
+.sc.cr{border-color:rgba(248,81,73,.3);background:var(--rdim)}
+.sc.cb{border-color:rgba(88,166,255,.3);background:var(--bdim)}
+.sc-l{font-size:10px;color:var(--text2);margin-bottom:3px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.sc-v{font-size:22px;font-weight:600;font-family:var(--mono)}
+.sc-s{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* TRAY CARD */
+.tcard{background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.tcard-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tcard-name{font-size:14px;font-weight:600}
+.tcard-sub{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px}
+.tcard-body{padding:16px}
+.tcard-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+
+/* TRAY GRID */
+.tgrid{display:grid;gap:4px;width:fit-content;margin:0 auto 12px}
+.hole{border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s,filter .15s;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mono);font-weight:600;color:rgba(255,255,255,.7);user-select:none;position:relative}
+.hole:hover{transform:scale(1.18);z-index:2;filter:brightness(1.3)}
+.hole.hs-empty{background:#21262d;border-color:#484f58}
+.hole.hs-seed{background:#0d1f38;border-color:#58a6ff}
+.hole.hs-sprout{background:#0a2e14;border-color:#3fb950}
+.hole.hs-ready{background:#2e1f00;border-color:#d29922}
+.hole.hs-planted{background:#160d38;border-color:#bc8cff}
+.hole.hs-dead{background:#2a0c0c;border-color:#f85149}
+.hole.has-note::after{content:'';position:absolute;top:1px;right:1px;width:5px;height:5px;border-radius:50%;background:var(--amber)}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 9px;border-radius:20px;border:1px solid transparent;transition:all .15s;user-select:none}
+.leg:hover{background:var(--s2);border-color:var(--border)}
+.leg.on{border-color:var(--border2);background:var(--s2);color:var(--text)}
+.leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0}
+
+/* DETAIL TABLE */
+.dtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.dtbl th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;color:var(--text2);font-family:var(--mono);border-bottom:1px solid var(--border)}
+.dtbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tr:hover td{background:rgba(255,255,255,.02);cursor:pointer}
+
+/* PLANT PICKER */
+.pp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;max-height:200px;overflow-y:auto;margin-top:6px}
+.pp-item{padding:8px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:12px;transition:all .15s;background:var(--s2)}
+.pp-item:hover{border-color:var(--green);background:var(--gdim)}
+.pp-item.on{border-color:var(--green);background:var(--gdim);color:var(--green)}
+.pp-name{font-weight:500}
+.pp-var{font-size:10px;color:var(--text2);margin-top:1px}
+.pp-clear{padding:8px 10px;border-radius:8px;border:1px dashed var(--border2);cursor:pointer;font-size:12px;color:var(--text3);transition:all .15s}
+.pp-clear:hover{border-color:var(--red);color:var(--red)}
 
 /* EMPTY */
-.empty{text-align:center;padding:48px 24px;color:var(--text2)}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
-.empty-text{font-size:14px;margin-bottom:16px}
+.empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.ei{font-size:36px;margin-bottom:10px;opacity:.5}
 
-/* PHOTO */
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:8px}
-.photo-slot{width:80px;height:80px;background:var(--s2);border:1px dashed var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:20px;transition:all .15s}
-.photo-slot:hover{border-color:var(--green);color:var(--green)}
-.photo-thumb{width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--border)}
+/* TIMELINE */
+.tl{display:flex;flex-direction:column}
+.tli{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.tli:not(:last-child)::before{content:'';position:absolute;left:13px;top:26px;bottom:0;width:1px;background:var(--border)}
+.tl-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--border);background:var(--s2)}
+.tl-dot.done{border-color:var(--green);background:var(--gdk)}
+.tl-c{flex:1;padding-top:2px}
+.tl-title{font-size:13px;font-weight:500}
+.tl-date{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.tl-note{font-size:12px;color:var(--text2);margin-top:4px;background:var(--s2);padding:5px 9px;border-radius:6px;border-left:2px solid var(--border2)}
 
-.watered-btn{font-size:11px;padding:3px 8px}
-.watered-btn.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
-
-/* TRAY */
-.tray-grid{display:grid;gap:5px;margin:0 auto}
-.tray-cell{border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono);font-weight:500;color:rgba(255,255,255,0.5)}
-.tray-cell:hover{transform:scale(1.15);z-index:2}
-.tray-cell.h-empty{background:var(--s3);border-color:var(--border2)}
-.tray-cell.h-seed{background:#1a2d4a;border-color:var(--blue)}
-.tray-cell.h-sprout{background:var(--green-dk);border-color:var(--green)}
-.tray-cell.h-ready{background:#3d2e00;border-color:var(--amber)}
-.tray-cell.h-dead{background:#2d0f0f;border-color:var(--red)}
-.tray-cell.h-planted{background:#1e1040;border-color:var(--purple)}
-.tray-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-.tray-leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;border:1px solid transparent;transition:all .15s}
-.tray-leg:hover{background:var(--s2);border-color:var(--border)}
-.tray-leg.active-tool{background:var(--s2);border-color:var(--border2)}
-.tray-dot{width:10px;height:10px;border-radius:50%;border:2px solid}
-.tray-controls{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.tray-size-btn{padding:4px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--s2);color:var(--text2);cursor:pointer;font-family:var(--mono)}
-.tray-size-btn.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
-.tray-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.tray-stat{font-size:11px;color:var(--text2);font-family:var(--mono)}
-.tray-stat span{color:var(--text);font-weight:500}
-.tray-wrap{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
-.tray-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
-.tray-sub{font-size:11px;color:var(--text2);font-family:var(--mono);margin-bottom:12px}
+/* PROG */
+.pw{background:var(--s3);border-radius:3px;height:4px;overflow:hidden;margin-top:4px}
+.pf{height:100%;border-radius:3px;transition:width .3s}
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-logo" href="#">
-    <div class="nav-logo-icon">🌱</div>
-    <div class="nav-logo-text">SeedLog</div>
-  </a>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard',this)">ภาพรวม</button>
-    <button class="nav-tab" onclick="showPage('seeds',this)">รายการเพาะ</button>
-    <button class="nav-tab" onclick="showPage('notify',this)">การแจ้งเตือน</button>
-    <button class="nav-tab" onclick="showPage('log',this)">บันทึกประจำวัน</button>
-    <button class="nav-tab" onclick="showPage('tray',this)">📋 ถาดหลุม</button>
+  <div class="logo"><div class="logo-ic">🌱</div><div class="logo-tx">SeedLog</div></div>
+  <div class="tabs">
+    <button class="tab on"  onclick="go('dash',this)">ภาพรวม</button>
+    <button class="tab"     onclick="go('trays',this)">ถาดหลุม</button>
+    <button class="tab"     onclick="go('notify',this)">แจ้งเตือน</button>
+    <button class="tab"     onclick="go('log',this)">บันทึก</button>
   </div>
-  <div class="nav-right">
-    <span class="badge-notify" id="notify-badge">0</span>
-    <button class="btn sm primary" onclick="openAdd()">+ เพิ่มรายการ</button>
+  <div class="nav-r">
+    <span class="nbadge" id="nbadge">0</span>
+    <button class="btn sm" onclick="openNewPlant()">+ พืช</button>
+    <button class="btn sm pr" onclick="openNewTray()">+ ถาด</button>
   </div>
 </nav>
 
 <!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
-  <div class="stats-bar">
-    <div class="stat-card g">
-      <div class="stat-lbl">กำลังเพาะ</div>
-      <div class="stat-val" id="cnt-active">0</div>
-      <div class="stat-sub">รายการทั้งหมด</div>
-    </div>
-    <div class="stat-card b">
-      <div class="stat-lbl">งอกแล้ว</div>
-      <div class="stat-val" id="cnt-sprout">0</div>
-      <div class="stat-sub">ต้นกล้า</div>
-    </div>
-    <div class="stat-card a">
-      <div class="stat-lbl">พร้อมย้ายปลูก</div>
-      <div class="stat-val" id="cnt-ready">0</div>
-      <div class="stat-sub">รายการ</div>
-    </div>
-    <div class="stat-card r">
-      <div class="stat-lbl">ต้องรดน้ำวันนี้</div>
-      <div class="stat-val" id="cnt-water">0</div>
-      <div class="stat-sub">รายการ</div>
-    </div>
+<div class="pg on" id="pg-dash">
+  <div class="sbar">
+    <div class="sc cg"><div class="sc-l">ถาดทั้งหมด</div><div class="sc-v" id="ds-trays">0</div><div class="sc-s">ถาด</div></div>
+    <div class="sc cb"><div class="sc-l">หลุมงอกแล้ว</div><div class="sc-v" id="ds-sprout">0</div><div class="sc-s">หลุม</div></div>
+    <div class="sc ca"><div class="sc-l">พร้อมย้ายปลูก</div><div class="sc-v" id="ds-ready">0</div><div class="sc-s">หลุม</div></div>
+    <div class="sc cr"><div class="sc-l">หลุมตาย</div><div class="sc-v" id="ds-dead">0</div><div class="sc-s">หลุม</div></div>
   </div>
-
-  <div class="sec-hd">
-    <div class="sec-title">รายการล่าสุด</div>
-    <button class="btn sm" onclick="showPage('seeds', document.querySelector('.nav-tab:nth-child(2)'))">ดูทั้งหมด →</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:14px;font-weight:600">สรุปถาดทั้งหมด</div>
   </div>
-
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>พืช / สายพันธุ์</th>
-        <th>วันที่เพาะ</th>
-        <th>วันงอก</th>
-        <th>สถานะ</th>
-        <th>ความคืบหน้า</th>
-        <th>รดน้ำล่าสุด</th>
-        <th></th>
-      </tr></thead>
-      <tbody id="dash-tbody"></tbody>
-    </table>
-  </div>
+  <div id="dash-list"></div>
 </div>
 
-<!-- SEEDS -->
-<div class="page" id="page-seeds">
-  <div class="sec-hd">
-    <div class="sec-title">รายการเพาะทั้งหมด</div>
-    <button class="btn primary" onclick="openAdd()">+ เพิ่มรายการใหม่</button>
+<!-- TRAYS -->
+<div class="pg" id="pg-trays">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:600">ถาดเพาะกล้า</div>
+    <button class="btn pr" onclick="openNewTray()">+ เพิ่มถาดใหม่</button>
   </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>พืช / สายพันธุ์</th>
-        <th>จำนวนเมล็ด</th>
-        <th>วันที่เพาะ</th>
-        <th>วันงอก</th>
-        <th>วันย้ายปลูก</th>
-        <th>สถานะ</th>
-        <th>รดน้ำ</th>
-        <th>จัดการ</th>
-      </tr></thead>
-      <tbody id="seeds-tbody"></tbody>
-    </table>
-  </div>
+  <div id="trays-list"></div>
 </div>
 
 <!-- NOTIFY -->
-<div class="page" id="page-notify">
-  <div class="sec-hd"><div class="sec-title">การแจ้งเตือน</div></div>
-  <div class="notify-list" id="notify-list"></div>
+<div class="pg" id="pg-notify">
+  <div style="font-size:14px;font-weight:600;margin-bottom:14px">การแจ้งเตือน</div>
+  <div id="notify-list"></div>
 </div>
 
 <!-- LOG -->
-<div class="page" id="page-log">
-  <div class="sec-hd">
-    <div class="sec-title">บันทึกประจำวัน</div>
-  </div>
-  <div class="timeline" id="log-timeline"></div>
-  <div class="empty" id="log-empty" style="display:none">
-    <div class="empty-icon">📖</div>
-    <div class="empty-text">ยังไม่มีบันทึก — เพิ่มรายการเพาะและอัปเดตสถานะเพื่อสร้าง timeline</div>
-  </div>
+<div class="pg" id="pg-log">
+  <div style="font-size:14px;font-weight:600;margin-bottom:14px">บันทึกประวัติ</div>
+  <div class="tl" id="log-tl"></div>
+  <div class="empty" id="log-empty"><div class="ei">📖</div><div>ยังไม่มีบันทึก</div></div>
 </div>
 
-<!-- TRAY -->
-<div class="page" id="page-tray">
-  <div class="sec-hd">
-    <div class="sec-title">ถาดหลุมเพาะกล้า</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn sm" onclick="openTrayConfig()">⚙ ตั้งค่าถาด</button>
-      <button class="btn sm primary" onclick="resetTray()">รีเซตถาด</button>
+<!-- MODAL: NEW TRAY -->
+<div class="ov" id="ov-tray">
+<div class="modal" style="max-width:420px">
+  <div class="mhd"><div class="mtitle" id="tray-modal-title">สร้างถาดใหม่</div><button class="mclose" onclick="cm('ov-tray')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><label>ชื่อถาด</label><input id="nt-name" placeholder="เช่น ถาด A — มะเขือเทศ"></div>
+    <div class="fg">
+      <div class="fr"><label>แถว</label><input id="nt-rows" type="number" min="1" max="20" value="5"></div>
+      <div class="fr"><label>คอลัมน์</label><input id="nt-cols" type="number" min="1" max="24" value="10"></div>
     </div>
+    <div class="fr"><label>พืชเริ่มต้น (ทุกหลุม)</label>
+      <select id="nt-plant">
+        <option value="">— ว่างทุกหลุม (กำหนดทีหลัง) —</option>
+      </select>
+    </div>
+    <div class="fr"><label>โนต</label><input id="nt-note" placeholder="บันทึกเพิ่มเติม"></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">💡 หลังสร้างแล้ว ดับเบิลคลิกหลุมเพื่อกำหนดพืชและสถานะแต่ละหลุมได้</div>
   </div>
-
-  <div class="tray-controls">
-    <span style="font-size:12px;color:var(--text2)">ขนาดถาด:</span>
-    <button class="tray-size-btn active" onclick="setTraySize(50,this)">50 หลุม (5×10)</button>
-    <button class="tray-size-btn" onclick="setTraySize(72,this)">72 หลุม (6×12)</button>
-    <button class="tray-size-btn" onclick="setTraySize(104,this)">104 หลุม (8×13)</button>
-    <button class="tray-size-btn" onclick="setTraySize(128,this)">128 หลุม (8×16)</button>
-  </div>
-
-  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
-    <div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-family:var(--mono)">เลือกสถานะแล้วคลิกหลุม:</div>
-      <div class="tray-legend" id="tray-legend">
-        <div class="tray-leg active-tool" onclick="setHoleTool('empty',this)"><div class="tray-dot" style="background:var(--s3);border-color:var(--border2)"></div>ว่าง</div>
-        <div class="tray-leg" onclick="setHoleTool('seed',this)"><div class="tray-dot" style="background:#1a2d4a;border-color:var(--blue)"></div>เมล็ด</div>
-        <div class="tray-leg" onclick="setHoleTool('sprout',this)"><div class="tray-dot" style="background:var(--green-dk);border-color:var(--green)"></div>งอก</div>
-        <div class="tray-leg" onclick="setHoleTool('ready',this)"><div class="tray-dot" style="background:#3d2e00;border-color:var(--amber)"></div>พร้อมย้าย</div>
-        <div class="tray-leg" onclick="setHoleTool('dead',this)"><div class="tray-dot" style="background:#2d0f0f;border-color:var(--red)"></div>ตาย</div>
-        <div class="tray-leg" onclick="setHoleTool('planted',this)"><div class="tray-dot" style="background:#1e1040;border-color:var(--purple)"></div>ย้ายแล้ว</div>
-      </div>
-      <div class="tray-stats" id="tray-stats"></div>
-    </div>
-  </div>
-
-  <div id="trays-container" style="margin-top:16px;display:flex;flex-direction:column;gap:20px"></div>
-</div>
-
-<!-- TRAY CONFIG MODAL -->
-<div class="modal-overlay" id="modal-tray-config">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-title">ตั้งค่าถาดหลุม</div>
-      <button class="modal-close" onclick="closeModal('modal-tray-config')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <label>ชื่อถาด</label>
-        <input id="tc-name" placeholder="เช่น ถาด A - มะเขือเทศ">
-      </div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label>จำนวนแถว</label>
-          <input id="tc-rows" type="number" min="1" max="16" value="5">
-        </div>
-        <div class="form-row">
-          <label>จำนวนคอลัมน์</label>
-          <input id="tc-cols" type="number" min="1" max="20" value="10">
-        </div>
-      </div>
-      <div class="form-row">
-        <label>พืชที่เพาะ (เชื่อมกับรายการ)</label>
-        <select id="tc-seed">
-          <option value="">— ไม่ระบุ —</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>โนต</label>
-        <input id="tc-note" placeholder="บันทึกเพิ่มเติม">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-tray-config')">ยกเลิก</button>
-      <button class="btn primary" onclick="saveTrayConfig()">เพิ่มถาด</button>
-    </div>
+  <div class="mfoot">
+    <button class="btn" onclick="cm('ov-tray')">ยกเลิก</button>
+    <button class="btn pr" onclick="saveTray()">สร้างถาด</button>
   </div>
 </div>
-
-<!-- HOLE NOTE MODAL -->
-<div class="modal-overlay" id="modal-hole">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-hd">
-      <div class="modal-title" id="hole-title">หลุมที่ —</div>
-      <button class="modal-close" onclick="closeModal('modal-hole')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <label>สถานะ</label>
-        <select id="hole-status">
-          <option value="empty">ว่าง</option>
-          <option value="seed">เมล็ด (รองอก)</option>
-          <option value="sprout">งอกแล้ว</option>
-          <option value="ready">พร้อมย้ายปลูก</option>
-          <option value="planted">ย้ายปลูกแล้ว</option>
-          <option value="dead">ตาย</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>โนต (ไม่บังคับ)</label>
-        <input id="hole-note" placeholder="เช่น งอกช้า, ต้นแข็งแรง">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-hole')">ยกเลิก</button>
-      <button class="btn primary" onclick="saveHole()">บันทึก</button>
-    </div>
-  </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
-<div class="modal-overlay" id="modal-add">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-title" id="modal-title">เพิ่มรายการเพาะใหม่</div>
-      <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+<!-- MODAL: NEW PLANT -->
+<div class="ov" id="ov-plant">
+<div class="modal" style="max-width:400px">
+  <div class="mhd"><div class="mtitle">เพิ่มพืช</div><button class="mclose" onclick="cm('ov-plant')">✕</button></div>
+  <div class="mbody">
+    <div class="fg">
+      <div class="fr"><label>ชื่อพืช *</label><input id="np-name" placeholder="มะเขือเทศ"></div>
+      <div class="fr"><label>สายพันธุ์</label><input id="np-var" placeholder="ลูกท้อ"></div>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-id">
-      <div class="form-grid">
-        <div class="form-row">
-          <label>ชื่อพืช *</label>
-          <input id="f-name" placeholder="เช่น มะเขือเทศ">
-        </div>
-        <div class="form-row">
-          <label>สายพันธุ์</label>
-          <input id="f-variety" placeholder="เช่น ลูกท้อ, ซีซันไนน์">
-        </div>
-      </div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label>จำนวนเมล็ด</label>
-          <input id="f-seeds" type="number" min="1" placeholder="0">
-        </div>
-        <div class="form-row">
-          <label>วันที่เพาะ *</label>
-          <input id="f-sow" type="date">
-        </div>
-      </div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label>วันงอก (ถ้าทราบ)</label>
-          <input id="f-sprout" type="date">
-        </div>
-        <div class="form-row">
-          <label>วันย้ายปลูก (แผน)</label>
-          <input id="f-transplant" type="date">
-        </div>
-      </div>
-      <div class="form-row">
-        <label>สถานะปัจจุบัน</label>
-        <select id="f-status">
-          <option value="seed">เมล็ด (รองอก)</option>
-          <option value="sprout">งอกแล้ว</option>
-          <option value="ready">พร้อมย้ายปลูก</option>
-          <option value="planted">ย้ายปลูกแล้ว</option>
-          <option value="dead">ตาย</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>โนต / สังเกตการณ์</label>
-        <textarea id="f-note" placeholder="บันทึกสิ่งที่สังเกตได้..."></textarea>
-      </div>
+    <div class="fg">
+      <div class="fr"><label>วันงอก (เฉลี่ย)</label><input id="np-sprout" type="number" min="1" placeholder="7" value="7"> </div>
+      <div class="fr"><label>วันพร้อมย้าย</label><input id="np-ready" type="number" min="1" placeholder="21" value="21"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-add')">ยกเลิก</button>
-      <button class="btn primary" onclick="saveSeed()">บันทึก</button>
-    </div>
+    <div class="fr"><label>โนต</label><textarea id="np-note" placeholder="ข้อมูลพิเศษ..."></textarea></div>
+  </div>
+  <div class="mfoot">
+    <button class="btn" onclick="cm('ov-plant')">ยกเลิก</button>
+    <button class="btn pr" onclick="savePlant()">บันทึก</button>
   </div>
 </div>
+</div>
 
-<!-- DETAIL MODAL -->
-<div class="modal-overlay" id="modal-detail">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-title" id="detail-title">รายละเอียด</div>
-      <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+<!-- MODAL: HOLE DETAIL -->
+<div class="ov" id="ov-hole">
+<div class="modal" style="max-width:400px">
+  <div class="mhd"><div class="mtitle" id="hole-title">หลุม —</div><button class="mclose" onclick="cm('ov-hole')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><label>พืชในหลุมนี้</label>
+      <div class="pp-grid" id="pp-grid"></div>
     </div>
-    <div class="modal-body" id="detail-body"></div>
-    <div class="modal-footer">
-      <button class="btn danger" id="detail-delete">ลบรายการ</button>
-      <button class="btn" onclick="closeModal('modal-detail')">ปิด</button>
-      <button class="btn primary" id="detail-edit">แก้ไข</button>
+    <div class="fr"><label>สถานะ</label>
+      <select id="h-status">
+        <option value="empty">ว่าง</option>
+        <option value="seed">หยอดเมล็ดแล้ว</option>
+        <option value="sprout">งอกแล้ว</option>
+        <option value="ready">พร้อมย้ายปลูก</option>
+        <option value="planted">ย้ายปลูกแล้ว</option>
+        <option value="dead">ตาย</option>
+      </select>
     </div>
+    <div class="fr"><label>วันที่หยอด</label><input id="h-sow" type="date"></div>
+    <div class="fr"><label>โนต</label><input id="h-note" placeholder="สังเกตการณ์..."></div>
   </div>
+  <div class="mfoot">
+    <button class="btn" onclick="cm('ov-hole')">ยกเลิก</button>
+    <button class="btn pr" onclick="saveHole()">บันทึก</button>
+  </div>
+</div>
 </div>
 
 <script>
-const STATUSES = {
-  seed:     {label:'รองอก',     cls:'s-seed'},
-  sprout:   {label:'งอกแล้ว',   cls:'s-sprout'},
-  ready:    {label:'พร้อมย้าย', cls:'s-ready'},
-  planted:  {label:'ย้ายแล้ว',  cls:'s-planted'},
-  dead:     {label:'ตาย',       cls:'s-dead'},
+// ---- DATA ----
+let plants = JSON.parse(localStorage.getItem('sl_plants')||'[]');
+let trays  = JSON.parse(localStorage.getItem('sl_trays') ||'[]');
+let logs   = JSON.parse(localStorage.getItem('sl_logs')  ||'[]');
+
+const ST = {
+  empty:   {label:'ว่าง',          cls:'st-empty',  hcls:'hs-empty',  col:'#484f58'},
+  seed:    {label:'หยอดแล้ว',      cls:'st-seed',   hcls:'hs-seed',   col:'#58a6ff'},
+  sprout:  {label:'งอกแล้ว',       cls:'st-sprout', hcls:'hs-sprout', col:'#3fb950'},
+  ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#d29922'},
+  planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#bc8cff'},
+  dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#f85149'},
 };
 
-let seeds = JSON.parse(localStorage.getItem('seedlog_seeds')||'[]');
-let logs  = JSON.parse(localStorage.getItem('seedlog_logs')||'[]');
+let curTool = 'seed';
+let editHole = null; // {trayId, idx}
 
-function save() {
-  localStorage.setItem('seedlog_seeds', JSON.stringify(seeds));
-  localStorage.setItem('seedlog_logs',  JSON.stringify(logs));
-  render();
+function sd(){
+  localStorage.setItem('sl_plants', JSON.stringify(plants));
+  localStorage.setItem('sl_trays',  JSON.stringify(trays));
+  localStorage.setItem('sl_logs',   JSON.stringify(logs));
 }
 
-function today() { return new Date().toISOString().slice(0,10); }
+function td(){ return new Date().toISOString().slice(0,10); }
 
-function daysDiff(a, b) {
-  if(!a||!b) return null;
-  return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));
+function pid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+function addLog(icon, text, note=''){
+  logs.unshift({id:pid(), icon, text, note, date:td()});
+  if(logs.length>200) logs.pop();
+  localStorage.setItem('sl_logs', JSON.stringify(logs));
 }
 
-function daysFromNow(d) {
-  if(!d) return null;
-  return daysDiff(today(), d);
+// ---- RENDER ----
+function render(){
+  renderDash();
+  renderTrays();
+  renderNotify();
+  renderLog();
+  renderBadge();
 }
 
-function statusBadge(s) {
-  const st = STATUSES[s]||STATUSES.seed;
-  return `<span class="status ${st.cls}">${st.label}</span>`;
+function renderDash(){
+  let ts=0, sp=0, rd=0, dd=0;
+  trays.forEach(t=>{
+    ts++;
+    t.holes.forEach(h=>{
+      if(h.st==='sprout') sp++;
+      if(h.st==='ready') rd++;
+      if(h.st==='dead') dd++;
+    });
+  });
+  document.getElementById('ds-trays').textContent=ts;
+  document.getElementById('ds-sprout').textContent=sp;
+  document.getElementById('ds-ready').textContent=rd;
+  document.getElementById('ds-dead').textContent=dd;
+
+  const el=document.getElementById('dash-list');
+  if(!trays.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🌱</div><div>ยังไม่มีถาด — กด "+ ถาด" เพื่อเริ่ม</div></div>`;
+    return;
+  }
+  el.innerHTML=trays.map(t=>{
+    const cnt={};
+    t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
+    const total=t.holes.length;
+    const used=total-(cnt.empty||0);
+    const pct=Math.round(used/total*100);
+    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="go('trays');scrollToTray('${t.id}')">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${t.name}</div>
+        <div style="font-size:11px;color:var(--text2);font-family:var(--mono)">${t.rows}×${t.cols} | ${Object.entries(cnt).filter(([k])=>k!=='empty').map(([k,v])=>`${ST[k].label}:${v}`).join(' · ')}</div>
+        <div class="pw" style="width:200px;margin-top:5px"><div class="pf" style="width:${pct}%;background:var(--green)"></div></div>
+      </div>
+      <div style="font-size:20px;font-family:var(--mono);font-weight:600;color:var(--green)">${pct}%</div>
+    </div>`;
+  }).join('');
 }
 
-function progressBar(seed) {
-  if(seed.status==='dead') return '<span style="color:var(--red);font-size:11px">ตาย</span>';
-  if(seed.status==='planted') return '<span style="color:var(--purple);font-size:11px">ย้ายแล้ว</span>';
-  const steps = ['seed','sprout','ready','planted'];
-  const idx = steps.indexOf(seed.status);
-  const pct = Math.round((idx/3)*100);
-  const colors = ['var(--blue)','var(--green)','var(--amber)','var(--purple)'];
-  return `<div style="display:flex;align-items:center;gap:6px">
-    <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:${colors[idx]}"></div></div>
-    <span style="font-size:10px;color:var(--text2);font-family:var(--mono)">${pct}%</span>
+function renderTrays(){
+  const el=document.getElementById('trays-list');
+  if(!trays.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🗂️</div><div style="margin-bottom:12px">ยังไม่มีถาดหลุม</div><button class="btn pr" onclick="openNewTray()">+ เพิ่มถาดแรก</button></div>`;
+    return;
+  }
+  el.innerHTML=trays.map(t=>renderTrayCard(t)).join('');
+}
+
+function renderTrayCard(t){
+  const cw=Math.min(34,Math.floor(Math.min(window.innerWidth-80,680)/t.cols));
+  const cnt={};
+  t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
+
+  const holes=t.holes.map((h,i)=>{
+    const p=h.plantId ? plants.find(x=>x.id===h.plantId) : null;
+    const label=p ? (p.name.slice(0,2)) : '';
+    return `<div class="hole ${ST[h.st].hcls} ${h.note?'has-note':''}"
+      style="width:${cw}px;height:${cw}px;font-size:${cw>24?9:7}px"
+      title="${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[h.st].label}${h.note?' | '+h.note:''}"
+      onmousedown="quickPaint('${t.id}',${i},event)"
+      ondblclick="openHole('${t.id}',${i},event)"
+    >${cw>=22?label:''}</div>`;
+  }).join('');
+
+  const statSummary=Object.entries(cnt).map(([k,v])=>
+    `<span class="stag ${ST[k].cls}">${ST[k].label} ${v}</span>`
+  ).join('');
+
+  return `<div class="tcard" id="tcard-${t.id}">
+    <div class="tcard-hd">
+      <div>
+        <div class="tcard-name">${t.name}</div>
+        <div class="tcard-sub">${t.rows}×${t.cols} = ${t.holes.length} หลุม${t.note?' · '+t.note:''}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn sm" onclick="editTray('${t.id}')">แก้ไข</button>
+        <button class="btn sm danger" onclick="delTray('${t.id}')">ลบ</button>
+      </div>
+    </div>
+    <div class="tcard-body">
+      <div class="legend" id="leg-${t.id}">
+        ${Object.entries(ST).map(([k,v])=>`
+          <div class="leg ${curTool===k?'on':''}" onclick="setTool('${k}','${t.id}')">
+            <div class="leg-dot" style="background:${v.col}22;border-color:${v.col}"></div>${v.label}
+          </div>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">คลิก/ลาก = เปลี่ยนสถานะ · ดับเบิลคลิก = กำหนดพืช+โนต</div>
+      <div style="overflow-x:auto">
+        <div style="display:grid;grid-template-columns:repeat(${t.cols},${cw}px);gap:3px;width:fit-content">
+          ${holes}
+        </div>
+      </div>
+    </div>
+    <div class="tcard-foot">${statSummary}</div>
   </div>`;
 }
 
-function render() {
-  renderDash();
-  renderSeeds();
-  renderNotify();
-  renderLog();
-  updateBadge();
+function scrollToTray(id){
+  setTimeout(()=>{
+    const el=document.getElementById('tcard-'+id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
 }
 
-function renderDash() {
-  const active = seeds.filter(s=>s.status!=='dead'&&s.status!=='planted');
-  document.getElementById('cnt-active').textContent = active.length;
-  document.getElementById('cnt-sprout').textContent = seeds.filter(s=>s.status==='sprout').length;
-  document.getElementById('cnt-ready').textContent  = seeds.filter(s=>s.status==='ready').length;
-  const waterNeeded = seeds.filter(s=>s.status!=='dead'&&s.status!=='planted'&&s.lastWater!==today()).length;
-  document.getElementById('cnt-water').textContent  = waterNeeded;
-
-  const tbody = document.getElementById('dash-tbody');
-  const recent = [...seeds].sort((a,b)=>b.created-a.created).slice(0,8);
-  if(!recent.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">ยังไม่มีรายการ — กด "+ เพิ่มรายการ" เพื่อเริ่ม</div></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = recent.map(s=>{
-    const wBtn = s.status!=='dead'&&s.status!=='planted'
-      ? `<button class="btn sm watered-btn ${s.lastWater===today()?'done':''}" onclick="markWater('${s.id}',event)">${s.lastWater===today()?'✓ รดแล้ว':'รดน้ำ'}</button>`
-      : '—';
-    return `<tr onclick="openDetail('${s.id}')" style="cursor:pointer">
-      <td><strong>${s.name}</strong>${s.variety?`<br><span style="font-size:11px;color:var(--text2)">${s.variety}</span>`:''}
-      </td>
-      <td style="font-family:var(--mono);font-size:12px">${s.sowDate||'—'}</td>
-      <td style="font-family:var(--mono);font-size:12px">${s.sproutDate||'—'}</td>
-      <td>${statusBadge(s.status)}</td>
-      <td>${progressBar(s)}</td>
-      <td>${s.lastWater?`<span style="font-family:var(--mono);font-size:11px">${s.lastWater}</span>`:'—'}</td>
-      <td onclick="event.stopPropagation()">${wBtn}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderSeeds() {
-  const tbody = document.getElementById('seeds-tbody');
-  if(!seeds.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">ยังไม่มีรายการเพาะ</div><button class="btn primary" onclick="openAdd()">+ เพิ่มรายการแรก</button></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = seeds.map(s=>{
-    const wBtn = s.status!=='dead'&&s.status!=='planted'
-      ? `<button class="btn sm watered-btn ${s.lastWater===today()?'done':''}" onclick="markWater('${s.id}',event)">${s.lastWater===today()?'✓':'รดน้ำ'}</button>`
-      : '—';
-    return `<tr onclick="openDetail('${s.id}')" style="cursor:pointer">
-      <td><strong>${s.name}</strong>${s.variety?` <span style="font-size:11px;color:var(--text2)">(${s.variety})</span>`:''}</td>
-      <td style="font-family:var(--mono);font-size:12px">${s.seedCount||'—'}</td>
-      <td style="font-family:var(--mono);font-size:12px">${s.sowDate||'—'}</td>
-      <td style="font-family:var(--mono);font-size:12px">${s.sproutDate||'—'}</td>
-      <td style="font-family:var(--mono);font-size:12px">${s.transplantDate||'—'}</td>
-      <td>${statusBadge(s.status)}</td>
-      <td onclick="event.stopPropagation()">${wBtn}</td>
-      <td onclick="event.stopPropagation()"><button class="btn sm" onclick="openEdit('${s.id}')">แก้ไข</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderNotify() {
-  const list = document.getElementById('notify-list');
-  const items = [];
-
-  seeds.forEach(s=>{
-    if(s.status==='dead'||s.status==='planted') return;
-
-    // water alert
-    if(s.lastWater!==today()) {
-      const d = s.lastWater ? daysDiff(s.lastWater, today()) : null;
-      items.push({type:'urgent', icon:'💧', title:`รดน้ำ: ${s.name}`, sub: d ? `ไม่ได้รดมา ${d} วันแล้ว` : 'ยังไม่เคยรดน้ำ', days: 'วันนี้', id:s.id, action:'water'});
-    }
-
-    // transplant alert
-    if(s.transplantDate) {
-      const diff = daysFromNow(s.transplantDate);
-      if(diff !== null && diff >= 0 && diff <= 7) {
-        items.push({type: diff<=2?'urgent':'warn', icon:'🌿', title:`ถึงเวลาย้ายปลูก: ${s.name}`, sub:`วันย้ายปลูกที่วางแผนไว้: ${s.transplantDate}`, days: diff===0?'วันนี้':`อีก ${diff} วัน`, id:s.id});
+function renderNotify(){
+  const el=document.getElementById('notify-list');
+  const items=[];
+  trays.forEach(t=>{
+    t.holes.forEach((h,i)=>{
+      if(h.st==='dead'||h.st==='planted'||h.st==='empty') return;
+      const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+      const name=p?p.name+(p.variety?' '+p.variety:''):`หลุม ${i+1}`;
+      if(h.st==='seed'&&h.sowDate&&p){
+        const d=Math.round((new Date()-new Date(h.sowDate))/(864e5));
+        if(d>=(p.sproutDays||7)){
+          items.push({type:'info',icon:'🌱',title:`เช็กการงอก: ${name}`,sub:`${t.name} หลุม ${i+1} — หยอดมา ${d} วัน`,tid:t.id,hi:i});
+        }
       }
-    }
-
-    // sprout alert - sown 5-7 days ago and still seed status
-    if(s.status==='seed' && s.sowDate) {
-      const d = daysDiff(s.sowDate, today());
-      if(d>=5) {
-        items.push({type:'info', icon:'🌱', title:`เช็กการงอก: ${s.name}`, sub:`เพาะมาแล้ว ${d} วัน ควรเริ่มงอกแล้ว`, days:`วันที่ ${d}`, id:s.id});
+      if(h.st==='sprout'&&h.sowDate&&p){
+        const d=Math.round((new Date()-new Date(h.sowDate))/(864e5));
+        if(d>=(p.readyDays||21)){
+          items.push({type:'warn',icon:'⏰',title:`พร้อมย้ายปลูก: ${name}`,sub:`${t.name} หลุม ${i+1} — เพาะมา ${d} วัน`,tid:t.id,hi:i});
+        }
       }
-    }
+    });
   });
-
-  if(!items.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">ไม่มีการแจ้งเตือนในขณะนี้</div></div>`;
+  if(!items.length){
+    el.innerHTML=`<div class="empty"><div class="ei">✅</div><div>ไม่มีการแจ้งเตือน</div></div>`;
     return;
   }
-
-  list.innerHTML = items.map(i=>`
-    <div class="notify-card ${i.type}">
-      <div class="notify-icon">${i.icon}</div>
-      <div class="notify-text">
-        <div class="notify-title">${i.title}</div>
-        <div class="notify-sub">${i.sub}</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <span class="notify-days">${i.days}</span>
-        ${i.action==='water'?`<button class="btn sm primary" onclick="markWater('${i.id}',event)">รดน้ำเลย</button>`:''}
-      </div>
-    </div>
-  `).join('');
+  const typeStyle={info:'border-color:rgba(88,166,255,.4);background:var(--bdim)',warn:'border-color:rgba(210,153,34,.4);background:var(--adim)',urgent:'border-color:rgba(248,81,73,.4);background:var(--rdim)'};
+  el.innerHTML=items.map(x=>`
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;${typeStyle[x.type]||''}">
+      <div style="font-size:20px">${x.icon}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${x.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${x.sub}</div></div>
+      <button class="btn sm pr" onclick="openHole('${x.tid}',${x.hi},event)">อัปเดต</button>
+    </div>`).join('');
 }
 
-function renderLog() {
-  const tl = document.getElementById('log-timeline');
-  const empty = document.getElementById('log-empty');
-  if(!logs.length) { tl.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tl.innerHTML = [...logs].reverse().map(l=>`
-    <div class="tl-item">
-      <div class="tl-dot done">${l.icon||'📝'}</div>
-      <div class="tl-content">
-        <div class="tl-title">${l.title}</div>
+function renderLog(){
+  const tl=document.getElementById('log-tl');
+  const em=document.getElementById('log-empty');
+  if(!logs.length){tl.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tl.innerHTML=logs.map(l=>`
+    <div class="tli">
+      <div class="tl-dot done">${l.icon}</div>
+      <div class="tl-c">
+        <div class="tl-title">${l.text}</div>
         <div class="tl-date">${l.date}</div>
         ${l.note?`<div class="tl-note">${l.note}</div>`:''}
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function updateBadge() {
-  let count = 0;
-  seeds.forEach(s=>{
-    if(s.status==='dead'||s.status==='planted') return;
-    if(s.lastWater!==today()) count++;
-    if(s.transplantDate) {
-      const diff = daysFromNow(s.transplantDate);
-      if(diff!==null&&diff>=0&&diff<=2) count++;
-    }
-  });
-  document.getElementById('notify-badge').textContent = count;
-}
-
-function markWater(id, e) {
-  if(e) e.stopPropagation();
-  const s = seeds.find(x=>x.id===id);
-  if(!s) return;
-  s.lastWater = today();
-  addLog('💧', `รดน้ำ: ${s.name}`, id, '');
-  save();
-}
-
-function addLog(icon, title, seedId, note) {
-  logs.push({ id: Date.now().toString(), icon, title, date: today(), seedId, note });
-  localStorage.setItem('seedlog_logs', JSON.stringify(logs));
-}
-
-function openAdd() {
-  document.getElementById('modal-title').textContent = 'เพิ่มรายการเพาะใหม่';
-  document.getElementById('edit-id').value = '';
-  document.getElementById('f-name').value = '';
-  document.getElementById('f-variety').value = '';
-  document.getElementById('f-seeds').value = '';
-  document.getElementById('f-sow').value = today();
-  document.getElementById('f-sprout').value = '';
-  document.getElementById('f-transplant').value = '';
-  document.getElementById('f-status').value = 'seed';
-  document.getElementById('f-note').value = '';
-  document.getElementById('modal-add').classList.add('open');
-}
-
-function openEdit(id) {
-  const s = seeds.find(x=>x.id===id);
-  if(!s) return;
-  document.getElementById('modal-title').textContent = 'แก้ไขรายการ';
-  document.getElementById('edit-id').value = id;
-  document.getElementById('f-name').value = s.name||'';
-  document.getElementById('f-variety').value = s.variety||'';
-  document.getElementById('f-seeds').value = s.seedCount||'';
-  document.getElementById('f-sow').value = s.sowDate||'';
-  document.getElementById('f-sprout').value = s.sproutDate||'';
-  document.getElementById('f-transplant').value = s.transplantDate||'';
-  document.getElementById('f-status').value = s.status||'seed';
-  document.getElementById('f-note').value = s.note||'';
-  closeModal('modal-detail');
-  document.getElementById('modal-add').classList.add('open');
-}
-
-function saveSeed() {
-  const name = document.getElementById('f-name').value.trim();
-  if(!name) { alert('กรุณากรอกชื่อพืช'); return; }
-  const id = document.getElementById('edit-id').value;
-  const prevStatus = id ? (seeds.find(x=>x.id===id)||{}).status : null;
-  const newStatus = document.getElementById('f-status').value;
-  const data = {
-    id: id || Date.now().toString(),
-    name,
-    variety: document.getElementById('f-variety').value.trim(),
-    seedCount: document.getElementById('f-seeds').value,
-    sowDate: document.getElementById('f-sow').value,
-    sproutDate: document.getElementById('f-sprout').value,
-    transplantDate: document.getElementById('f-transplant').value,
-    status: newStatus,
-    note: document.getElementById('f-note').value.trim(),
-    lastWater: id ? (seeds.find(x=>x.id===id)||{}).lastWater : null,
-    created: id ? (seeds.find(x=>x.id===id)||{}).created : Date.now(),
-  };
-  if(id) {
-    const idx = seeds.findIndex(x=>x.id===id);
-    seeds[idx] = data;
-  } else {
-    seeds.push(data);
-    addLog('🌱', `เริ่มเพาะ: ${name}${data.variety?' ('+data.variety+')':''}`, data.id, data.note);
-  }
-  if(prevStatus && prevStatus!==newStatus) {
-    const icons = {sprout:'🌿',ready:'⏰',planted:'🌳',dead:'💀'};
-    addLog(icons[newStatus]||'📝', `อัปเดตสถานะ ${name}: ${STATUSES[newStatus].label}`, data.id, data.note);
-  }
-  closeModal('modal-add');
-  save();
-}
-
-function openDetail(id) {
-  const s = seeds.find(x=>x.id===id);
-  if(!s) return;
-  const sowDays = s.sowDate ? daysDiff(s.sowDate, today()) : null;
-  document.getElementById('detail-title').textContent = `${s.name}${s.variety?' · '+s.variety:''}`;
-  document.getElementById('detail-body').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      ${infoCard('สถานะ', statusBadge(s.status))}
-      ${infoCard('จำนวนเมล็ด', s.seedCount ? s.seedCount+' เมล็ด' : '—')}
-      ${infoCard('วันที่เพาะ', s.sowDate||(sowDays?`${sowDays} วันที่แล้ว`:'—'))}
-      ${infoCard('วันงอก', s.sproutDate||'—')}
-      ${infoCard('วันย้ายปลูก', s.transplantDate||'—')}
-      ${infoCard('รดน้ำล่าสุด', s.lastWater||'ยังไม่เคย')}
-    </div>
-    ${s.note?`<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-family:var(--mono)">NOTES</div><div style="background:var(--s2);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.6;border-left:2px solid var(--green)">${s.note}</div></div>`:''}
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <select onchange="quickStatus('${s.id}',this.value)" style="padding:6px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer">
-        <option value="">อัปเดตสถานะ...</option>
-        ${Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${s.status===k?'selected':''}>${v.label}</option>`).join('')}
-      </select>
-      ${s.status!=='dead'&&s.status!=='planted'?`<button class="btn primary" onclick="markWater('${s.id}',event);closeModal('modal-detail')">💧 รดน้ำเลย</button>`:''}
-    </div>
-  `;
-  document.getElementById('detail-edit').onclick   = ()=>openEdit(id);
-  document.getElementById('detail-delete').onclick = ()=>{ if(confirm('ลบรายการนี้?')){ seeds=seeds.filter(x=>x.id!==id); save(); closeModal('modal-detail'); } };
-  document.getElementById('modal-detail').classList.add('open');
-}
-
-function infoCard(lbl, val) {
-  return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
-    <div style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase">${lbl}</div>
-    <div style="font-size:13px">${val}</div>
-  </div>`;
-}
-
-function quickStatus(id, val) {
-  if(!val) return;
-  const s = seeds.find(x=>x.id===id);
-  if(!s) return;
-  s.status = val;
-  const icons = {sprout:'🌿',ready:'⏰',planted:'🌳',dead:'💀',seed:'🌱'};
-  addLog(icons[val]||'📝', `อัปเดตสถานะ ${s.name}: ${STATUSES[val].label}`, id, '');
-  save();
-  closeModal('modal-detail');
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if(btn) btn.classList.add('active');
-  if(id==='tray') renderTrayPage();
-  else render();
-}
-
-// ========== TRAY SYSTEM ==========
-let trays = JSON.parse(localStorage.getItem('seedlog_trays')||'[]');
-let holeTool = 'seed';
-let editingHole = null; // {trayId, holeIdx}
-
-const HOLE_COLORS = {
-  empty:   {bg:'var(--s3)',   border:'var(--border2)', label:'ว่าง'},
-  seed:    {bg:'#1a2d4a',     border:'var(--blue)',     label:'เมล็ด'},
-  sprout:  {bg:'var(--green-dk)', border:'var(--green)', label:'งอก'},
-  ready:   {bg:'#3d2e00',    border:'var(--amber)',     label:'พร้อมย้าย'},
-  dead:    {bg:'#2d0f0f',    border:'var(--red)',       label:'ตาย'},
-  planted: {bg:'#1e1040',    border:'var(--purple)',    label:'ย้ายแล้ว'},
-};
-
-const TRAY_SIZES = {50:[5,10], 72:[6,12], 104:[8,13], 128:[8,16]};
-
-function saveTrayData() {
-  localStorage.setItem('seedlog_trays', JSON.stringify(trays));
-}
-
-function setHoleTool(t, btn) {
-  holeTool = t;
-  document.querySelectorAll('.tray-leg').forEach(b=>b.classList.remove('active-tool'));
-  btn.classList.add('active-tool');
-}
-
-function setTraySize(n, btn) {
-  document.querySelectorAll('.tray-size-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  // apply to all trays that have this size? Just store preference
-}
-
-function openTrayConfig() {
-  document.getElementById('tc-name').value = `ถาด ${String.fromCharCode(65+trays.length)}`;
-  document.getElementById('tc-rows').value = 5;
-  document.getElementById('tc-cols').value = 10;
-  document.getElementById('tc-note').value = '';
-  // populate seed dropdown
-  const sel = document.getElementById('tc-seed');
-  sel.innerHTML = '<option value="">— ไม่ระบุ —</option>' +
-    seeds.map(s=>`<option value="${s.id}">${s.name}${s.variety?' ('+s.variety+')':''}</option>`).join('');
-  document.getElementById('modal-tray-config').classList.add('open');
-}
-
-function saveTrayConfig() {
-  const rows = parseInt(document.getElementById('tc-rows').value)||5;
-  const cols = parseInt(document.getElementById('tc-cols').value)||10;
-  const total = rows*cols;
-  const tray = {
-    id: Date.now().toString(),
-    name: document.getElementById('tc-name').value.trim() || `ถาด ${trays.length+1}`,
-    rows, cols,
-    seedId: document.getElementById('tc-seed').value,
-    note: document.getElementById('tc-note').value.trim(),
-    holes: Array(total).fill(null).map(()=>({status:'empty', note:''})),
-    created: Date.now(),
-  };
-  trays.push(tray);
-  saveTrayData();
-  closeModal('modal-tray-config');
-  renderTrayPage();
-}
-
-function resetTray() {
-  if(!confirm('ล้างถาดทั้งหมด?')) return;
-  trays = [];
-  saveTrayData();
-  renderTrayPage();
-}
-
-function deleteTray(id) {
-  if(!confirm('ลบถาดนี้?')) return;
-  trays = trays.filter(t=>t.id!==id);
-  saveTrayData();
-  renderTrayPage();
-}
-
-function paintHole(trayId, idx) {
-  const tray = trays.find(t=>t.id===trayId);
-  if(!tray) return;
-  tray.holes[idx].status = holeTool;
-  saveTrayData();
-  renderSingleTray(trayId);
-  updateTrayStats();
-}
-
-function openHoleNote(trayId, idx, e) {
-  e.stopPropagation();
-  const tray = trays.find(t=>t.id===trayId);
-  if(!tray) return;
-  editingHole = {trayId, idx};
-  const h = tray.holes[idx];
-  document.getElementById('hole-title').textContent = `หลุมที่ ${idx+1} — ${tray.name}`;
-  document.getElementById('hole-status').value = h.status;
-  document.getElementById('hole-note').value = h.note||'';
-  document.getElementById('modal-hole').classList.add('open');
-}
-
-function saveHole() {
-  if(!editingHole) return;
-  const {trayId, idx} = editingHole;
-  const tray = trays.find(t=>t.id===trayId);
-  if(!tray) return;
-  tray.holes[idx].status = document.getElementById('hole-status').value;
-  tray.holes[idx].note   = document.getElementById('hole-note').value.trim();
-  saveTrayData();
-  closeModal('modal-hole');
-  renderSingleTray(trayId);
-  updateTrayStats();
-}
-
-function renderSingleTray(id) {
-  const tray = trays.find(t=>t.id===id);
-  if(!tray) return;
-  const el = document.getElementById('tray-'+id);
-  if(!el) { renderTrayPage(); return; }
-  const cellSize = Math.min(36, Math.floor(320/tray.cols));
-  const grid = el.querySelector('.tray-grid');
-  if(!grid) return;
-  grid.style.gridTemplateColumns = `repeat(${tray.cols}, ${cellSize}px)`;
-  grid.innerHTML = tray.holes.map((h,i)=>{
-    const c = HOLE_COLORS[h.status]||HOLE_COLORS.empty;
-    const num = i+1;
-    const hasNote = h.note ? '•' : '';
-    return `<div class="tray-cell h-${h.status}" 
-      style="width:${cellSize}px;height:${cellSize}px;background:${c.bg};border-color:${c.border.replace('var(--','').replace(')','')}"
-      title="หลุม ${num}${h.note?' | '+h.note:''}"
-      onmousedown="paintHole('${tray.id}',${i})"
-      ondblclick="openHoleNote('${tray.id}',${i},event)"
-    >${hasNote}</div>`;
-  }).join('');
-}
-
-function renderTrayPage() {
-  const container = document.getElementById('trays-container');
-  if(!container) return;
-
-  if(!trays.length) {
-    container.innerHTML = `<div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">ยังไม่มีถาดหลุม — กด "⚙ ตั้งค่าถาด" เพื่อสร้างถาดแรก</div></div>`;
-    updateTrayStats();
-    return;
-  }
-
-  container.innerHTML = trays.map(tray=>{
-    const seedRef = tray.seedId ? seeds.find(s=>s.id===tray.seedId) : null;
-    const cellSize = Math.min(36, Math.floor(320/tray.cols));
-    const counts = {};
-    tray.holes.forEach(h=>{ counts[h.status]=(counts[h.status]||0)+1; });
-
-    return `<div class="tray-wrap" id="tray-${tray.id}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-        <div>
-          <div class="tray-name">${tray.name}</div>
-          <div class="tray-sub">${tray.rows}×${tray.cols} = ${tray.rows*tray.cols} หลุม${seedRef?' | '+seedRef.name+(seedRef.variety?' ('+seedRef.variety+')':''):''}${tray.note?' | '+tray.note:''}</div>
-        </div>
-        <button class="btn sm danger" onclick="deleteTray('${tray.id}')">ลบ</button>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;font-family:var(--mono)">
-        ${Object.entries(counts).filter(([k])=>k!=='empty').map(([k,v])=>`<span style="color:var(--text2)">${HOLE_COLORS[k].label}: <strong style="color:var(--text)">${v}</strong></span>`).join(' · ')}
-        <span style="color:var(--text3)">ว่าง: ${counts.empty||0}</span>
-      </div>
-      <div class="tray-grid" style="grid-template-columns:repeat(${tray.cols},${cellSize}px)">
-        ${tray.holes.map((h,i)=>{
-          const c = HOLE_COLORS[h.status]||HOLE_COLORS.empty;
-          return `<div class="tray-cell h-${h.status}"
-            style="width:${cellSize}px;height:${cellSize}px"
-            title="หลุม ${i+1}${h.note?' | '+h.note:''}"
-            onmousedown="paintHole('${tray.id}',${i})"
-            ondblclick="openHoleNote('${tray.id}',${i},event)"
-          >${h.note?'•':''}</div>`;
-        }).join('')}
-      </div>
-      <div style="font-size:10px;color:var(--text3);margin-top:6px;font-family:var(--mono)">คลิก = วาดสถานะ | ดับเบิลคลิก = แก้ไขโนต</div>
-    </div>`;
-  }).join('');
-
-  updateTrayStats();
-}
-
-function updateTrayStats() {
-  const el = document.getElementById('tray-stats');
-  if(!el) return;
-  let total=0, sprout=0, dead=0, planted=0, seed=0;
-  trays.forEach(t=>t.holes.forEach(h=>{
-    total++;
-    if(h.status==='sprout') sprout++;
-    if(h.status==='dead') dead++;
-    if(h.status==='planted') planted++;
-    if(h.status==='seed') seed++;
+function renderBadge(){
+  let n=0;
+  trays.forEach(t=>t.holes.forEach((h,i)=>{
+    if(h.st==='dead'||h.st==='planted'||h.st==='empty') return;
+    const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+    if(!p) return;
+    const d=h.sowDate?Math.round((new Date()-new Date(h.sowDate))/(864e5)):0;
+    if(h.st==='seed'&&d>=(p.sproutDays||7)) n++;
+    if(h.st==='sprout'&&d>=(p.readyDays||21)) n++;
   }));
-  el.innerHTML = [
-    `<span class="tray-stat">ถาดทั้งหมด <span>${trays.length}</span></span>`,
-    `<span class="tray-stat">หลุมรวม <span>${total}</span></span>`,
-    `<span class="tray-stat" style="color:var(--blue)">เมล็ด <span>${seed}</span></span>`,
-    `<span class="tray-stat" style="color:var(--green)">งอก <span>${sprout}</span></span>`,
-    `<span class="tray-stat" style="color:var(--red)">ตาย <span>${dead}</span></span>`,
-    `<span class="tray-stat" style="color:var(--purple)">ย้ายแล้ว <span>${planted}</span></span>`,
-  ].join('');
+  document.getElementById('nbadge').textContent=n;
 }
 
-// init demo tray
-if(!trays.length && seeds.length) {
-  trays.push({
-    id:'t1', name:'ถาด A — มะเขือเทศลูกท้อ', rows:5, cols:10,
-    seedId:'1', note:'เพาะ 1 มิ.ย. 2569',
-    holes: Array(50).fill(null).map((_,i)=>({
-      status: i<40 ? (i<35?'sprout':'seed') : (i<45?'seed':'empty'),
-      note: i===0?'งอกดีสุด':''
-    })),
-    created: Date.now()
+// ---- TOOL ----
+function setTool(t, trayId){
+  curTool=t;
+  // update all legends
+  document.querySelectorAll('.leg').forEach(el=>{
+    el.classList.remove('on');
   });
-  saveTrayData();
+  const leg=document.getElementById('leg-'+trayId);
+  if(leg){
+    const legs=leg.querySelectorAll('.leg');
+    legs.forEach((el,i)=>{
+      if(Object.keys(ST)[i]===t) el.classList.add('on');
+    });
+  }
 }
 
-// ========================
+let isPainting=false;
+document.addEventListener('mousedown',()=>isPainting=true);
+document.addEventListener('mouseup',()=>isPainting=false);
 
-document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+function quickPaint(trayId, idx, e){
+  if(e.detail>=2) return; // let dblclick handle
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const prev=t.holes[idx].st;
+  t.holes[idx].st=curTool;
+  if(curTool==='seed'&&!t.holes[idx].sowDate) t.holes[idx].sowDate=td();
+  if(prev!==curTool){
+    addLog(curTool==='seed'?'🌱':curTool==='sprout'?'🌿':curTool==='ready'?'⏰':curTool==='planted'?'🌳':'💀',
+      `${ST[curTool].label}: ${t.name} หลุม ${idx+1}`,
+      t.holes[idx].plantId?(plants.find(p=>p.id===t.holes[idx].plantId)||{}).name||'':''
+    );
+  }
+  sd();
+  refreshTrayCard(trayId);
+  renderBadge();
+}
+
+function refreshTrayCard(trayId){
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const el=document.getElementById('tcard-'+trayId);
+  if(!el) return;
+  el.outerHTML=renderTrayCard(t);
+  renderDash();
+}
+
+// ---- HOLE MODAL ----
+function openHole(trayId, idx, e){
+  if(e) e.stopPropagation();
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  editHole={trayId,idx};
+  const h=t.holes[idx];
+  document.getElementById('hole-title').textContent=`${t.name} — หลุมที่ ${idx+1}`;
+  document.getElementById('h-status').value=h.st;
+  document.getElementById('h-sow').value=h.sowDate||td();
+  document.getElementById('h-note').value=h.note||'';
+  // plant picker
+  const pp=document.getElementById('pp-grid');
+  pp.innerHTML=`<div class="pp-clear ${!h.plantId?'on':''}" onclick="selectPlant(null)">ว่าง / ไม่ระบุ</div>`+
+    plants.map(p=>`<div class="pp-item ${h.plantId===p.id?'on':''}" onclick="selectPlant('${p.id}')"><div class="pp-name">${p.name}</div><div class="pp-var">${p.variety||'—'}</div></div>`).join('');
+  document.getElementById('ov-hole').classList.add('on');
+}
+
+function selectPlant(id){
+  document.querySelectorAll('.pp-item,.pp-clear').forEach(el=>el.classList.remove('on'));
+  if(id){
+    document.querySelector(`.pp-item[onclick="selectPlant('${id}')"]`)?.classList.add('on');
+  } else {
+    document.querySelector('.pp-clear')?.classList.add('on');
+  }
+  editHole._plant=id;
+}
+
+function saveHole(){
+  if(!editHole) return;
+  const {trayId,idx}=editHole;
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const prev=t.holes[idx].st;
+  const newSt=document.getElementById('h-status').value;
+  const plantId=editHole._plant!==undefined?editHole._plant:t.holes[idx].plantId;
+  t.holes[idx].st=newSt;
+  t.holes[idx].sowDate=document.getElementById('h-sow').value;
+  t.holes[idx].note=document.getElementById('h-note').value.trim();
+  t.holes[idx].plantId=plantId||null;
+  const p=plantId?plants.find(x=>x.id===plantId):null;
+  if(prev!==newSt||p){
+    addLog(
+      newSt==='seed'?'🌱':newSt==='sprout'?'🌿':newSt==='ready'?'⏰':newSt==='planted'?'🌳':newSt==='dead'?'💀':'📝',
+      `${t.name} หลุม ${idx+1}: ${ST[newSt].label}${p?' ('+p.name+(p.variety?' '+p.variety:'')+')'  :''}`,
+      t.holes[idx].note
+    );
+  }
+  sd();
+  cm('ov-hole');
+  refreshTrayCard(trayId);
+  renderBadge();
+  renderNotify();
+}
+
+// ---- TRAY CRUD ----
+function openNewTray(){
+  document.getElementById('tray-modal-title').textContent='สร้างถาดใหม่';
+  document.getElementById('nt-name').value=`ถาด ${String.fromCharCode(65+trays.length)}`;
+  document.getElementById('nt-rows').value=5;
+  document.getElementById('nt-cols').value=10;
+  document.getElementById('nt-note').value='';
+  const sel=document.getElementById('nt-plant');
+  sel.innerHTML='<option value="">— ว่างทุกหลุม —</option>'+
+    plants.map(p=>`<option value="${p.id}">${p.name}${p.variety?' ('+p.variety+')':''}</option>`).join('');
+  document.getElementById('ov-tray').classList.add('on');
+}
+
+function saveTray(){
+  const rows=parseInt(document.getElementById('nt-rows').value)||5;
+  const cols=parseInt(document.getElementById('nt-cols').value)||10;
+  const plantId=document.getElementById('nt-plant').value||null;
+  const t={
+    id:pid(),
+    name:document.getElementById('nt-name').value.trim()||`ถาด ${trays.length+1}`,
+    rows,cols,
+    note:document.getElementById('nt-note').value.trim(),
+    holes:Array(rows*cols).fill(null).map(()=>({
+      st: plantId?'seed':'empty',
+      plantId: plantId||null,
+      sowDate: plantId?td():null,
+      note:''
+    })),
+    created:Date.now()
+  };
+  trays.push(t);
+  if(plantId){
+    const p=plants.find(x=>x.id===plantId);
+    addLog('🌱',`สร้างถาด ${t.name}: หยอดเมล็ด ${rows*cols} หลุม`,p?p.name+(p.variety?' '+p.variety:''):'');
+  } else {
+    addLog('🗂️',`สร้างถาด ${t.name}`,`${rows}×${cols} = ${rows*cols} หลุม`);
+  }
+  sd();
+  cm('ov-tray');
+  render();
+  go('trays');
+}
+
+function delTray(id){
+  if(!confirm('ลบถาดนี้?')) return;
+  trays=trays.filter(t=>t.id!==id);
+  sd();
+  render();
+}
+
+function editTray(id){
+  // simple: re-open with current values
+  const t=trays.find(x=>x.id===id);
+  if(!t) return;
+  // for now just allow rename
+  const name=prompt('ชื่อถาด:',t.name);
+  if(name!==null&&name.trim()){
+    t.name=name.trim();
+    sd();
+    render();
+  }
+}
+
+// ---- PLANT CRUD ----
+function openNewPlant(){
+  document.getElementById('np-name').value='';
+  document.getElementById('np-var').value='';
+  document.getElementById('np-sprout').value=7;
+  document.getElementById('np-ready').value=21;
+  document.getElementById('np-note').value='';
+  document.getElementById('ov-plant').classList.add('on');
+}
+
+function savePlant(){
+  const name=document.getElementById('np-name').value.trim();
+  if(!name){alert('กรุณากรอกชื่อพืช');return;}
+  const p={
+    id:pid(),
+    name,
+    variety:document.getElementById('np-var').value.trim(),
+    sproutDays:parseInt(document.getElementById('np-sprout').value)||7,
+    readyDays:parseInt(document.getElementById('np-ready').value)||21,
+    note:document.getElementById('np-note').value.trim(),
+  };
+  plants.push(p);
+  addLog('🌿',`เพิ่มพืช: ${p.name}${p.variety?' ('+p.variety+')':''}`,p.note);
+  sd();
+  cm('ov-plant');
+}
+
+// ---- NAV ----
+function go(id,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  else document.querySelectorAll('.tab').forEach(b=>{
+    if(b.getAttribute('onclick')===`go('${id}',this)`) b.classList.add('on');
+  });
+  if(id==='trays') renderTrays();
+  else if(id==='notify') renderNotify();
+  else if(id==='log') renderLog();
+  else renderDash();
+}
+
+function cm(id){document.getElementById(id).classList.remove('on');}
+
+document.querySelectorAll('.ov').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');});
 });
 
-// init demo data if empty
-if(!seeds.length) {
-  const demo = [
-    {id:'1',name:'มะเขือเทศ',variety:'ลูกท้อ',seedCount:'50',sowDate:'2026-06-01',sproutDate:'2026-06-07',transplantDate:'2026-06-25',status:'sprout',note:'งอกประมาณ 40 ต้น ต้นกล้าสมบูรณ์ดี',lastWater:today(),created:1},
-    {id:'2',name:'พริก',variety:'จินดา',seedCount:'30',sowDate:'2026-06-05',sproutDate:'',transplantDate:'2026-07-05',status:'seed',note:'',lastWater:'2026-06-16',created:2},
-    {id:'3',name:'กะเพรา',variety:'',seedCount:'20',sowDate:'2026-05-20',sproutDate:'2026-05-26',transplantDate:'2026-06-15',status:'ready',note:'ต้นกล้าสูงดีแล้ว พร้อมย้าย',lastWater:today(),created:3},
+// ---- INIT DEMO ----
+if(!plants.length){
+  plants=[
+    {id:'p1',name:'มะเขือเทศ',variety:'ลูกท้อ',sproutDays:7,readyDays:21,note:''},
+    {id:'p2',name:'พริก',variety:'จินดา',sproutDays:10,readyDays:30,note:''},
+    {id:'p3',name:'กะเพรา',variety:'',sproutDays:5,readyDays:14,note:''},
   ];
-  seeds = demo;
-  logs = [
-    {id:'l1',icon:'🌱',title:'เริ่มเพาะ: มะเขือเทศ (ลูกท้อ)',date:'2026-06-01',seedId:'1',note:'เพาะในถาด 50 หลุม'},
-    {id:'l2',icon:'🌱',title:'เริ่มเพาะ: พริก (จินดา)',date:'2026-06-05',seedId:'2',note:''},
-    {id:'l3',icon:'🌿',title:'อัปเดตสถานะ มะเขือเทศ: งอกแล้ว',date:'2026-06-07',seedId:'1',note:'งอก 40/50 ต้น'},
-    {id:'l4',icon:'⏰',title:'อัปเดตสถานะ กะเพรา: พร้อมย้าย',date:'2026-06-14',seedId:'3',note:''},
+  trays=[{
+    id:'t1',name:'ถาด A — มะเขือเทศลูกท้อ',rows:5,cols:10,note:'เพาะ มิ.ย. 2569',
+    holes:Array(50).fill(null).map((_,i)=>({
+      st:i<38?(i<30?'sprout':'seed'):i<45?'seed':'empty',
+      plantId:'p1',
+      sowDate:'2026-06-01',
+      note:i===0?'งอกดีสุด':''
+    })),
+    created:Date.now()
+  }];
+  logs=[
+    {id:'l1',icon:'🗂️',text:'สร้างถาด A — มะเขือเทศลูกท้อ',note:'5×10 = 50 หลุม',date:'2026-06-01'},
+    {id:'l2',icon:'🌱',text:'หยอดเมล็ด 50 หลุม',note:'มะเขือเทศ ลูกท้อ',date:'2026-06-01'},
+    {id:'l3',icon:'🌿',text:'งอกแล้ว 30 หลุม',note:'',date:'2026-06-07'},
   ];
-  save();
-} else { render(); }
+  sd();
+}
+
+render();
 </script>
 </body>
 </html>
