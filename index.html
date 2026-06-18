@@ -1,589 +1,1024 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toon Fresh Stock</title>
-  <style>
-    *{ box-sizing:border-box; margin:0; padding:0; }
-    body{
-      font-family: system-ui,-apple-system,"Prompt",sans-serif;
-      background: #0d1f0f;
-      color: #e8f5e9;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เมล็ดพันธุ์ — บันทึกการเพาะ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-    header{
-      background: #1a2e1c;
-      border-bottom: 1px solid #2a5c35;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+:root {
+  --bg:#0d1117; --s1:#161b22; --s2:#21262d; --s3:#30363d;
+  --border:#30363d; --border2:#484f58;
+  --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
+  --green:#3fb950; --green-dim:rgba(63,185,80,0.15); --green-dk:#0f3d1a;
+  --amber:#d29922; --amber-dim:rgba(210,153,34,0.15);
+  --red:#f85149; --red-dim:rgba(248,81,73,0.15);
+  --blue:#58a6ff; --blue-dim:rgba(88,166,255,0.15);
+  --purple:#bc8cff; --purple-dim:rgba(188,140,255,0.15);
+  --mono:'IBM Plex Mono',monospace;
+}
 
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-    .logo-icon {
-      width: 56px;
-      height: 56px;
-      flex-shrink: 0;
-    }
+/* NAV */
+nav{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:0;height:52px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:24px}
+.nav-logo-icon{width:26px;height:26px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.nav-logo-text{font-size:14px;font-weight:600;color:var(--text);font-family:var(--mono)}
+.nav-tabs{display:flex;gap:0;height:100%}
+.nav-tab{padding:0 16px;font-size:13px;color:var(--text2);border:none;background:none;cursor:pointer;font-family:'Sarabun',sans-serif;height:100%;border-bottom:2px solid transparent;transition:all .15s}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--text);border-bottom-color:var(--green)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.badge-notify{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-family:var(--mono);font-weight:500}
 
-    .logo-text-block {
-      display: flex;
-      flex-direction: column;
-    }
+/* LAYOUT */
+.page{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
 
-    .logo-name {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      color: #52c460;
-      line-height: 1;
-    }
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-card.g{border-color:rgba(63,185,80,0.3);background:var(--green-dim)}
+.stat-card.a{border-color:rgba(210,153,34,0.3);background:var(--amber-dim)}
+.stat-card.r{border-color:rgba(248,81,73,0.3);background:var(--red-dim)}
+.stat-card.b{border-color:rgba(88,166,255,0.3);background:var(--blue-dim)}
+.stat-lbl{font-size:11px;color:var(--text2);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.stat-val{font-size:24px;font-weight:600;color:var(--text);font-family:var(--mono);line-height:1}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:3px}
 
-    .logo-tag {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 5px;
-      color: #81c784;
-      margin-top: 3px;
-    }
+/* SECTION HEADER */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:14px;font-weight:600;color:var(--text)}
+.btn{padding:7px 14px;border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer;border:1px solid var(--border2);background:var(--s2);color:var(--text);transition:all .15s}
+.btn:hover{background:var(--s3)}
+.btn.primary{background:var(--green-dk);border-color:var(--green);color:var(--green)}
+.btn.primary:hover{background:rgba(63,185,80,0.25)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.danger{border-color:rgba(248,81,73,0.4);color:var(--red)}
+.btn.danger:hover{background:var(--red-dim)}
 
-    .logo-sub {
-      font-size: 12px;
-      color: #5a8a62;
-      margin-top: 2px;
-    }
+/* TABLE */
+.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--s2);padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
 
-    .container{ max-width:1200px; margin:0 auto; padding:24px 20px; }
+/* STATUS BADGES */
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--mono)}
+.status::before{content:'';width:6px;height:6px;border-radius:50%}
+.s-seed{background:rgba(88,166,255,0.15);color:var(--blue)}.s-seed::before{background:var(--blue)}
+.s-sprout{background:var(--green-dim);color:var(--green)}.s-sprout::before{background:var(--green)}
+.s-ready{background:var(--amber-dim);color:var(--amber)}.s-ready::before{background:var(--amber)}
+.s-planted{background:var(--purple-dim);color:var(--purple)}.s-planted::before{background:var(--purple)}
+.s-dead{background:var(--red-dim);color:var(--red)}.s-dead::before{background:var(--red)}
 
-    .stats{
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .stat-card{
-      background: #0f2a12;
-      border: 1px solid #1e4d22;
-      border-radius: 16px;
-      padding: 18px 20px;
-      position: relative;
-      overflow: hidden;
-      transition: transform .2s, border-color .2s;
-    }
-    .stat-card:hover{ transform: translateY(-3px); border-color: #2e7d32; }
-    .stat-card::after{
-      content:'';
-      position:absolute;
-      bottom:-30px;right:-30px;
-      width:80px;height:80px;
-      border-radius:50%;
-      background: radial-gradient(circle, rgba(74,163,91,.12) 0%, transparent 70%);
-    }
-    .stat-label{ font-size:12px; color:#81c784; text-transform:uppercase; letter-spacing:.8px; }
-    .stat-value{ font-size:30px; font-weight:700; margin-top:6px; color:#e8f5e9; }
-    .stat-value.warn{ color:#ffb74d; }
-    .stat-value.danger{ color:#ef5350; }
-    .stat-value.accent{ color:#69f0ae; }
+/* PROGRESS BAR */
+.prog-wrap{background:var(--s3);border-radius:4px;height:5px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
+.prog-fill{height:100%;border-radius:4px;transition:width .3s}
 
-    .form-section{
-      background: #0f2a12;
-      border: 1px solid #1e4d22;
-      border-radius: 20px;
-      padding: 22px 24px;
-      margin-bottom: 28px;
-    }
-    .form-section h2{
-      font-size:15px; font-weight:600; color:#81c784;
-      margin-bottom:16px; display:flex; align-items:center; gap:8px;
-    }
-    .form-grid{
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
-      gap: 12px;
-      align-items: end;
-    }
-    .field label{
-      display:block;
-      font-size:12px; color:#66bb6a; margin-bottom:6px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.5px;
-    }
-    .field select, .field input{
-      width:100%;
-      background: #0d1f0f;
-      border: 1px solid #2e4d30;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size:14px;
-      color: #e8f5e9;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .field select:focus, .field input:focus{
-      border-color: #43a047;
-      box-shadow: 0 0 0 3px rgba(67,160,71,.2);
-    }
-    .field select option{ background:#0d1f0f; color:#e8f5e9; }
-    .btn-submit{
-      background: linear-gradient(135deg,#2e7d32,#43a047);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 11px 20px;
-      font-size:14px; font-weight:700;
-      cursor:pointer;
-      transition: opacity .2s, transform .1s;
-      white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(46,125,50,.4);
-    }
-    .btn-submit:hover{ opacity:.9; transform:translateY(-1px); }
-    .btn-cancel{
-      display:none;
-      margin-top:10px;
-      background:transparent;
-      border:1px solid #2e4d30;
-      color:#81c784;
-      border-radius:10px;
-      padding:8px 16px;
-      font-size:13px;
-      cursor:pointer;
-    }
-    .btn-cancel:hover{ background:#1e4d22; }
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px}
+.modal-close:hover{background:var(--s3);color:var(--text)}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 
-    .shelf-section{ margin-top:4px; }
-    .shelf-toolbar{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:20px; flex-wrap:wrap; gap:12px;
-    }
-    .shelf-toolbar h2{ font-size:16px; font-weight:600; color:#a5d6a7; }
-    .search-input{
-      background:#0f2a12;
-      border:1px solid #2e4d30;
-      border-radius:10px;
-      padding:9px 14px;
-      font-size:13px;
-      color:#e8f5e9;
-      width:220px;
-      outline:none;
-    }
-    .search-input:focus{ border-color:#43a047; }
-    .search-input::placeholder{ color:#4a7c4e; }
+/* FORM */
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-family:var(--mono)}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;transition:border .15s;outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green)}
+.form-row textarea{min-height:70px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+select option{background:var(--s2)}
 
-    .shelf-3d{ perspective: 1200px; }
-    .shelf-inner{
-      transform-style: preserve-3d;
-      transform: rotateX(4deg);
-    }
-    .crates-grid{
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 18px;
-    }
+/* NOTIFY CARDS */
+.notify-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.notify-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.notify-card.urgent{border-color:rgba(248,81,73,0.4);background:var(--red-dim)}
+.notify-card.warn{border-color:rgba(210,153,34,0.4);background:var(--amber-dim)}
+.notify-card.info{border-color:rgba(88,166,255,0.4);background:var(--blue-dim)}
+.notify-icon{font-size:20px;flex-shrink:0}
+.notify-text{flex:1}
+.notify-title{font-size:13px;font-weight:500;color:var(--text)}
+.notify-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.notify-days{font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text2)}
 
-    .crate{ position:relative; cursor:default; }
-    .crate-body{
-      border-radius: 16px 16px 10px 10px;
-      padding: 16px 14px 14px;
-      position: relative;
-      overflow: hidden;
-      border-top: 3px solid rgba(255,255,255,.15);
-      box-shadow:
-        0 10px 0 rgba(0,0,0,.35),
-        0 14px 20px rgba(0,0,0,.3),
-        inset 0 1px 0 rgba(255,255,255,.15);
-      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
-    }
-    .crate:hover .crate-body{
-      transform: translateY(-10px) scale(1.04);
-      box-shadow:
-        0 18px 0 rgba(0,0,0,.3),
-        0 24px 32px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.2);
-    }
-    .crate-body::before{
-      content:'';
-      position:absolute;top:0;left:0;right:0;height:8px;
-      background:rgba(255,255,255,.12);
-      border-radius:16px 16px 0 0;
-    }
-    .crate-body::after{
-      content:'';
-      position:absolute;inset:0;
-      background: repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 18px,
-        rgba(0,0,0,.06) 18px,
-        rgba(0,0,0,.06) 19px
-      );
-      border-radius:inherit;
-      pointer-events:none;
-    }
-    .crate-shadow{
-      height:10px;
-      margin:0 14px;
-      background:rgba(0,0,0,.25);
-      border-radius:0 0 16px 16px;
-      filter:blur(4px);
-      transition:margin .25s, filter .25s;
-    }
-    .crate:hover .crate-shadow{
-      margin:6px 20px 0;
-      filter:blur(8px);
-    }
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:15px;top:28px;bottom:0;width:1px;background:var(--border)}
+.tl-dot{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid var(--border)}
+.tl-dot.done{border-color:var(--green);background:var(--green-dk)}
+.tl-dot.active{border-color:var(--amber);background:var(--amber-dim)}
+.tl-dot.future{border-color:var(--border);background:var(--s2)}
+.tl-content{flex:1;padding-top:4px}
+.tl-title{font-size:13px;font-weight:500;color:var(--text)}
+.tl-date{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px}
+.tl-note{font-size:12px;color:var(--text2);margin-top:4px;background:var(--s2);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border2)}
 
-    .crate-badge{
-      position:absolute;top:10px;right:10px;
-      font-size:10px;font-weight:700;
-      padding:3px 8px;border-radius:999px;
-      background:rgba(0,0,0,.25);
-    }
-    .crate-icon{ font-size:28px; margin-bottom:6px; }
-    .crate-name{ font-size:14px; font-weight:700; margin-bottom:2px; }
-    .crate-qty{
-      font-size:28px; font-weight:800;
-      line-height:1; margin-bottom:2px;
-    }
-    .crate-unit{ font-size:11px; opacity:.65; margin-bottom:10px; }
-    .crate-bar-bg{
-      height:4px; border-radius:999px;
-      background:rgba(0,0,0,.2);
-      margin-bottom:8px;
-    }
-    .crate-bar{
-      height:4px; border-radius:999px;
-      background:rgba(255,255,255,.6);
-      transition:width .5s ease;
-    }
-    .crate-cost{ font-size:11px; opacity:.6; margin-bottom:2px; }
-    .crate-date{ font-size:10px; opacity:.45; margin-bottom:10px; }
-    .crate-actions{ display:flex; gap:6px; }
-    .btn-crate{
-      flex:1; border:none; border-radius:8px; padding:6px;
-      font-size:11px; font-weight:700; cursor:pointer;
-      transition:opacity .15s;
-    }
-    .btn-crate:hover{ opacity:.8; }
-    .btn-crate-edit{ background:rgba(255,255,255,.2); color:inherit; }
-    .btn-crate-del{ background:rgba(200,0,0,.25); color:#ffcdd2; }
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--text2)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty-text{font-size:14px;margin-bottom:16px}
 
-    .c-forest{ background:#1b5e20; color:#e8f5e9; }
-    .c-teal  { background:#004d40; color:#e0f2f1; }
-    .c-indigo{ background:#1a237e; color:#e8eaf6; }
-    .c-brown { background:#3e2723; color:#efebe9; }
-    .c-slate { background:#263238; color:#eceff1; }
-    .c-olive { background:#33691e; color:#f9fbe7; }
-    .c-grape { background:#4a148c; color:#f3e5f5; }
-    .c-rust  { background:#bf360c; color:#fbe9e7; }
-    .c-ocean { background:#01579b; color:#e1f5fe; }
-    .c-moss  { background:#2e7d32; color:#e8f5e9; }
+/* PHOTO */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:8px}
+.photo-slot{width:80px;height:80px;background:var(--s2);border:1px dashed var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:20px;transition:all .15s}
+.photo-slot:hover{border-color:var(--green);color:var(--green)}
+.photo-thumb{width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--border)}
 
-    .empty-state{
-      grid-column:1/-1;
-      text-align:center;
-      padding:60px 20px;
-      color:#4a7c4e;
-      font-size:14px;
-    }
-    .empty-state .empty-icon{ font-size:48px; margin-bottom:12px; opacity:.5; }
+.watered-btn{font-size:11px;padding:3px 8px}
+.watered-btn.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
 
-    .toast{
-      position:fixed;bottom:24px;right:24px;
-      background:#2e7d32;color:white;
-      padding:12px 20px;border-radius:12px;
-      font-size:14px;font-weight:600;
-      box-shadow:0 8px 24px rgba(0,0,0,.4);
-      transform:translateY(80px);opacity:0;
-      transition:all .3s;
-      z-index:999;
-    }
-    .toast.show{ transform:translateY(0);opacity:1; }
-
-    @media(max-width:960px){
-      .stats{ grid-template-columns:repeat(2,1fr); }
-      .form-grid{ grid-template-columns:1fr 1fr; }
-    }
-    @media(max-width:580px){
-      .stats{ grid-template-columns:repeat(2,1fr); }
-      .form-grid{ grid-template-columns:1fr; }
-      .logo-name{ font-size:24px; }
-      .crates-grid{ grid-template-columns:repeat(2,1fr); }
-    }
-  </style>
+/* TRAY */
+.tray-grid{display:grid;gap:5px;margin:0 auto}
+.tray-cell{border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono);font-weight:500;color:rgba(255,255,255,0.5)}
+.tray-cell:hover{transform:scale(1.15);z-index:2}
+.tray-cell.h-empty{background:var(--s3);border-color:var(--border2)}
+.tray-cell.h-seed{background:#1a2d4a;border-color:var(--blue)}
+.tray-cell.h-sprout{background:var(--green-dk);border-color:var(--green)}
+.tray-cell.h-ready{background:#3d2e00;border-color:var(--amber)}
+.tray-cell.h-dead{background:#2d0f0f;border-color:var(--red)}
+.tray-cell.h-planted{background:#1e1040;border-color:var(--purple)}
+.tray-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.tray-leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:3px 8px;border-radius:6px;border:1px solid transparent;transition:all .15s}
+.tray-leg:hover{background:var(--s2);border-color:var(--border)}
+.tray-leg.active-tool{background:var(--s2);border-color:var(--border2)}
+.tray-dot{width:10px;height:10px;border-radius:50%;border:2px solid}
+.tray-controls{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tray-size-btn{padding:4px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--s2);color:var(--text2);cursor:pointer;font-family:var(--mono)}
+.tray-size-btn.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.tray-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.tray-stat{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.tray-stat span{color:var(--text);font-weight:500}
+.tray-wrap{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.tray-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.tray-sub{font-size:11px;color:var(--text2);font-family:var(--mono);margin-bottom:12px}
+</style>
 </head>
 <body>
 
-<header>
-  <div class="logo-wrap">
-    <svg class="logo-icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="28" cy="28" r="28" fill="#d4f5dc"/>
-      <circle cx="28" cy="28" r="21" fill="#a8e6b4"/>
-      <ellipse cx="22" cy="20" rx="7" ry="11" fill="#2d7a3a" transform="rotate(-20 22 20)"/>
-      <ellipse cx="30" cy="17" rx="6" ry="9" fill="#3d9e4a" transform="rotate(10 30 17)"/>
-      <ellipse cx="37" cy="22" rx="5" ry="8" fill="#2d7a3a" transform="rotate(30 37 22)"/>
-      <ellipse cx="16" cy="25" rx="4" ry="7" fill="#52c460" transform="rotate(-40 16 25)"/>
-      <line x1="22" y1="31" x2="24" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
-      <line x1="30" y1="26" x2="28" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
-      <line x1="37" y1="30" x2="33" y2="40" stroke="#1a5e24" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <div class="logo-text-block">
-      <span class="logo-name">Toon</span>
-      <span class="logo-tag">FRESH &amp; LOCAL</span>
-      <span class="logo-sub">คลังผักดิจิทัล — บันทึกและติดตามสต็อกของคุณ</span>
-    </div>
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">🌱</div>
+    <div class="nav-logo-text">SeedLog</div>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard',this)">ภาพรวม</button>
+    <button class="nav-tab" onclick="showPage('seeds',this)">รายการเพาะ</button>
+    <button class="nav-tab" onclick="showPage('notify',this)">การแจ้งเตือน</button>
+    <button class="nav-tab" onclick="showPage('log',this)">บันทึกประจำวัน</button>
+    <button class="nav-tab" onclick="showPage('tray',this)">📋 ถาดหลุม</button>
   </div>
-</header>
-
-<div class="container">
-
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-label">รายการทั้งหมด</div>
-      <div class="stat-value" id="sTotalItems">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">จำนวนรวม</div>
-      <div class="stat-value accent" id="sTotalQty">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">มูลค่าสต็อก</div>
-      <div class="stat-value accent" id="sTotalVal">฿0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">ใกล้หมด / หมด</div>
-      <div class="stat-value danger" id="sLow">0</div>
-    </div>
+  <div class="nav-right">
+    <span class="badge-notify" id="notify-badge">0</span>
+    <button class="btn sm primary" onclick="openAdd()">+ เพิ่มรายการ</button>
   </div>
+</nav>
 
-  <div class="form-section">
-    <h2>➕ เพิ่มสต็อก</h2>
-    <div class="form-grid">
-      <div class="field">
-        <label>ชื่อผัก</label>
-        <select id="fName">
-          <option value="">เลือกชนิดผัก</option>
-          <option>คะน้า</option><option>ผักกาดขาว</option><option>ผักบุ้ง</option>
-          <option>กะหล่ำปลี</option><option>กวางตุ้ง</option><option>แตงกวา</option>
-          <option>พริก</option><option>มะเขือเทศ</option><option>ต้นหอม</option>
-          <option>ผักชี</option><option>แครอท</option><option>ฟักทอง</option>
-          <option>ถั่วฝักยาว</option><option>บรอกโคลี</option><option>เห็ด</option>
-          <option>ข้าวโพดอ่อน</option><option>ใบโหระพา</option><option>กะเพรา</option>
-          <option>ขึ้นฉ่าย</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>จำนวน</label>
-        <select id="fQty">
-          <option value="">เลือก</option>
-          <option>1</option><option>2</option><option>3</option><option>5</option>
-          <option>10</option><option>15</option><option>20</option><option>25</option>
-          <option>30</option><option>50</option><option>100</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>หน่วย</label>
-        <select id="fUnit">
-          <option>กก.</option><option>มัด</option><option>ถุง</option>
-          <option>ลัง</option><option>ชิ้น</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>ต้นทุน/หน่วย</label>
-        <select id="fCost">
-          <option value="">เลือก</option>
-          <option>5</option><option>10</option><option>15</option><option>20</option>
-          <option>25</option><option>30</option><option>35</option><option>40</option>
-          <option>50</option><option>80</option><option>100</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>วันรับเข้า</label>
-        <input type="date" id="fDate">
-      </div>
-      <div>
-        <button class="btn-submit" id="submitBtn" onclick="submitForm()">เพิ่มสต็อก</button>
-      </div>
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-bar">
+    <div class="stat-card g">
+      <div class="stat-lbl">กำลังเพาะ</div>
+      <div class="stat-val" id="cnt-active">0</div>
+      <div class="stat-sub">รายการทั้งหมด</div>
     </div>
-    <button class="btn-cancel" id="cancelBtn" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
-  </div>
-
-  <div class="shelf-section">
-    <div class="shelf-toolbar">
-      <h2>📦 ชั้นวางสต็อก</h2>
-      <input class="search-input" id="searchBox" placeholder="ค้นหาผัก..." oninput="render()">
+    <div class="stat-card b">
+      <div class="stat-lbl">งอกแล้ว</div>
+      <div class="stat-val" id="cnt-sprout">0</div>
+      <div class="stat-sub">ต้นกล้า</div>
     </div>
-    <div class="shelf-3d">
-      <div class="shelf-inner">
-        <div class="crates-grid" id="cratesGrid"></div>
-      </div>
+    <div class="stat-card a">
+      <div class="stat-lbl">พร้อมย้ายปลูก</div>
+      <div class="stat-val" id="cnt-ready">0</div>
+      <div class="stat-sub">รายการ</div>
+    </div>
+    <div class="stat-card r">
+      <div class="stat-lbl">ต้องรดน้ำวันนี้</div>
+      <div class="stat-val" id="cnt-water">0</div>
+      <div class="stat-sub">รายการ</div>
     </div>
   </div>
 
+  <div class="sec-hd">
+    <div class="sec-title">รายการล่าสุด</div>
+    <button class="btn sm" onclick="showPage('seeds', document.querySelector('.nav-tab:nth-child(2)'))">ดูทั้งหมด →</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>พืช / สายพันธุ์</th>
+        <th>วันที่เพาะ</th>
+        <th>วันงอก</th>
+        <th>สถานะ</th>
+        <th>ความคืบหน้า</th>
+        <th>รดน้ำล่าสุด</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="dash-tbody"></tbody>
+    </table>
+  </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- SEEDS -->
+<div class="page" id="page-seeds">
+  <div class="sec-hd">
+    <div class="sec-title">รายการเพาะทั้งหมด</div>
+    <button class="btn primary" onclick="openAdd()">+ เพิ่มรายการใหม่</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>พืช / สายพันธุ์</th>
+        <th>จำนวนเมล็ด</th>
+        <th>วันที่เพาะ</th>
+        <th>วันงอก</th>
+        <th>วันย้ายปลูก</th>
+        <th>สถานะ</th>
+        <th>รดน้ำ</th>
+        <th>จัดการ</th>
+      </tr></thead>
+      <tbody id="seeds-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- NOTIFY -->
+<div class="page" id="page-notify">
+  <div class="sec-hd"><div class="sec-title">การแจ้งเตือน</div></div>
+  <div class="notify-list" id="notify-list"></div>
+</div>
+
+<!-- LOG -->
+<div class="page" id="page-log">
+  <div class="sec-hd">
+    <div class="sec-title">บันทึกประจำวัน</div>
+  </div>
+  <div class="timeline" id="log-timeline"></div>
+  <div class="empty" id="log-empty" style="display:none">
+    <div class="empty-icon">📖</div>
+    <div class="empty-text">ยังไม่มีบันทึก — เพิ่มรายการเพาะและอัปเดตสถานะเพื่อสร้าง timeline</div>
+  </div>
+</div>
+
+<!-- TRAY -->
+<div class="page" id="page-tray">
+  <div class="sec-hd">
+    <div class="sec-title">ถาดหลุมเพาะกล้า</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn sm" onclick="openTrayConfig()">⚙ ตั้งค่าถาด</button>
+      <button class="btn sm primary" onclick="resetTray()">รีเซตถาด</button>
+    </div>
+  </div>
+
+  <div class="tray-controls">
+    <span style="font-size:12px;color:var(--text2)">ขนาดถาด:</span>
+    <button class="tray-size-btn active" onclick="setTraySize(50,this)">50 หลุม (5×10)</button>
+    <button class="tray-size-btn" onclick="setTraySize(72,this)">72 หลุม (6×12)</button>
+    <button class="tray-size-btn" onclick="setTraySize(104,this)">104 หลุม (8×13)</button>
+    <button class="tray-size-btn" onclick="setTraySize(128,this)">128 หลุม (8×16)</button>
+  </div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+    <div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-family:var(--mono)">เลือกสถานะแล้วคลิกหลุม:</div>
+      <div class="tray-legend" id="tray-legend">
+        <div class="tray-leg active-tool" onclick="setHoleTool('empty',this)"><div class="tray-dot" style="background:var(--s3);border-color:var(--border2)"></div>ว่าง</div>
+        <div class="tray-leg" onclick="setHoleTool('seed',this)"><div class="tray-dot" style="background:#1a2d4a;border-color:var(--blue)"></div>เมล็ด</div>
+        <div class="tray-leg" onclick="setHoleTool('sprout',this)"><div class="tray-dot" style="background:var(--green-dk);border-color:var(--green)"></div>งอก</div>
+        <div class="tray-leg" onclick="setHoleTool('ready',this)"><div class="tray-dot" style="background:#3d2e00;border-color:var(--amber)"></div>พร้อมย้าย</div>
+        <div class="tray-leg" onclick="setHoleTool('dead',this)"><div class="tray-dot" style="background:#2d0f0f;border-color:var(--red)"></div>ตาย</div>
+        <div class="tray-leg" onclick="setHoleTool('planted',this)"><div class="tray-dot" style="background:#1e1040;border-color:var(--purple)"></div>ย้ายแล้ว</div>
+      </div>
+      <div class="tray-stats" id="tray-stats"></div>
+    </div>
+  </div>
+
+  <div id="trays-container" style="margin-top:16px;display:flex;flex-direction:column;gap:20px"></div>
+</div>
+
+<!-- TRAY CONFIG MODAL -->
+<div class="modal-overlay" id="modal-tray-config">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">ตั้งค่าถาดหลุม</div>
+      <button class="modal-close" onclick="closeModal('modal-tray-config')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>ชื่อถาด</label>
+        <input id="tc-name" placeholder="เช่น ถาด A - มะเขือเทศ">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>จำนวนแถว</label>
+          <input id="tc-rows" type="number" min="1" max="16" value="5">
+        </div>
+        <div class="form-row">
+          <label>จำนวนคอลัมน์</label>
+          <input id="tc-cols" type="number" min="1" max="20" value="10">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>พืชที่เพาะ (เชื่อมกับรายการ)</label>
+        <select id="tc-seed">
+          <option value="">— ไม่ระบุ —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>โนต</label>
+        <input id="tc-note" placeholder="บันทึกเพิ่มเติม">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-tray-config')">ยกเลิก</button>
+      <button class="btn primary" onclick="saveTrayConfig()">เพิ่มถาด</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOLE NOTE MODAL -->
+<div class="modal-overlay" id="modal-hole">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hd">
+      <div class="modal-title" id="hole-title">หลุมที่ —</div>
+      <button class="modal-close" onclick="closeModal('modal-hole')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>สถานะ</label>
+        <select id="hole-status">
+          <option value="empty">ว่าง</option>
+          <option value="seed">เมล็ด (รองอก)</option>
+          <option value="sprout">งอกแล้ว</option>
+          <option value="ready">พร้อมย้ายปลูก</option>
+          <option value="planted">ย้ายปลูกแล้ว</option>
+          <option value="dead">ตาย</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>โนต (ไม่บังคับ)</label>
+        <input id="hole-note" placeholder="เช่น งอกช้า, ต้นแข็งแรง">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-hole')">ยกเลิก</button>
+      <button class="btn primary" onclick="saveHole()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">เพิ่มรายการเพาะใหม่</div>
+      <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-grid">
+        <div class="form-row">
+          <label>ชื่อพืช *</label>
+          <input id="f-name" placeholder="เช่น มะเขือเทศ">
+        </div>
+        <div class="form-row">
+          <label>สายพันธุ์</label>
+          <input id="f-variety" placeholder="เช่น ลูกท้อ, ซีซันไนน์">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>จำนวนเมล็ด</label>
+          <input id="f-seeds" type="number" min="1" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label>วันที่เพาะ *</label>
+          <input id="f-sow" type="date">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>วันงอก (ถ้าทราบ)</label>
+          <input id="f-sprout" type="date">
+        </div>
+        <div class="form-row">
+          <label>วันย้ายปลูก (แผน)</label>
+          <input id="f-transplant" type="date">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>สถานะปัจจุบัน</label>
+        <select id="f-status">
+          <option value="seed">เมล็ด (รองอก)</option>
+          <option value="sprout">งอกแล้ว</option>
+          <option value="ready">พร้อมย้ายปลูก</option>
+          <option value="planted">ย้ายปลูกแล้ว</option>
+          <option value="dead">ตาย</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>โนต / สังเกตการณ์</label>
+        <textarea id="f-note" placeholder="บันทึกสิ่งที่สังเกตได้..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-add')">ยกเลิก</button>
+      <button class="btn primary" onclick="saveSeed()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="detail-title">รายละเอียด</div>
+      <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn danger" id="detail-delete">ลบรายการ</button>
+      <button class="btn" onclick="closeModal('modal-detail')">ปิด</button>
+      <button class="btn primary" id="detail-edit">แก้ไข</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-7OvuXMxi8jwI187d_ExDFX9WwFwbceWTOy7ihom6kjddopVApmwrtBciyBmZNa7_/exec";
-
-const VEGGIE_ICONS = {
-  'คะน้า':'🥬','ผักกาดขาว':'🥬','ผักบุ้ง':'🌿','กะหล่ำปลี':'🥦',
-  'กวางตุ้ง':'🥬','แตงกวา':'🥒','พริก':'🌶️','มะเขือเทศ':'🍅',
-  'ต้นหอม':'🧅','ผักชี':'🌿','แครอท':'🥕','ฟักทอง':'🎃',
-  'ถั่วฝักยาว':'🫛','บรอกโคลี':'🥦','เห็ด':'🍄','ข้าวโพดอ่อน':'🌽',
-  'ใบโหระพา':'🌿','กะเพรา':'🌿','ขึ้นฉ่าย':'🌿',
+const STATUSES = {
+  seed:     {label:'รองอก',     cls:'s-seed'},
+  sprout:   {label:'งอกแล้ว',   cls:'s-sprout'},
+  ready:    {label:'พร้อมย้าย', cls:'s-ready'},
+  planted:  {label:'ย้ายแล้ว',  cls:'s-planted'},
+  dead:     {label:'ตาย',       cls:'s-dead'},
 };
 
-const COLORS = [
-  'c-forest','c-teal','c-indigo','c-brown','c-slate',
-  'c-olive','c-grape','c-rust','c-ocean','c-moss'
-];
+let seeds = JSON.parse(localStorage.getItem('seedlog_seeds')||'[]');
+let logs  = JSON.parse(localStorage.getItem('seedlog_logs')||'[]');
 
-function colorFor(name){
-  let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffff;
-  return COLORS[h%COLORS.length];
-}
-
-let stocks = [];
-try{ stocks = JSON.parse(localStorage.getItem('veg_stocks_3d')||'[]'); }catch(e){}
-
-let editId = null;
-document.getElementById('fDate').valueAsDate = new Date();
-
-function save(){ localStorage.setItem('veg_stocks_3d', JSON.stringify(stocks)); }
-
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
-}
-
-function getStatus(q){
-  q = Number(q);
-  if(q <= 0) return {text:'หมด', pct:0};
-  if(q <= 5) return {text:'ใกล้หมด', pct:Math.round(q/5*40)};
-  return {text:'ปกติ', pct:Math.min(100,Math.round(q/50*100))};
-}
-
-function submitForm(){
-  const name = document.getElementById('fName').value.trim();
-  const qty  = document.getElementById('fQty').value;
-  const unit = document.getElementById('fUnit').value;
-  const cost = document.getElementById('fCost').value;
-  const date = document.getElementById('fDate').value;
-  if(!name||!qty||!cost||!date){ alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  const item = { id: editId||Date.now().toString(), name, qty:Number(qty), unit, cost:Number(cost), date };
-  if(editId){
-    stocks = stocks.map(s=>s.id===editId?item:s);
-    cancelEdit();
-    showToast('✅ แก้ไขสต็อกแล้ว');
-  } else {
-    stocks.push(item);
-    showToast('✅ เพิ่มสต็อกแล้ว');
-  }
-  save();
-  syncToSheet(item);
-  document.getElementById('fName').value='';
-  document.getElementById('fQty').value='';
-  document.getElementById('fCost').value='';
-  document.getElementById('fDate').valueAsDate=new Date();
+function save() {
+  localStorage.setItem('seedlog_seeds', JSON.stringify(seeds));
+  localStorage.setItem('seedlog_logs',  JSON.stringify(logs));
   render();
 }
 
-function cancelEdit(){
-  editId=null;
-  document.getElementById('submitBtn').textContent='เพิ่มสต็อก';
-  document.getElementById('cancelBtn').style.display='none';
-  document.getElementById('fName').value='';
-  document.getElementById('fQty').value='';
-  document.getElementById('fCost').value='';
+function today() { return new Date().toISOString().slice(0,10); }
+
+function daysDiff(a, b) {
+  if(!a||!b) return null;
+  return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));
 }
 
-function editItem(id){
-  const s=stocks.find(x=>x.id===id); if(!s)return;
-  editId=id;
-  document.getElementById('fName').value=s.name;
-  document.getElementById('fQty').value=s.qty;
-  document.getElementById('fUnit').value=s.unit;
-  document.getElementById('fCost').value=s.cost;
-  document.getElementById('fDate').value=s.date;
-  document.getElementById('submitBtn').textContent='บันทึกแก้ไข';
-  document.getElementById('cancelBtn').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+function daysFromNow(d) {
+  if(!d) return null;
+  return daysDiff(today(), d);
 }
 
-function deleteItem(id){
-  if(confirm('ลบรายการนี้?')){
-    stocks=stocks.filter(s=>s.id!==id);
-    save(); render();
-    showToast('🗑️ ลบแล้ว');
+function statusBadge(s) {
+  const st = STATUSES[s]||STATUSES.seed;
+  return `<span class="status ${st.cls}">${st.label}</span>`;
+}
+
+function progressBar(seed) {
+  if(seed.status==='dead') return '<span style="color:var(--red);font-size:11px">ตาย</span>';
+  if(seed.status==='planted') return '<span style="color:var(--purple);font-size:11px">ย้ายแล้ว</span>';
+  const steps = ['seed','sprout','ready','planted'];
+  const idx = steps.indexOf(seed.status);
+  const pct = Math.round((idx/3)*100);
+  const colors = ['var(--blue)','var(--green)','var(--amber)','var(--purple)'];
+  return `<div style="display:flex;align-items:center;gap:6px">
+    <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:${colors[idx]}"></div></div>
+    <span style="font-size:10px;color:var(--text2);font-family:var(--mono)">${pct}%</span>
+  </div>`;
+}
+
+function render() {
+  renderDash();
+  renderSeeds();
+  renderNotify();
+  renderLog();
+  updateBadge();
+}
+
+function renderDash() {
+  const active = seeds.filter(s=>s.status!=='dead'&&s.status!=='planted');
+  document.getElementById('cnt-active').textContent = active.length;
+  document.getElementById('cnt-sprout').textContent = seeds.filter(s=>s.status==='sprout').length;
+  document.getElementById('cnt-ready').textContent  = seeds.filter(s=>s.status==='ready').length;
+  const waterNeeded = seeds.filter(s=>s.status!=='dead'&&s.status!=='planted'&&s.lastWater!==today()).length;
+  document.getElementById('cnt-water').textContent  = waterNeeded;
+
+  const tbody = document.getElementById('dash-tbody');
+  const recent = [...seeds].sort((a,b)=>b.created-a.created).slice(0,8);
+  if(!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">ยังไม่มีรายการ — กด "+ เพิ่มรายการ" เพื่อเริ่ม</div></div></td></tr>`;
+    return;
   }
+  tbody.innerHTML = recent.map(s=>{
+    const wBtn = s.status!=='dead'&&s.status!=='planted'
+      ? `<button class="btn sm watered-btn ${s.lastWater===today()?'done':''}" onclick="markWater('${s.id}',event)">${s.lastWater===today()?'✓ รดแล้ว':'รดน้ำ'}</button>`
+      : '—';
+    return `<tr onclick="openDetail('${s.id}')" style="cursor:pointer">
+      <td><strong>${s.name}</strong>${s.variety?`<br><span style="font-size:11px;color:var(--text2)">${s.variety}</span>`:''}
+      </td>
+      <td style="font-family:var(--mono);font-size:12px">${s.sowDate||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.sproutDate||'—'}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>${progressBar(s)}</td>
+      <td>${s.lastWater?`<span style="font-family:var(--mono);font-size:11px">${s.lastWater}</span>`:'—'}</td>
+      <td onclick="event.stopPropagation()">${wBtn}</td>
+    </tr>`;
+  }).join('');
 }
 
-async function syncToSheet(item){
-  try{
-    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(item)});
-  }catch(e){ console.error('Sync error:',e); }
+function renderSeeds() {
+  const tbody = document.getElementById('seeds-tbody');
+  if(!seeds.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">ยังไม่มีรายการเพาะ</div><button class="btn primary" onclick="openAdd()">+ เพิ่มรายการแรก</button></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = seeds.map(s=>{
+    const wBtn = s.status!=='dead'&&s.status!=='planted'
+      ? `<button class="btn sm watered-btn ${s.lastWater===today()?'done':''}" onclick="markWater('${s.id}',event)">${s.lastWater===today()?'✓':'รดน้ำ'}</button>`
+      : '—';
+    return `<tr onclick="openDetail('${s.id}')" style="cursor:pointer">
+      <td><strong>${s.name}</strong>${s.variety?` <span style="font-size:11px;color:var(--text2)">(${s.variety})</span>`:''}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.seedCount||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.sowDate||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.sproutDate||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.transplantDate||'—'}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td onclick="event.stopPropagation()">${wBtn}</td>
+      <td onclick="event.stopPropagation()"><button class="btn sm" onclick="openEdit('${s.id}')">แก้ไข</button></td>
+    </tr>`;
+  }).join('');
 }
 
-function render(){
-  const kw = document.getElementById('searchBox').value.toLowerCase();
-  const filtered = stocks.filter(s=>s.name.toLowerCase().includes(kw));
-  const grid = document.getElementById('cratesGrid');
+function renderNotify() {
+  const list = document.getElementById('notify-list');
+  const items = [];
 
-  if(!filtered.length){
-    grid.innerHTML=`
-      <div class="empty-state">
-        <div class="empty-icon">🥬</div>
-        ยังไม่มีสต็อก<br>กรอกข้อมูลด้านบนเพื่อเพิ่มผัก
-      </div>`;
+  seeds.forEach(s=>{
+    if(s.status==='dead'||s.status==='planted') return;
+
+    // water alert
+    if(s.lastWater!==today()) {
+      const d = s.lastWater ? daysDiff(s.lastWater, today()) : null;
+      items.push({type:'urgent', icon:'💧', title:`รดน้ำ: ${s.name}`, sub: d ? `ไม่ได้รดมา ${d} วันแล้ว` : 'ยังไม่เคยรดน้ำ', days: 'วันนี้', id:s.id, action:'water'});
+    }
+
+    // transplant alert
+    if(s.transplantDate) {
+      const diff = daysFromNow(s.transplantDate);
+      if(diff !== null && diff >= 0 && diff <= 7) {
+        items.push({type: diff<=2?'urgent':'warn', icon:'🌿', title:`ถึงเวลาย้ายปลูก: ${s.name}`, sub:`วันย้ายปลูกที่วางแผนไว้: ${s.transplantDate}`, days: diff===0?'วันนี้':`อีก ${diff} วัน`, id:s.id});
+      }
+    }
+
+    // sprout alert - sown 5-7 days ago and still seed status
+    if(s.status==='seed' && s.sowDate) {
+      const d = daysDiff(s.sowDate, today());
+      if(d>=5) {
+        items.push({type:'info', icon:'🌱', title:`เช็กการงอก: ${s.name}`, sub:`เพาะมาแล้ว ${d} วัน ควรเริ่มงอกแล้ว`, days:`วันที่ ${d}`, id:s.id});
+      }
+    }
+  });
+
+  if(!items.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">ไม่มีการแจ้งเตือนในขณะนี้</div></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(i=>`
+    <div class="notify-card ${i.type}">
+      <div class="notify-icon">${i.icon}</div>
+      <div class="notify-text">
+        <div class="notify-title">${i.title}</div>
+        <div class="notify-sub">${i.sub}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="notify-days">${i.days}</span>
+        ${i.action==='water'?`<button class="btn sm primary" onclick="markWater('${i.id}',event)">รดน้ำเลย</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLog() {
+  const tl = document.getElementById('log-timeline');
+  const empty = document.getElementById('log-empty');
+  if(!logs.length) { tl.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tl.innerHTML = [...logs].reverse().map(l=>`
+    <div class="tl-item">
+      <div class="tl-dot done">${l.icon||'📝'}</div>
+      <div class="tl-content">
+        <div class="tl-title">${l.title}</div>
+        <div class="tl-date">${l.date}</div>
+        ${l.note?`<div class="tl-note">${l.note}</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateBadge() {
+  let count = 0;
+  seeds.forEach(s=>{
+    if(s.status==='dead'||s.status==='planted') return;
+    if(s.lastWater!==today()) count++;
+    if(s.transplantDate) {
+      const diff = daysFromNow(s.transplantDate);
+      if(diff!==null&&diff>=0&&diff<=2) count++;
+    }
+  });
+  document.getElementById('notify-badge').textContent = count;
+}
+
+function markWater(id, e) {
+  if(e) e.stopPropagation();
+  const s = seeds.find(x=>x.id===id);
+  if(!s) return;
+  s.lastWater = today();
+  addLog('💧', `รดน้ำ: ${s.name}`, id, '');
+  save();
+}
+
+function addLog(icon, title, seedId, note) {
+  logs.push({ id: Date.now().toString(), icon, title, date: today(), seedId, note });
+  localStorage.setItem('seedlog_logs', JSON.stringify(logs));
+}
+
+function openAdd() {
+  document.getElementById('modal-title').textContent = 'เพิ่มรายการเพาะใหม่';
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-variety').value = '';
+  document.getElementById('f-seeds').value = '';
+  document.getElementById('f-sow').value = today();
+  document.getElementById('f-sprout').value = '';
+  document.getElementById('f-transplant').value = '';
+  document.getElementById('f-status').value = 'seed';
+  document.getElementById('f-note').value = '';
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function openEdit(id) {
+  const s = seeds.find(x=>x.id===id);
+  if(!s) return;
+  document.getElementById('modal-title').textContent = 'แก้ไขรายการ';
+  document.getElementById('edit-id').value = id;
+  document.getElementById('f-name').value = s.name||'';
+  document.getElementById('f-variety').value = s.variety||'';
+  document.getElementById('f-seeds').value = s.seedCount||'';
+  document.getElementById('f-sow').value = s.sowDate||'';
+  document.getElementById('f-sprout').value = s.sproutDate||'';
+  document.getElementById('f-transplant').value = s.transplantDate||'';
+  document.getElementById('f-status').value = s.status||'seed';
+  document.getElementById('f-note').value = s.note||'';
+  closeModal('modal-detail');
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function saveSeed() {
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { alert('กรุณากรอกชื่อพืช'); return; }
+  const id = document.getElementById('edit-id').value;
+  const prevStatus = id ? (seeds.find(x=>x.id===id)||{}).status : null;
+  const newStatus = document.getElementById('f-status').value;
+  const data = {
+    id: id || Date.now().toString(),
+    name,
+    variety: document.getElementById('f-variety').value.trim(),
+    seedCount: document.getElementById('f-seeds').value,
+    sowDate: document.getElementById('f-sow').value,
+    sproutDate: document.getElementById('f-sprout').value,
+    transplantDate: document.getElementById('f-transplant').value,
+    status: newStatus,
+    note: document.getElementById('f-note').value.trim(),
+    lastWater: id ? (seeds.find(x=>x.id===id)||{}).lastWater : null,
+    created: id ? (seeds.find(x=>x.id===id)||{}).created : Date.now(),
+  };
+  if(id) {
+    const idx = seeds.findIndex(x=>x.id===id);
+    seeds[idx] = data;
   } else {
-    grid.innerHTML = filtered.map(s=>{
-      const col = colorFor(s.name);
-      const st  = getStatus(s.qty);
-      const val = s.qty * s.cost;
-      const icon = VEGGIE_ICONS[s.name]||'🌱';
-      return `
-      <div class="crate">
-        <div class="crate-body ${col}">
-          <div class="crate-badge">${st.text}</div>
-          <div class="crate-icon">${icon}</div>
-          <div class="crate-name">${s.name}</div>
-          <div class="crate-qty">${s.qty}</div>
-          <div class="crate-unit">${s.unit}</div>
-          <div class="crate-bar-bg">
-            <div class="crate-bar" style="width:${st.pct}%"></div>
-          </div>
-          <div class="crate-cost">฿${s.cost}/หน่วย · รวม ฿${val.toLocaleString('th-TH')}</div>
-          <div class="crate-date">${s.date}</div>
-          <div class="crate-actions">
-            <button class="btn-crate btn-crate-edit" onclick="editItem('${s.id}')">แก้ไข</button>
-            <button class="btn-crate btn-crate-del" onclick="deleteItem('${s.id}')">ลบ</button>
-          </div>
-        </div>
-        <div class="crate-shadow"></div>
-      </div>`;
-    }).join('');
+    seeds.push(data);
+    addLog('🌱', `เริ่มเพาะ: ${name}${data.variety?' ('+data.variety+')':''}`, data.id, data.note);
   }
-
-  const totalVal = stocks.reduce((a,s)=>a+s.qty*s.cost,0);
-  const totalQty = stocks.reduce((a,s)=>a+s.qty,0);
-  const low = stocks.filter(s=>s.qty<=5).length;
-  document.getElementById('sTotalItems').textContent = stocks.length;
-  document.getElementById('sTotalQty').textContent = totalQty.toLocaleString('th-TH');
-  document.getElementById('sTotalVal').textContent = '฿'+totalVal.toLocaleString('th-TH');
-  document.getElementById('sLow').textContent = low;
+  if(prevStatus && prevStatus!==newStatus) {
+    const icons = {sprout:'🌿',ready:'⏰',planted:'🌳',dead:'💀'};
+    addLog(icons[newStatus]||'📝', `อัปเดตสถานะ ${name}: ${STATUSES[newStatus].label}`, data.id, data.note);
+  }
+  closeModal('modal-add');
+  save();
 }
 
-render();
+function openDetail(id) {
+  const s = seeds.find(x=>x.id===id);
+  if(!s) return;
+  const sowDays = s.sowDate ? daysDiff(s.sowDate, today()) : null;
+  document.getElementById('detail-title').textContent = `${s.name}${s.variety?' · '+s.variety:''}`;
+  document.getElementById('detail-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      ${infoCard('สถานะ', statusBadge(s.status))}
+      ${infoCard('จำนวนเมล็ด', s.seedCount ? s.seedCount+' เมล็ด' : '—')}
+      ${infoCard('วันที่เพาะ', s.sowDate||(sowDays?`${sowDays} วันที่แล้ว`:'—'))}
+      ${infoCard('วันงอก', s.sproutDate||'—')}
+      ${infoCard('วันย้ายปลูก', s.transplantDate||'—')}
+      ${infoCard('รดน้ำล่าสุด', s.lastWater||'ยังไม่เคย')}
+    </div>
+    ${s.note?`<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-family:var(--mono)">NOTES</div><div style="background:var(--s2);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.6;border-left:2px solid var(--green)">${s.note}</div></div>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select onchange="quickStatus('${s.id}',this.value)" style="padding:6px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer">
+        <option value="">อัปเดตสถานะ...</option>
+        ${Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${s.status===k?'selected':''}>${v.label}</option>`).join('')}
+      </select>
+      ${s.status!=='dead'&&s.status!=='planted'?`<button class="btn primary" onclick="markWater('${s.id}',event);closeModal('modal-detail')">💧 รดน้ำเลย</button>`:''}
+    </div>
+  `;
+  document.getElementById('detail-edit').onclick   = ()=>openEdit(id);
+  document.getElementById('detail-delete').onclick = ()=>{ if(confirm('ลบรายการนี้?')){ seeds=seeds.filter(x=>x.id!==id); save(); closeModal('modal-detail'); } };
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+function infoCard(lbl, val) {
+  return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+    <div style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase">${lbl}</div>
+    <div style="font-size:13px">${val}</div>
+  </div>`;
+}
+
+function quickStatus(id, val) {
+  if(!val) return;
+  const s = seeds.find(x=>x.id===id);
+  if(!s) return;
+  s.status = val;
+  const icons = {sprout:'🌿',ready:'⏰',planted:'🌳',dead:'💀',seed:'🌱'};
+  addLog(icons[val]||'📝', `อัปเดตสถานะ ${s.name}: ${STATUSES[val].label}`, id, '');
+  save();
+  closeModal('modal-detail');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='tray') renderTrayPage();
+  else render();
+}
+
+// ========== TRAY SYSTEM ==========
+let trays = JSON.parse(localStorage.getItem('seedlog_trays')||'[]');
+let holeTool = 'seed';
+let editingHole = null; // {trayId, holeIdx}
+
+const HOLE_COLORS = {
+  empty:   {bg:'var(--s3)',   border:'var(--border2)', label:'ว่าง'},
+  seed:    {bg:'#1a2d4a',     border:'var(--blue)',     label:'เมล็ด'},
+  sprout:  {bg:'var(--green-dk)', border:'var(--green)', label:'งอก'},
+  ready:   {bg:'#3d2e00',    border:'var(--amber)',     label:'พร้อมย้าย'},
+  dead:    {bg:'#2d0f0f',    border:'var(--red)',       label:'ตาย'},
+  planted: {bg:'#1e1040',    border:'var(--purple)',    label:'ย้ายแล้ว'},
+};
+
+const TRAY_SIZES = {50:[5,10], 72:[6,12], 104:[8,13], 128:[8,16]};
+
+function saveTrayData() {
+  localStorage.setItem('seedlog_trays', JSON.stringify(trays));
+}
+
+function setHoleTool(t, btn) {
+  holeTool = t;
+  document.querySelectorAll('.tray-leg').forEach(b=>b.classList.remove('active-tool'));
+  btn.classList.add('active-tool');
+}
+
+function setTraySize(n, btn) {
+  document.querySelectorAll('.tray-size-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // apply to all trays that have this size? Just store preference
+}
+
+function openTrayConfig() {
+  document.getElementById('tc-name').value = `ถาด ${String.fromCharCode(65+trays.length)}`;
+  document.getElementById('tc-rows').value = 5;
+  document.getElementById('tc-cols').value = 10;
+  document.getElementById('tc-note').value = '';
+  // populate seed dropdown
+  const sel = document.getElementById('tc-seed');
+  sel.innerHTML = '<option value="">— ไม่ระบุ —</option>' +
+    seeds.map(s=>`<option value="${s.id}">${s.name}${s.variety?' ('+s.variety+')':''}</option>`).join('');
+  document.getElementById('modal-tray-config').classList.add('open');
+}
+
+function saveTrayConfig() {
+  const rows = parseInt(document.getElementById('tc-rows').value)||5;
+  const cols = parseInt(document.getElementById('tc-cols').value)||10;
+  const total = rows*cols;
+  const tray = {
+    id: Date.now().toString(),
+    name: document.getElementById('tc-name').value.trim() || `ถาด ${trays.length+1}`,
+    rows, cols,
+    seedId: document.getElementById('tc-seed').value,
+    note: document.getElementById('tc-note').value.trim(),
+    holes: Array(total).fill(null).map(()=>({status:'empty', note:''})),
+    created: Date.now(),
+  };
+  trays.push(tray);
+  saveTrayData();
+  closeModal('modal-tray-config');
+  renderTrayPage();
+}
+
+function resetTray() {
+  if(!confirm('ล้างถาดทั้งหมด?')) return;
+  trays = [];
+  saveTrayData();
+  renderTrayPage();
+}
+
+function deleteTray(id) {
+  if(!confirm('ลบถาดนี้?')) return;
+  trays = trays.filter(t=>t.id!==id);
+  saveTrayData();
+  renderTrayPage();
+}
+
+function paintHole(trayId, idx) {
+  const tray = trays.find(t=>t.id===trayId);
+  if(!tray) return;
+  tray.holes[idx].status = holeTool;
+  saveTrayData();
+  renderSingleTray(trayId);
+  updateTrayStats();
+}
+
+function openHoleNote(trayId, idx, e) {
+  e.stopPropagation();
+  const tray = trays.find(t=>t.id===trayId);
+  if(!tray) return;
+  editingHole = {trayId, idx};
+  const h = tray.holes[idx];
+  document.getElementById('hole-title').textContent = `หลุมที่ ${idx+1} — ${tray.name}`;
+  document.getElementById('hole-status').value = h.status;
+  document.getElementById('hole-note').value = h.note||'';
+  document.getElementById('modal-hole').classList.add('open');
+}
+
+function saveHole() {
+  if(!editingHole) return;
+  const {trayId, idx} = editingHole;
+  const tray = trays.find(t=>t.id===trayId);
+  if(!tray) return;
+  tray.holes[idx].status = document.getElementById('hole-status').value;
+  tray.holes[idx].note   = document.getElementById('hole-note').value.trim();
+  saveTrayData();
+  closeModal('modal-hole');
+  renderSingleTray(trayId);
+  updateTrayStats();
+}
+
+function renderSingleTray(id) {
+  const tray = trays.find(t=>t.id===id);
+  if(!tray) return;
+  const el = document.getElementById('tray-'+id);
+  if(!el) { renderTrayPage(); return; }
+  const cellSize = Math.min(36, Math.floor(320/tray.cols));
+  const grid = el.querySelector('.tray-grid');
+  if(!grid) return;
+  grid.style.gridTemplateColumns = `repeat(${tray.cols}, ${cellSize}px)`;
+  grid.innerHTML = tray.holes.map((h,i)=>{
+    const c = HOLE_COLORS[h.status]||HOLE_COLORS.empty;
+    const num = i+1;
+    const hasNote = h.note ? '•' : '';
+    return `<div class="tray-cell h-${h.status}" 
+      style="width:${cellSize}px;height:${cellSize}px;background:${c.bg};border-color:${c.border.replace('var(--','').replace(')','')}"
+      title="หลุม ${num}${h.note?' | '+h.note:''}"
+      onmousedown="paintHole('${tray.id}',${i})"
+      ondblclick="openHoleNote('${tray.id}',${i},event)"
+    >${hasNote}</div>`;
+  }).join('');
+}
+
+function renderTrayPage() {
+  const container = document.getElementById('trays-container');
+  if(!container) return;
+
+  if(!trays.length) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">ยังไม่มีถาดหลุม — กด "⚙ ตั้งค่าถาด" เพื่อสร้างถาดแรก</div></div>`;
+    updateTrayStats();
+    return;
+  }
+
+  container.innerHTML = trays.map(tray=>{
+    const seedRef = tray.seedId ? seeds.find(s=>s.id===tray.seedId) : null;
+    const cellSize = Math.min(36, Math.floor(320/tray.cols));
+    const counts = {};
+    tray.holes.forEach(h=>{ counts[h.status]=(counts[h.status]||0)+1; });
+
+    return `<div class="tray-wrap" id="tray-${tray.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div>
+          <div class="tray-name">${tray.name}</div>
+          <div class="tray-sub">${tray.rows}×${tray.cols} = ${tray.rows*tray.cols} หลุม${seedRef?' | '+seedRef.name+(seedRef.variety?' ('+seedRef.variety+')':''):''}${tray.note?' | '+tray.note:''}</div>
+        </div>
+        <button class="btn sm danger" onclick="deleteTray('${tray.id}')">ลบ</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;font-family:var(--mono)">
+        ${Object.entries(counts).filter(([k])=>k!=='empty').map(([k,v])=>`<span style="color:var(--text2)">${HOLE_COLORS[k].label}: <strong style="color:var(--text)">${v}</strong></span>`).join(' · ')}
+        <span style="color:var(--text3)">ว่าง: ${counts.empty||0}</span>
+      </div>
+      <div class="tray-grid" style="grid-template-columns:repeat(${tray.cols},${cellSize}px)">
+        ${tray.holes.map((h,i)=>{
+          const c = HOLE_COLORS[h.status]||HOLE_COLORS.empty;
+          return `<div class="tray-cell h-${h.status}"
+            style="width:${cellSize}px;height:${cellSize}px"
+            title="หลุม ${i+1}${h.note?' | '+h.note:''}"
+            onmousedown="paintHole('${tray.id}',${i})"
+            ondblclick="openHoleNote('${tray.id}',${i},event)"
+          >${h.note?'•':''}</div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px;font-family:var(--mono)">คลิก = วาดสถานะ | ดับเบิลคลิก = แก้ไขโนต</div>
+    </div>`;
+  }).join('');
+
+  updateTrayStats();
+}
+
+function updateTrayStats() {
+  const el = document.getElementById('tray-stats');
+  if(!el) return;
+  let total=0, sprout=0, dead=0, planted=0, seed=0;
+  trays.forEach(t=>t.holes.forEach(h=>{
+    total++;
+    if(h.status==='sprout') sprout++;
+    if(h.status==='dead') dead++;
+    if(h.status==='planted') planted++;
+    if(h.status==='seed') seed++;
+  }));
+  el.innerHTML = [
+    `<span class="tray-stat">ถาดทั้งหมด <span>${trays.length}</span></span>`,
+    `<span class="tray-stat">หลุมรวม <span>${total}</span></span>`,
+    `<span class="tray-stat" style="color:var(--blue)">เมล็ด <span>${seed}</span></span>`,
+    `<span class="tray-stat" style="color:var(--green)">งอก <span>${sprout}</span></span>`,
+    `<span class="tray-stat" style="color:var(--red)">ตาย <span>${dead}</span></span>`,
+    `<span class="tray-stat" style="color:var(--purple)">ย้ายแล้ว <span>${planted}</span></span>`,
+  ].join('');
+}
+
+// init demo tray
+if(!trays.length && seeds.length) {
+  trays.push({
+    id:'t1', name:'ถาด A — มะเขือเทศลูกท้อ', rows:5, cols:10,
+    seedId:'1', note:'เพาะ 1 มิ.ย. 2569',
+    holes: Array(50).fill(null).map((_,i)=>({
+      status: i<40 ? (i<35?'sprout':'seed') : (i<45?'seed':'empty'),
+      note: i===0?'งอกดีสุด':''
+    })),
+    created: Date.now()
+  });
+  saveTrayData();
+}
+
+// ========================
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+
+// init demo data if empty
+if(!seeds.length) {
+  const demo = [
+    {id:'1',name:'มะเขือเทศ',variety:'ลูกท้อ',seedCount:'50',sowDate:'2026-06-01',sproutDate:'2026-06-07',transplantDate:'2026-06-25',status:'sprout',note:'งอกประมาณ 40 ต้น ต้นกล้าสมบูรณ์ดี',lastWater:today(),created:1},
+    {id:'2',name:'พริก',variety:'จินดา',seedCount:'30',sowDate:'2026-06-05',sproutDate:'',transplantDate:'2026-07-05',status:'seed',note:'',lastWater:'2026-06-16',created:2},
+    {id:'3',name:'กะเพรา',variety:'',seedCount:'20',sowDate:'2026-05-20',sproutDate:'2026-05-26',transplantDate:'2026-06-15',status:'ready',note:'ต้นกล้าสูงดีแล้ว พร้อมย้าย',lastWater:today(),created:3},
+  ];
+  seeds = demo;
+  logs = [
+    {id:'l1',icon:'🌱',title:'เริ่มเพาะ: มะเขือเทศ (ลูกท้อ)',date:'2026-06-01',seedId:'1',note:'เพาะในถาด 50 หลุม'},
+    {id:'l2',icon:'🌱',title:'เริ่มเพาะ: พริก (จินดา)',date:'2026-06-05',seedId:'2',note:''},
+    {id:'l3',icon:'🌿',title:'อัปเดตสถานะ มะเขือเทศ: งอกแล้ว',date:'2026-06-07',seedId:'1',note:'งอก 40/50 ต้น'},
+    {id:'l4',icon:'⏰',title:'อัปเดตสถานะ กะเพรา: พร้อมย้าย',date:'2026-06-14',seedId:'3',note:''},
+  ];
+  save();
+} else { render(); }
 </script>
 </body>
 </html>
