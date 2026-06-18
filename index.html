@@ -162,6 +162,7 @@ select option{background:var(--s2)}
   </div>
   <div class="nav-r">
     <span class="nbadge" id="nbadge">0</span>
+    <button class="btn sm" onclick="openExport()" title="ส่งออก Excel">📊 Export</button>
     <button class="btn sm" onclick="openNewPlant()">+ พืช</button>
     <button class="btn sm pr" onclick="openNewTray()">+ ถาด</button>
   </div>
@@ -726,6 +727,124 @@ if(!plants.length){
 }
 
 render();
+</script>
+<!-- MODAL: EXPORT -->
+<div class="ov" id="ov-export">
+<div class="modal" style="max-width:420px">
+  <div class="mhd"><div class="mtitle">ส่งออก Excel</div><button class="mclose" onclick="cm('ov-export')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><label>เลือกถาดที่ต้องการ Export</label>
+      <select id="ex-tray">
+        <option value="all">— ทุกถาด —</option>
+      </select>
+    </div>
+    <div class="fr"><label>รูปแบบข้อมูล</label>
+      <select id="ex-mode">
+        <option value="detail">รายหลุม (ทุกหลุม พร้อมพืช/สถานะ/โนต)</option>
+        <option value="summary">สรุปรายถาด (นับจำนวนแต่ละสถานะ)</option>
+        <option value="both">ทั้งสองแบบ (2 sheet)</option>
+      </select>
+    </div>
+    <div style="background:var(--s2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);margin-top:4px">
+      💡 ไฟล์ที่ได้เป็น <strong style="color:var(--text)">.xlsx</strong> เปิดได้ใน Microsoft Excel, Google Sheets, LibreOffice
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn" onclick="cm('ov-export')">ยกเลิก</button>
+    <button class="btn pr" onclick="doExport()">📥 ดาวน์โหลด Excel</button>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+function openExport(){
+  const sel=document.getElementById('ex-tray');
+  sel.innerHTML='<option value="all">— ทุกถาด —</option>'+
+    trays.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  document.getElementById('ov-export').classList.add('on');
+}
+
+function doExport(){
+  const trayId=document.getElementById('ex-tray').value;
+  const mode=document.getElementById('ex-mode').value;
+  const selectedTrays=trayId==='all'?trays:trays.filter(t=>t.id===trayId);
+  if(!selectedTrays.length){alert('ไม่พบถาดที่เลือก');return;}
+
+  const wb=XLSX.utils.book_new();
+
+  const stLabel={empty:'ว่าง',seed:'หยอดแล้ว',sprout:'งอกแล้ว',ready:'พร้อมย้าย',planted:'ย้ายแล้ว',dead:'ตาย'};
+
+  if(mode==='detail'||mode==='both'){
+    const rows=[['ถาด','หลุมที่','แถว','คอลัมน์','พืช','สายพันธุ์','สถานะ','วันที่หยอด','โนต']];
+    selectedTrays.forEach(t=>{
+      t.holes.forEach((h,i)=>{
+        const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+        const row=Math.floor(i/t.cols)+1;
+        const col=(i%t.cols)+1;
+        rows.push([
+          t.name,
+          i+1,
+          row,
+          col,
+          p?p.name:'—',
+          p?(p.variety||'—'):'—',
+          stLabel[h.st]||h.st,
+          h.sowDate||'—',
+          h.note||''
+        ]);
+      });
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    // column widths
+    ws['!cols']=[{wch:22},{wch:8},{wch:6},{wch:8},{wch:14},{wch:12},{wch:12},{wch:12},{wch:24}];
+    // header style (xlsx-lite doesn't support rich style but column width helps)
+    XLSX.utils.book_append_sheet(wb, ws, 'รายหลุม');
+  }
+
+  if(mode==='summary'||mode==='both'){
+    const rows=[['ถาด','ขนาด','หลุมทั้งหมด','ว่าง','หยอดแล้ว','งอก','พร้อมย้าย','ย้ายแล้ว','ตาย','% งอก','วันที่สร้าง']];
+    selectedTrays.forEach(t=>{
+      const cnt={empty:0,seed:0,sprout:0,ready:0,planted:0,dead:0};
+      t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
+      const total=t.holes.length;
+      const sprouted=cnt.sprout+cnt.ready+cnt.planted;
+      const seeded=total-cnt.empty;
+      const pct=seeded>0?Math.round(sprouted/seeded*100):0;
+      rows.push([
+        t.name,
+        `${t.rows}×${t.cols}`,
+        total,
+        cnt.empty,cnt.seed,cnt.sprout,cnt.ready,cnt.planted,cnt.dead,
+        pct+'%',
+        t.note||''
+      ]);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:22},{wch:8},{wch:12},{wch:8},{wch:10},{wch:8},{wch:12},{wch:10},{wch:8},{wch:8},{wch:20}];
+    XLSX.utils.book_append_sheet(wb, ws, 'สรุปถาด');
+  }
+
+  // metadata sheet
+  const meta=[
+    ['SeedLog — Export'],
+    ['วันที่ Export', new Date().toLocaleDateString('th-TH')],
+    ['จำนวนถาด', selectedTrays.length],
+    ['จำนวนพืชในระบบ', plants.length],
+    [],
+    ['รายชื่อพืช','สายพันธุ์','วันงอก (เฉลี่ย)','วันพร้อมย้าย'],
+    ...plants.map(p=>[p.name,p.variety||'—',p.sproutDays+'วัน',p.readyDays+'วัน'])
+  ];
+  const wsMeta=XLSX.utils.aoa_to_sheet(meta);
+  wsMeta['!cols']=[{wch:20},{wch:16},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsMeta, 'ข้อมูล');
+
+  const fname=`SeedLog_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  cm('ov-export');
+  addLog('📊',`Export Excel: ${selectedTrays.map(t=>t.name).join(', ')}`,fname);
+  sd();
+}
 </script>
 </body>
 </html>
