@@ -382,7 +382,8 @@ function renderTrays(){
 
 function elapsedStr(dateStr){
   if(!dateStr) return null;
-  const start=new Date(dateStr);
+  // parse as local time (not UTC) by replacing T with space
+  const start=new Date(dateStr.replace('T',' '));
   const now=new Date();
   const diffMs=now-start;
   if(diffMs<0) return null;
@@ -391,6 +392,7 @@ function elapsedStr(dateStr){
   const days=Math.floor(totalHours/24);
   const hours=totalHours%24;
   const mins=totalMins%60;
+  if(totalMins<1) return 'เพิ่งเริ่ม';
   if(totalMins<60) return `${totalMins} นาทีที่ผ่านมา`;
   if(days===0) return `${hours} ชั่วโมง ${mins} นาทีที่ผ่านมา`;
   if(hours===0&&mins===0) return `${days} วันที่ผ่านมา`;
@@ -626,6 +628,12 @@ function saveHole(){
   renderNotify();
 }
 
+function localDatetime(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 // ---- TRAY CRUD ----
 function openNewTray(){
   document.getElementById('tray-modal-title').textContent='สร้างถาดใหม่';
@@ -633,7 +641,7 @@ function openNewTray(){
   document.getElementById('nt-rows').value=5;
   document.getElementById('nt-cols').value=10;
   document.getElementById('nt-note').value='';
-  document.getElementById('nt-sowdate').value=new Date().toISOString().slice(0,16);
+  document.getElementById('nt-sowdate').value=localDatetime();
   const sel=document.getElementById('nt-plant');
   sel.innerHTML='<option value="">— ว่างทุกหลุม —</option>'+
     plants.map(p=>`<option value="${p.id}">${p.name}${p.variety?' ('+p.variety+')':''}</option>`).join('');
@@ -867,7 +875,7 @@ if(!plants.length){
   ];
   trays=[{
     id:'t1',name:'ถาด A — มะเขือเทศลูกท้อ',rows:5,cols:10,note:'เพาะ มิ.ย. 2569',
-    traySowDate:new Date().toISOString().slice(0,16),
+    traySowDate:localDatetime(),
     holes:Array(50).fill(null).map((_,i)=>({
       st:i<38?(i<30?'sprout':'seed'):i<45?'seed':'empty',
       plantId:'p1',
