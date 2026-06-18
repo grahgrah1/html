@@ -157,6 +157,7 @@ select option{background:var(--s2)}
   <div class="tabs">
     <button class="tab on"  onclick="go('dash',this)">ภาพรวม</button>
     <button class="tab"     onclick="go('trays',this)">ถาดหลุม</button>
+    <button class="tab"     onclick="go('plants',this)">พืชของฉัน</button>
     <button class="tab"     onclick="go('notify',this)">แจ้งเตือน</button>
     <button class="tab"     onclick="go('log',this)">บันทึก</button>
   </div>
@@ -195,6 +196,16 @@ select option{background:var(--s2)}
 <div class="pg" id="pg-notify">
   <div style="font-size:14px;font-weight:600;margin-bottom:14px">การแจ้งเตือน</div>
   <div id="notify-list"></div>
+</div>
+
+<!-- PLANTS -->
+<div class="pg" id="pg-plants">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:600">พืชของฉัน</div>
+    <button class="btn pr" onclick="openNewPlant()">+ เพิ่มพืช</button>
+  </div>
+  <div id="plants-summary-bar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
+  <div id="plants-list"></div>
 </div>
 
 <!-- LOG -->
@@ -680,6 +691,124 @@ function savePlant(){
   cm('ov-plant');
 }
 
+// ---- PLANTS PAGE ----
+function renderPlants(){
+  // aggregate per plant across all trays
+  const stats={};
+  plants.forEach(p=>{
+    stats[p.id]={total:0,seed:0,sprout:0,ready:0,planted:0,dead:0,empty:0};
+  });
+  trays.forEach(t=>{
+    t.holes.forEach(h=>{
+      if(!h.plantId||!stats[h.plantId]) return;
+      stats[h.plantId].total++;
+      stats[h.plantId][h.st]=(stats[h.plantId][h.st]||0)+1;
+    });
+  });
+
+  // summary bar
+  let totalSeeds=0,totalSprout=0,totalDead=0,totalPlanted=0;
+  plants.forEach(p=>{
+    const s=stats[p.id]||{};
+    totalSeeds+=s.total||0;
+    totalSprout+=(s.sprout||0)+(s.ready||0)+(s.planted||0);
+    totalDead+=s.dead||0;
+    totalPlanted+=s.planted||0;
+  });
+  const germRate=totalSeeds>0?Math.round(totalSprout/totalSeeds*100):0;
+  document.getElementById('plants-summary-bar').innerHTML=`
+    <div class="sc cg"><div class="sc-l">พืชทั้งหมด</div><div class="sc-v">${plants.length}</div><div class="sc-s">ชนิด</div></div>
+    <div class="sc cb"><div class="sc-l">หลุมทั้งหมด</div><div class="sc-v">${totalSeeds}</div><div class="sc-s">หลุม</div></div>
+    <div class="sc ca"><div class="sc-l">อัตราการงอก</div><div class="sc-v">${germRate}%</div><div class="sc-s">เฉลี่ยทุกพืช</div></div>
+    <div class="sc cr"><div class="sc-l">หลุมตาย</div><div class="sc-v">${totalDead}</div><div class="sc-s">หลุม</div></div>
+  `;
+
+  const el=document.getElementById('plants-list');
+  if(!plants.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🌿</div><div style="margin-bottom:12px">ยังไม่มีพืช</div><button class="btn pr" onclick="openNewPlant()">+ เพิ่มพืชแรก</button></div>`;
+    return;
+  }
+
+  el.innerHTML=plants.map(p=>{
+    const s=stats[p.id]||{total:0,seed:0,sprout:0,ready:0,planted:0,dead:0};
+    const seeded=s.total;
+    const alive=(s.sprout||0)+(s.ready||0)+(s.planted||0)+(s.seed||0);
+    const sprouted=(s.sprout||0)+(s.ready||0)+(s.planted||0);
+    const germPct=seeded>0?Math.round(sprouted/seeded*100):0;
+    const deadPct=seeded>0?Math.round((s.dead||0)/seeded*100):0;
+    const barW=Math.max(1,germPct);
+
+    // which trays contain this plant
+    const inTrays=trays.filter(t=>t.holes.some(h=>h.plantId===p.id));
+
+    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:15px;font-weight:600">${p.name} ${p.variety?`<span style="font-size:12px;color:var(--text2);font-weight:400">(${p.variety})</span>`:''}</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">
+            งอกใน ~${p.sproutDays} วัน · พร้อมย้ายใน ~${p.readyDays} วัน
+            ${inTrays.length?` · ถาด: ${inTrays.map(t=>t.name).join(', ')}`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" onclick="deletePlant('${p.id}')">ลบ</button>
+        </div>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+          <div style="text-align:center;background:var(--s2);border-radius:8px;padding:10px 6px">
+            <div style="font-size:20px;font-weight:600;font-family:var(--mono)">${seeded}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">หลุมทั้งหมด</div>
+          </div>
+          <div style="text-align:center;background:rgba(88,166,255,.1);border-radius:8px;padding:10px 6px;border:1px solid rgba(88,166,255,.2)">
+            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--blue)">${s.seed||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">รองอก</div>
+          </div>
+          <div style="text-align:center;background:var(--gdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(63,185,80,.2)">
+            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--green)">${sprouted}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">งอกแล้ว</div>
+          </div>
+          <div style="text-align:center;background:var(--pdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(188,140,255,.2)">
+            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--purple)">${s.planted||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ย้ายแล้ว</div>
+          </div>
+          <div style="text-align:center;background:var(--rdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(248,81,73,.2)">
+            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--red)">${s.dead||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ตาย</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;color:var(--text2)">อัตราการงอก</div>
+          <div style="font-size:12px;font-weight:600;font-family:var(--mono);color:${germPct>=70?'var(--green)':germPct>=40?'var(--amber)':'var(--red)'}">${germPct}%</div>
+        </div>
+        <div style="background:var(--s3);border-radius:4px;height:8px;overflow:hidden;margin-bottom:4px">
+          <div style="height:100%;border-radius:4px;background:${germPct>=70?'var(--green)':germPct>=40?'var(--amber)':'var(--red)'};width:${barW}%;transition:width .4s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono)">
+          <span>งอก ${sprouted}/${seeded} หลุม</span>
+          <span style="color:var(--red)">ตาย ${deadPct}%</span>
+        </div>
+
+        ${p.note?`<div style="margin-top:10px;font-size:12px;color:var(--text2);background:var(--s2);padding:7px 10px;border-radius:6px;border-left:2px solid var(--border2)">${p.note}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deletePlant(id){
+  const inUse=trays.some(t=>t.holes.some(h=>h.plantId===id));
+  if(inUse){
+    if(!confirm('พืชนี้ถูกใช้งานในถาดอยู่ ยืนยันลบ?')) return;
+    trays.forEach(t=>t.holes.forEach(h=>{if(h.plantId===id)h.plantId=null;}));
+  } else {
+    if(!confirm('ลบพืชนี้?')) return;
+  }
+  plants=plants.filter(p=>p.id!==id);
+  sd();
+  renderPlants();
+}
+
 // ---- NAV ----
 function go(id,btn){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -690,6 +819,7 @@ function go(id,btn){
     if(b.getAttribute('onclick')===`go('${id}',this)`) b.classList.add('on');
   });
   if(id==='trays') renderTrays();
+  else if(id==='plants') renderPlants();
   else if(id==='notify') renderNotify();
   else if(id==='log') renderLog();
   else renderDash();
