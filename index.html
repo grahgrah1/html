@@ -6,148 +6,369 @@
 <title>SeedLog — ถาดเพาะกล้า</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-:root{
-  --bg:#0d1117;--s1:#161b22;--s2:#21262d;--s3:#30363d;
-  --border:#30363d;--border2:#484f58;
-  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
-  --green:#3fb950;--gdim:rgba(63,185,80,.15);--gdk:#0f3d1a;
-  --amber:#d29922;--adim:rgba(210,153,34,.15);
-  --red:#f85149;--rdim:rgba(248,81,73,.15);
-  --blue:#58a6ff;--bdim:rgba(88,166,255,.15);
-  --purple:#bc8cff;--pdim:rgba(188,140,255,.15);
-  --mono:'IBM Plex Mono',monospace;
+
+:root {
+  --bg:     #07090d;
+  --s1:     #0d1520;
+  --s2:     #111d2c;
+  --s3:     #172233;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:   #d0e4f0;
+  --text2:  #4d6e88;
+  --text3:  #243444;
+  --green:  #00e87c;
+  --gdim:   rgba(0,232,124,0.1);
+  --gdk:    #002619;
+  --amber:  #ffba00;
+  --adim:   rgba(255,186,0,0.1);
+  --red:    #ff4560;
+  --rdim:   rgba(255,69,96,0.1);
+  --blue:   #00c8ff;
+  --bdim:   rgba(0,200,255,0.1);
+  --purple: #b06aff;
+  --pdim:   rgba(176,106,255,0.1);
+  --mono:   'IBM Plex Mono', monospace;
+  --cshadow: 0 8px 32px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* NAV */
-nav{background:var(--s1);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;height:52px;position:sticky;top:0;z-index:100;gap:0}
-.logo{display:flex;align-items:center;gap:8px;margin-right:20px}
-.logo-ic{width:26px;height:26px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
-.logo-tx{font-size:14px;font-weight:600;font-family:var(--mono)}
-.tabs{display:flex;height:100%}
-.tab{padding:0 14px;font-size:13px;color:var(--text2);border:none;background:none;cursor:pointer;font-family:'Sarabun',sans-serif;height:100%;border-bottom:2px solid transparent;transition:all .15s}
-.tab:hover{color:var(--text)}
-.tab.on{color:var(--text);border-bottom-color:var(--green)}
-.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
-.nbadge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-family:var(--mono)}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* PAGES */
-.pg{display:none;padding:20px;max-width:1100px;margin:0 auto}
-.pg.on{display:block}
+body {
+  font-family: 'Sarabun', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 75% 55% at 5%  45%, rgba(0,232,124,0.045) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 75% at 95% 10%, rgba(0,200,255,0.03)  0%, transparent 55%),
+    radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 26px 26px;
+}
 
-/* BUTTONS */
-.btn{padding:7px 14px;border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer;border:1px solid var(--border2);background:var(--s2);color:var(--text);transition:all .15s}
-.btn:hover{background:var(--s3)}
-.btn.pr{background:var(--gdk);border-color:var(--green);color:var(--green)}
-.btn.pr:hover{background:rgba(63,185,80,.25)}
-.btn.sm{padding:4px 10px;font-size:12px}
-.btn.danger{border-color:rgba(248,81,73,.4);color:var(--red)}
-.btn.danger:hover{background:var(--rdim)}
+/* ─── NAV ─── */
+nav {
+  background: rgba(5,8,12,0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(0,232,124,0.16);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 4px 28px rgba(0,0,0,0.55);
+  padding: 0 20px;
+  display: flex; align-items: center;
+  height: 54px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { display:flex; align-items:center; gap:9px; margin-right:22px; }
+.logo-ic {
+  width:30px; height:30px;
+  background: linear-gradient(135deg, #00e87c 0%, #009c52 100%);
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px;
+  box-shadow: 0 0 18px rgba(0,232,124,0.55), 0 3px 7px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.logo-tx { font-size:14px; font-weight:600; font-family:var(--mono); letter-spacing:0.03em; }
+.tabs { display:flex; height:100%; }
+.tab {
+  padding:0 15px; font-size:13px; color:var(--text2);
+  border:none; background:none; cursor:pointer;
+  font-family:'Sarabun',sans-serif; height:100%;
+  border-bottom:2px solid transparent;
+  transition:color .15s, border-color .15s;
+  letter-spacing:0.01em;
+}
+.tab:hover { color:var(--text); }
+.tab.on { color:var(--green); border-bottom-color:var(--green); text-shadow:0 0 10px rgba(0,232,124,0.55); }
+.nav-r { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.nbadge {
+  background: linear-gradient(135deg,var(--red),#c0001a);
+  color:#fff; font-size:10px; padding:2px 7px;
+  border-radius:10px; font-family:var(--mono);
+  box-shadow: 0 0 9px rgba(255,69,96,0.55);
+}
 
-/* MODAL */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px}
-.ov.on{display:flex}
-.modal{background:var(--s1);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto}
-.mhd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.mtitle{font-size:15px;font-weight:600}
-.mclose{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px}
-.mclose:hover{background:var(--s3)}
-.mbody{padding:18px}
-.mfoot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+/* ─── PAGES ─── */
+.pg { display:none; padding:22px; max-width:1100px; margin:0 auto; }
+.pg.on { display:block; }
 
-/* FORM */
-.fr{margin-bottom:12px}
-.fr label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase}
-.fr input,.fr select,.fr textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;outline:none;transition:border .15s}
-.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--green)}
-.fr textarea{min-height:60px;resize:vertical}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-select option{background:var(--s2)}
+/* ─── BUTTONS ─── */
+.btn {
+  padding:7px 14px; border-radius:9px;
+  font-size:13px; font-family:'Sarabun',sans-serif; cursor:pointer;
+  border:1px solid var(--border2);
+  background: linear-gradient(160deg, var(--s2) 0%, var(--s1) 100%);
+  color:var(--text);
+  transition:all .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  position:relative;
+}
+.btn:hover {
+  background: linear-gradient(160deg, var(--s3) 0%, var(--s2) 100%);
+  transform:translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.btn:active { transform:translateY(1px); box-shadow:0 1px 4px rgba(0,0,0,0.5); }
+.btn.pr {
+  background: linear-gradient(135deg, #00c86a 0%, #007a42 100%);
+  border-color:rgba(0,200,106,0.45);
+  color:#fff;
+  box-shadow: 0 4px 18px rgba(0,200,106,0.4), 0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+  text-shadow:0 1px 2px rgba(0,0,0,0.3);
+}
+.btn.pr:hover {
+  background: linear-gradient(135deg, #00e87c 0%, #009a52 100%);
+  box-shadow: 0 6px 26px rgba(0,232,124,0.6), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  transform:translateY(-1px);
+}
+.btn.pr:active { transform:translateY(1px); box-shadow:0 2px 10px rgba(0,200,106,0.35); }
+.btn.sm { padding:5px 11px; font-size:12px; }
+.btn.danger { border-color:rgba(255,69,96,0.28); color:var(--red); }
+.btn.danger:hover { background:var(--rdim); border-color:var(--red); box-shadow:0 0 12px rgba(255,69,96,0.2), 0 2px 8px rgba(0,0,0,0.4); }
 
-/* STATUS */
-.stag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--mono)}
-.stag::before{content:'';width:5px;height:5px;border-radius:50%}
-.st-empty{background:rgba(255,255,255,.05);color:var(--text3)}.st-empty::before{background:var(--text3)}
-.st-seed{background:var(--bdim);color:var(--blue)}.st-seed::before{background:var(--blue)}
-.st-sprout{background:var(--gdim);color:var(--green)}.st-sprout::before{background:var(--green)}
-.st-ready{background:var(--adim);color:var(--amber)}.st-ready::before{background:var(--amber)}
-.st-planted{background:var(--pdim);color:var(--purple)}.st-planted::before{background:var(--purple)}
-.st-dead{background:var(--rdim);color:var(--red)}.st-dead::before{background:var(--red)}
+/* ─── MODAL ─── */
+.ov {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.84);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  z-index:200; align-items:center; justify-content:center; padding:16px;
+}
+.ov.on { display:flex; }
+.modal {
+  background: linear-gradient(145deg, var(--s1) 0%, var(--bg) 100%);
+  border:1px solid var(--border2); border-radius:18px;
+  width:100%; max-width:500px; max-height:92vh; overflow-y:auto;
+  box-shadow: 0 28px 90px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.mhd {
+  padding:16px 20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(255,255,255,0.02); border-radius:18px 18px 0 0;
+}
+.mtitle { font-size:15px; font-weight:600; }
+.mclose { background:none; border:none; color:var(--text2); cursor:pointer; font-size:16px; padding:4px 7px; border-radius:6px; transition:all .15s; }
+.mclose:hover { background:var(--rdim); color:var(--red); }
+.mbody { padding:20px; }
+.mfoot {
+  padding:14px 20px; border-top:1px solid var(--border);
+  display:flex; gap:8px; justify-content:flex-end;
+  background:rgba(0,0,0,0.25); border-radius:0 0 18px 18px;
+}
 
-/* STATS */
-.sbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.sc{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.sc.cg{border-color:rgba(63,185,80,.3);background:var(--gdim)}
-.sc.ca{border-color:rgba(210,153,34,.3);background:var(--adim)}
-.sc.cr{border-color:rgba(248,81,73,.3);background:var(--rdim)}
-.sc.cb{border-color:rgba(88,166,255,.3);background:var(--bdim)}
-.sc-l{font-size:10px;color:var(--text2);margin-bottom:3px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
-.sc-v{font-size:22px;font-weight:600;font-family:var(--mono)}
-.sc-s{font-size:11px;color:var(--text2);margin-top:2px}
+/* ─── FORM ─── */
+.fr { margin-bottom:14px; }
+.fr label {
+  display:block; font-size:10px; color:var(--text2);
+  margin-bottom:5px; font-family:var(--mono);
+  text-transform:uppercase; letter-spacing:0.08em;
+}
+.fr input,.fr select,.fr textarea {
+  width:100%;
+  background: linear-gradient(160deg, rgba(0,0,0,0.45), var(--s1));
+  border:1px solid var(--border2); border-radius:9px;
+  padding:9px 12px; color:var(--text); font-size:13px;
+  font-family:'Sarabun',sans-serif; outline:none;
+  transition:border .15s, box-shadow .15s;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.55);
+}
+.fr input:focus,.fr select:focus,.fr textarea:focus {
+  border-color:var(--green);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.55), 0 0 0 3px rgba(0,232,124,0.13);
+}
+.fr textarea { min-height:60px; resize:vertical; }
+.fg { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+select option { background:var(--s1); }
 
-/* TRAY CARD */
-.tcard{background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
-.tcard-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.tcard-name{font-size:14px;font-weight:600}
-.tcard-sub{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px}
-.tcard-body{padding:16px}
-.tcard-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+/* ─── STATUS TAGS ─── */
+.stag {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:20px;
+  font-size:11px; font-weight:500; font-family:var(--mono); border:1px solid;
+}
+.stag::before { content:''; width:5px; height:5px; border-radius:50%; }
+.st-empty   { background:rgba(255,255,255,0.03); color:var(--text3); border-color:rgba(255,255,255,0.07); }
+.st-empty::before   { background:var(--text3); }
+.st-seed    { background:var(--bdim); color:var(--blue); border-color:rgba(0,200,255,0.28); box-shadow:0 0 8px rgba(0,200,255,0.12); }
+.st-seed::before    { background:var(--blue); box-shadow:0 0 4px var(--blue); }
+.st-sprout  { background:var(--gdim); color:var(--green); border-color:rgba(0,232,124,0.28); box-shadow:0 0 8px rgba(0,232,124,0.18); }
+.st-sprout::before  { background:var(--green); box-shadow:0 0 4px var(--green); }
+.st-ready   { background:var(--adim); color:var(--amber); border-color:rgba(255,186,0,0.28); box-shadow:0 0 8px rgba(255,186,0,0.18); }
+.st-ready::before   { background:var(--amber); box-shadow:0 0 4px var(--amber); }
+.st-planted { background:var(--pdim); color:var(--purple); border-color:rgba(176,106,255,0.28); box-shadow:0 0 8px rgba(176,106,255,0.18); }
+.st-planted::before { background:var(--purple); box-shadow:0 0 4px var(--purple); }
+.st-dead    { background:var(--rdim); color:var(--red); border-color:rgba(255,69,96,0.28); box-shadow:0 0 8px rgba(255,69,96,0.12); }
+.st-dead::before    { background:var(--red); box-shadow:0 0 4px var(--red); }
 
-/* TRAY GRID */
-.tgrid{display:grid;gap:4px;width:fit-content;margin:0 auto 12px}
-.hole{border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s,filter .15s;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mono);font-weight:600;color:rgba(255,255,255,.7);user-select:none;position:relative}
-.hole:hover{transform:scale(1.18);z-index:2;filter:brightness(1.3)}
-.hole.hs-empty{background:#21262d;border-color:#484f58}
-.hole.hs-seed{background:#0d1f38;border-color:#58a6ff}
-.hole.hs-sprout{background:#0a2e14;border-color:#3fb950}
-.hole.hs-ready{background:#2e1f00;border-color:#d29922}
-.hole.hs-planted{background:#160d38;border-color:#bc8cff}
-.hole.hs-dead{background:#2a0c0c;border-color:#f85149}
-.hole.has-note::after{content:'';position:absolute;top:1px;right:1px;width:5px;height:5px;border-radius:50%;background:var(--amber)}
+/* ─── STAT CARDS ─── */
+.sbar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+.sc {
+  background: linear-gradient(145deg, var(--s1) 0%, var(--bg) 100%);
+  border:1px solid var(--border); border-radius:14px;
+  padding:14px 16px; box-shadow:var(--cshadow);
+  position:relative; overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+}
+.sc:hover { transform:translateY(-3px); }
+.sc::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+}
+.sc.cg { border-color:rgba(0,232,124,0.22); background:linear-gradient(145deg,#002919,#040d09); box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 24px rgba(0,232,124,0.07),inset 0 1px 0 rgba(0,232,124,0.09); }
+.sc.ca { border-color:rgba(255,186,0,0.22);  background:linear-gradient(145deg,#261b00,#090600); box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 24px rgba(255,186,0,0.07),inset 0 1px 0 rgba(255,186,0,0.09); }
+.sc.cr { border-color:rgba(255,69,96,0.22);   background:linear-gradient(145deg,#200a0d,#080203); box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 24px rgba(255,69,96,0.07),inset 0 1px 0 rgba(255,69,96,0.09); }
+.sc.cb { border-color:rgba(0,200,255,0.22);   background:linear-gradient(145deg,#001e2e,#000609); box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 24px rgba(0,200,255,0.07),inset 0 1px 0 rgba(0,200,255,0.09); }
+.sc-l { font-size:10px; color:var(--text2); margin-bottom:5px; font-family:var(--mono); text-transform:uppercase; letter-spacing:0.08em; }
+.sc-v { font-size:30px; font-weight:600; font-family:var(--mono); line-height:1; }
+.sc.cg .sc-v { color:var(--green);  text-shadow:0 0 18px rgba(0,232,124,0.55); }
+.sc.cb .sc-v { color:var(--blue);   text-shadow:0 0 18px rgba(0,200,255,0.55); }
+.sc.ca .sc-v { color:var(--amber);  text-shadow:0 0 18px rgba(255,186,0,0.55); }
+.sc.cr .sc-v { color:var(--red);    text-shadow:0 0 18px rgba(255,69,96,0.55); }
+.sc-s { font-size:11px; color:var(--text2); margin-top:4px; }
 
-/* LEGEND */
-.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 9px;border-radius:20px;border:1px solid transparent;transition:all .15s;user-select:none}
-.leg:hover{background:var(--s2);border-color:var(--border)}
-.leg.on{border-color:var(--border2);background:var(--s2);color:var(--text)}
-.leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0}
+/* ─── TRAY CARD ─── */
+.tcard {
+  background: linear-gradient(145deg, #0e1925 0%, #080e17 100%);
+  border:1px solid var(--border); border-radius:18px;
+  margin-bottom:22px; overflow:hidden; box-shadow:var(--cshadow);
+  transition:transform .2s, box-shadow .2s;
+}
+.tcard:hover {
+  transform:translateY(-2px);
+  box-shadow:0 14px 48px rgba(0,0,0,0.75),0 0 0 1px rgba(0,232,124,0.07),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.tcard-hd {
+  padding:16px 18px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(255,255,255,0.015);
+}
+.tcard-name { font-size:14px; font-weight:600; }
+.tcard-sub  { font-size:11px; color:var(--text2); font-family:var(--mono); margin-top:2px; }
+.tcard-body { padding:18px; }
+.tcard-foot {
+  padding:10px 18px; border-top:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  background:rgba(0,0,0,0.25);
+}
 
-/* DETAIL TABLE */
-.dtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
-.dtbl th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;color:var(--text2);font-family:var(--mono);border-bottom:1px solid var(--border)}
-.dtbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
-.dtbl tr:last-child td{border-bottom:none}
-.dtbl tr:hover td{background:rgba(255,255,255,.02);cursor:pointer}
+/* ─── 3D HOLES (signature element) ─── */
+.tgrid { display:grid; gap:4px; width:fit-content; margin:0 auto 12px; }
+.hole {
+  border-radius:50%; cursor:pointer; border:none; outline:none;
+  transition:transform .12s, filter .15s;
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; font-family:var(--mono); font-weight:700;
+  color:rgba(255,255,255,0.72);
+  user-select:none; position:relative;
+}
+.hole:hover { transform:scale(1.24); z-index:2; filter:brightness(1.3); }
+.hole:active { transform:scale(0.93); }
 
-/* PLANT PICKER */
-.pp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;max-height:200px;overflow-y:auto;margin-top:6px}
-.pp-item{padding:8px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:12px;transition:all .15s;background:var(--s2)}
-.pp-item:hover{border-color:var(--green);background:var(--gdim)}
-.pp-item.on{border-color:var(--green);background:var(--gdim);color:var(--green)}
-.pp-name{font-weight:500}
-.pp-var{font-size:10px;color:var(--text2);margin-top:1px}
-.pp-clear{padding:8px 10px;border-radius:8px;border:1px dashed var(--border2);cursor:pointer;font-size:12px;color:var(--text3);transition:all .15s}
-.pp-clear:hover{border-color:var(--red);color:var(--red)}
+/* Each hole = physical cylindrical well viewed from above */
+.hole.hs-empty {
+  background: radial-gradient(circle at 34% 30%, #1b2a3b 0%, #0c1520 42%, #040a0e 100%);
+  box-shadow: inset 3px 3px 9px rgba(0,0,0,0.97), inset -1px -1px 2px rgba(255,255,255,0.03), 0 2px 5px rgba(0,0,0,0.6);
+}
+.hole.hs-seed {
+  background: radial-gradient(circle at 34% 30%, #2d1d0e 0%, #150d06 48%, #060402 100%);
+  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.92), inset -1px -1px 2px rgba(255,200,100,0.05), 0 0 7px rgba(0,200,255,0.13), 0 2px 5px rgba(0,0,0,0.6);
+}
+.hole.hs-sprout {
+  background: radial-gradient(circle at 37% 26%, rgba(0,232,124,0.68) 0%, #003d1a 36%, #00110a 100%);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.72), inset -1px -1px 2px rgba(0,232,124,0.12), 0 0 14px rgba(0,232,124,0.52), 0 0 5px rgba(0,232,124,0.75), 0 2px 5px rgba(0,0,0,0.5);
+}
+.hole.hs-ready {
+  background: radial-gradient(circle at 37% 26%, rgba(255,186,0,0.72) 0%, #3d2700 36%, #0f0900 100%);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.72), inset -1px -1px 2px rgba(255,186,0,0.12), 0 0 16px rgba(255,186,0,0.58), 0 0 6px rgba(255,186,0,0.8), 0 2px 5px rgba(0,0,0,0.5);
+  animation: amber-pulse 1.8s ease-in-out infinite;
+}
+.hole.hs-planted {
+  background: radial-gradient(circle at 37% 26%, rgba(176,106,255,0.62) 0%, #200d45 36%, #090420 100%);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.72), inset -1px -1px 2px rgba(176,106,255,0.1), 0 0 12px rgba(176,106,255,0.42), 0 0 4px rgba(176,106,255,0.65), 0 2px 5px rgba(0,0,0,0.5);
+}
+.hole.hs-dead {
+  background: radial-gradient(circle at 37% 37%, #1d0707 0%, #0d0303 52%, #040000 100%);
+  box-shadow: inset 3px 3px 9px rgba(0,0,0,0.97), inset -1px -1px 2px rgba(255,69,96,0.03), 0 0 6px rgba(255,69,96,0.18), 0 2px 5px rgba(0,0,0,0.65);
+}
+.hole.has-note::after {
+  content:''; position:absolute; top:2px; right:2px;
+  width:5px; height:5px; border-radius:50%;
+  background:var(--amber); box-shadow:0 0 5px var(--amber);
+}
 
-/* EMPTY */
-.empty{text-align:center;padding:40px 20px;color:var(--text2)}
-.ei{font-size:36px;margin-bottom:10px;opacity:.5}
+@keyframes amber-pulse {
+  0%,100% { box-shadow: inset 2px 2px 5px rgba(0,0,0,0.72), inset -1px -1px 2px rgba(255,186,0,0.12), 0 0 16px rgba(255,186,0,0.58), 0 0 6px rgba(255,186,0,0.8), 0 2px 5px rgba(0,0,0,0.5); }
+  50%      { box-shadow: inset 2px 2px 5px rgba(0,0,0,0.72), inset -1px -1px 2px rgba(255,186,0,0.18), 0 0 30px rgba(255,186,0,0.85), 0 0 12px rgba(255,186,0,1.0), 0 2px 5px rgba(0,0,0,0.5); }
+}
 
-/* TIMELINE */
-.tl{display:flex;flex-direction:column}
-.tli{display:flex;gap:12px;padding-bottom:16px;position:relative}
-.tli:not(:last-child)::before{content:'';position:absolute;left:13px;top:26px;bottom:0;width:1px;background:var(--border)}
-.tl-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--border);background:var(--s2)}
-.tl-dot.done{border-color:var(--green);background:var(--gdk)}
-.tl-c{flex:1;padding-top:2px}
-.tl-title{font-size:13px;font-weight:500}
-.tl-date{font-size:11px;color:var(--text2);font-family:var(--mono)}
-.tl-note{font-size:12px;color:var(--text2);margin-top:4px;background:var(--s2);padding:5px 9px;border-radius:6px;border-left:2px solid var(--border2)}
+/* ─── LEGEND ─── */
+.legend { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.leg {
+  display:flex; align-items:center; gap:5px;
+  font-size:11px; color:var(--text2); cursor:pointer;
+  padding:4px 10px; border-radius:20px; border:1px solid transparent;
+  transition:all .15s; user-select:none;
+}
+.leg:hover { background:var(--s2); border-color:var(--border); color:var(--text); }
+.leg.on { border-color:var(--border2); background:var(--s2); color:var(--text); box-shadow:inset 0 1px 0 rgba(255,255,255,0.05); }
+.leg-dot {
+  width:11px; height:11px; border-radius:50%; border:2px solid; flex-shrink:0;
+  box-shadow: inset -1px -1px 2px rgba(0,0,0,0.55), inset 1px 1px 2px rgba(255,255,255,0.18);
+}
 
-/* PROG */
-.pw{background:var(--s3);border-radius:3px;height:4px;overflow:hidden;margin-top:4px}
-.pf{height:100%;border-radius:3px;transition:width .3s}
+/* ─── PLANT PICKER ─── */
+.pp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:6px; max-height:200px; overflow-y:auto; margin-top:6px; }
+.pp-item {
+  padding:9px 10px; border-radius:9px; border:1px solid var(--border);
+  cursor:pointer; font-size:12px; transition:all .15s;
+  background:linear-gradient(145deg,var(--s2),var(--s1));
+  box-shadow:0 2px 6px rgba(0,0,0,0.35);
+}
+.pp-item:hover { border-color:var(--green); background:var(--gdim); box-shadow:0 0 10px rgba(0,232,124,0.16); }
+.pp-item.on  { border-color:var(--green); background:var(--gdim); color:var(--green); box-shadow:0 0 14px rgba(0,232,124,0.22); }
+.pp-name { font-weight:500; }
+.pp-var  { font-size:10px; color:var(--text2); margin-top:1px; }
+.pp-clear { padding:9px 10px; border-radius:9px; border:1px dashed var(--border2); cursor:pointer; font-size:12px; color:var(--text3); transition:all .15s; }
+.pp-clear:hover { border-color:var(--red); color:var(--red); background:var(--rdim); }
+.pp-clear.on { border-color:var(--border2); color:var(--text2); }
+
+/* ─── EMPTY STATE ─── */
+.empty { text-align:center; padding:50px 20px; color:var(--text2); }
+.ei { font-size:44px; margin-bottom:12px; opacity:.3; }
+
+/* ─── TIMELINE ─── */
+.tl { display:flex; flex-direction:column; }
+.tli { display:flex; gap:14px; padding-bottom:18px; position:relative; }
+.tli:not(:last-child)::before {
+  content:''; position:absolute; left:13px; top:26px; bottom:0; width:1px;
+  background:linear-gradient(to bottom, var(--border2) 0%, transparent 100%);
+}
+.tl-dot {
+  width:27px; height:27px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; border:2px solid var(--border); background:var(--s2);
+  box-shadow:0 2px 8px rgba(0,0,0,0.45);
+}
+.tl-dot.done { border-color:var(--green); background:var(--gdk); box-shadow:0 0 11px rgba(0,232,124,0.35),0 2px 7px rgba(0,0,0,0.45); }
+.tl-c { flex:1; padding-top:2px; }
+.tl-title { font-size:13px; font-weight:500; }
+.tl-date  { font-size:11px; color:var(--text2); font-family:var(--mono); margin-top:2px; }
+.tl-note  { font-size:12px; color:var(--text2); margin-top:5px; background:var(--s2); padding:6px 10px; border-radius:7px; border-left:2px solid var(--green); box-shadow:inset 0 1px 0 rgba(255,255,255,0.03); }
+
+/* ─── PROGRESS ─── */
+.pw { background:var(--s3); border-radius:3px; height:5px; overflow:hidden; margin-top:5px; }
+.pf { height:100%; border-radius:3px; transition:width .4s; }
+
+/* ─── TABLE ─── */
+.dtbl { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+.dtbl th { background:var(--s2); padding:8px 10px; text-align:left; font-size:10px; color:var(--text2); font-family:var(--mono); border-bottom:1px solid var(--border); letter-spacing:0.06em; }
+.dtbl td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+.dtbl tr:last-child td { border-bottom:none; }
+.dtbl tr:hover td { background:rgba(255,255,255,0.02); cursor:pointer; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--s3); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--border2); }
 </style>
 </head>
 <body>
@@ -177,7 +398,7 @@ select option{background:var(--s2)}
     <div class="sc ca"><div class="sc-l">พร้อมย้ายปลูก</div><div class="sc-v" id="ds-ready">0</div><div class="sc-s">หลุม</div></div>
     <div class="sc cr"><div class="sc-l">หลุมตาย</div><div class="sc-v" id="ds-dead">0</div><div class="sc-s">หลุม</div></div>
   </div>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:14px;font-weight:600">สรุปถาดทั้งหมด</div>
   </div>
   <div id="dash-list"></div>
@@ -185,7 +406,7 @@ select option{background:var(--s2)}
 
 <!-- TRAYS -->
 <div class="pg" id="pg-trays">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
     <div style="font-size:14px;font-weight:600">ถาดเพาะกล้า</div>
     <button class="btn pr" onclick="openNewTray()">+ เพิ่มถาดใหม่</button>
   </div>
@@ -194,25 +415,40 @@ select option{background:var(--s2)}
 
 <!-- NOTIFY -->
 <div class="pg" id="pg-notify">
-  <div style="font-size:14px;font-weight:600;margin-bottom:14px">การแจ้งเตือน</div>
+  <div style="font-size:14px;font-weight:600;margin-bottom:16px">การแจ้งเตือน</div>
   <div id="notify-list"></div>
 </div>
 
 <!-- PLANTS -->
 <div class="pg" id="pg-plants">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
     <div style="font-size:14px;font-weight:600">พืชของฉัน</div>
     <button class="btn pr" onclick="openNewPlant()">+ เพิ่มพืช</button>
   </div>
-  <div id="plants-summary-bar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
+  <div id="plants-summary-bar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px"></div>
   <div id="plants-list"></div>
 </div>
 
 <!-- LOG -->
 <div class="pg" id="pg-log">
-  <div style="font-size:14px;font-weight:600;margin-bottom:14px">บันทึกประวัติ</div>
+  <div style="font-size:14px;font-weight:600;margin-bottom:16px">บันทึกประวัติ</div>
   <div class="tl" id="log-tl"></div>
   <div class="empty" id="log-empty"><div class="ei">📖</div><div>ยังไม่มีบันทึก</div></div>
+</div>
+
+<!-- DEAD PLANT DETAIL PAGE -->
+<div class="pg" id="pg-dead">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
+    <button class="btn sm" id="dead-back-btn">← กลับ</button>
+    <div>
+      <div style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px">
+        💀 <span>รายงานหลุมตาย</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">คลิก "ฟื้น" เพื่อเปลี่ยนสถานะกลับ · ดับเบิลคลิกหลุมในถาดเพื่อแก้ไขโดยตรง</div>
+    </div>
+  </div>
+  <div id="dead-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px"></div>
+  <div id="dead-list"></div>
 </div>
 
 <!-- MODAL: NEW TRAY -->
@@ -226,13 +462,11 @@ select option{background:var(--s2)}
       <div class="fr"><label>คอลัมน์</label><input id="nt-cols" type="number" min="1" max="24" value="10"></div>
     </div>
     <div class="fr"><label>พืชเริ่มต้น (ทุกหลุม)</label>
-      <select id="nt-plant">
-        <option value="">— ว่างทุกหลุม (กำหนดทีหลัง) —</option>
-      </select>
+      <select id="nt-plant"><option value="">— ว่างทุกหลุม (กำหนดทีหลัง) —</option></select>
     </div>
     <div class="fr"><label>วันที่และเวลาเริ่มหยอด</label><input id="nt-sowdate" type="datetime-local"></div>
     <div class="fr"><label>โนต</label><input id="nt-note" placeholder="บันทึกเพิ่มเติม"></div>
-    <div style="font-size:11px;color:var(--text2);margin-top:4px">💡 หลังสร้างแล้ว ดับเบิลคลิกหลุมเพื่อกำหนดพืชและสถานะแต่ละหลุมได้</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">💡 ดับเบิลคลิกหลุมเพื่อกำหนดพืชและสถานะแต่ละหลุมได้</div>
   </div>
   <div class="mfoot">
     <button class="btn" onclick="cm('ov-tray')">ยกเลิก</button>
@@ -251,7 +485,7 @@ select option{background:var(--s2)}
       <div class="fr"><label>สายพันธุ์</label><input id="np-var" placeholder="ลูกท้อ"></div>
     </div>
     <div class="fg">
-      <div class="fr"><label>วันงอก (เฉลี่ย)</label><input id="np-sprout" type="number" min="1" placeholder="7" value="7"> </div>
+      <div class="fr"><label>วันงอก (เฉลี่ย)</label><input id="np-sprout" type="number" min="1" placeholder="7" value="7"></div>
       <div class="fr"><label>วันพร้อมย้าย</label><input id="np-ready" type="number" min="1" placeholder="21" value="21"></div>
     </div>
     <div class="fr"><label>โนต</label><textarea id="np-note" placeholder="ข้อมูลพิเศษ..."></textarea></div>
@@ -268,9 +502,7 @@ select option{background:var(--s2)}
 <div class="modal" style="max-width:400px">
   <div class="mhd"><div class="mtitle" id="hole-title">หลุม —</div><button class="mclose" onclick="cm('ov-hole')">✕</button></div>
   <div class="mbody">
-    <div class="fr"><label>พืชในหลุมนี้</label>
-      <div class="pp-grid" id="pp-grid"></div>
-    </div>
+    <div class="fr"><label>พืชในหลุมนี้</label><div class="pp-grid" id="pp-grid"></div></div>
     <div class="fr"><label>สถานะ</label>
       <select id="h-status">
         <option value="empty">ว่าง</option>
@@ -298,52 +530,36 @@ let trays  = JSON.parse(localStorage.getItem('sl_trays') ||'[]');
 let logs   = JSON.parse(localStorage.getItem('sl_logs')  ||'[]');
 
 const ST = {
-  empty:   {label:'ว่าง',          cls:'st-empty',  hcls:'hs-empty',  col:'#484f58'},
-  seed:    {label:'หยอดแล้ว',      cls:'st-seed',   hcls:'hs-seed',   col:'#58a6ff'},
-  sprout:  {label:'งอกแล้ว',       cls:'st-sprout', hcls:'hs-sprout', col:'#3fb950'},
-  ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#d29922'},
-  planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#bc8cff'},
-  dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#f85149'},
+  empty:   {label:'ว่าง',          cls:'st-empty',  hcls:'hs-empty',  col:'#243444'},
+  seed:    {label:'หยอดแล้ว',      cls:'st-seed',   hcls:'hs-seed',   col:'#00c8ff'},
+  sprout:  {label:'งอกแล้ว',       cls:'st-sprout', hcls:'hs-sprout', col:'#00e87c'},
+  ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#ffba00'},
+  planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#b06aff'},
+  dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#ff4560'},
 };
 
-let curTool = 'seed';
-let editHole = null; // {trayId, idx}
+let curTool  = 'seed';
+let editHole = null;
 
 function sd(){
   localStorage.setItem('sl_plants', JSON.stringify(plants));
   localStorage.setItem('sl_trays',  JSON.stringify(trays));
   localStorage.setItem('sl_logs',   JSON.stringify(logs));
 }
-
 function td(){ return new Date().toISOString().slice(0,10); }
-
 function pid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
-
-function addLog(icon, text, note=''){
-  logs.unshift({id:pid(), icon, text, note, date:td()});
+function addLog(icon,text,note=''){
+  logs.unshift({id:pid(),icon,text,note,date:td()});
   if(logs.length>200) logs.pop();
-  localStorage.setItem('sl_logs', JSON.stringify(logs));
+  localStorage.setItem('sl_logs',JSON.stringify(logs));
 }
 
 // ---- RENDER ----
-function render(){
-  renderDash();
-  renderTrays();
-  renderNotify();
-  renderLog();
-  renderBadge();
-}
+function render(){ renderDash(); renderTrays(); renderNotify(); renderLog(); renderBadge(); }
 
 function renderDash(){
-  let ts=0, sp=0, rd=0, dd=0;
-  trays.forEach(t=>{
-    ts++;
-    t.holes.forEach(h=>{
-      if(h.st==='sprout') sp++;
-      if(h.st==='ready') rd++;
-      if(h.st==='dead') dd++;
-    });
-  });
+  let ts=0,sp=0,rd=0,dd=0;
+  trays.forEach(t=>{ ts++; t.holes.forEach(h=>{ if(h.st==='sprout')sp++; if(h.st==='ready')rd++; if(h.st==='dead')dd++; }); });
   document.getElementById('ds-trays').textContent=ts;
   document.getElementById('ds-sprout').textContent=sp;
   document.getElementById('ds-ready').textContent=rd;
@@ -360,13 +576,16 @@ function renderDash(){
     const total=t.holes.length;
     const used=total-(cnt.empty||0);
     const pct=Math.round(used/total*100);
-    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="go('trays');scrollToTray('${t.id}')">
+    return `<div style="background:linear-gradient(145deg,var(--s1),var(--bg));border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--cshadow);transition:transform .2s,box-shadow .2s"
+      onclick="go('trays');scrollToTray('${t.id}')"
+      onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(0,232,124,0.07)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow=''">
       <div style="flex:1">
         <div style="font-size:13px;font-weight:600">${t.name}</div>
-        <div style="font-size:11px;color:var(--text2);font-family:var(--mono)">${t.rows}×${t.cols} | ${Object.entries(cnt).filter(([k])=>k!=='empty').map(([k,v])=>`${ST[k].label}:${v}`).join(' · ')}</div>
-        <div class="pw" style="width:200px;margin-top:5px"><div class="pf" style="width:${pct}%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">${t.rows}×${t.cols} | ${Object.entries(cnt).filter(([k])=>k!=='empty').map(([k,v])=>`${ST[k].label}:${v}`).join(' · ')}</div>
+        <div class="pw" style="width:200px;margin-top:6px"><div class="pf" style="width:${pct}%;background:var(--green);box-shadow:0 0 8px rgba(0,232,124,0.5)"></div></div>
       </div>
-      <div style="font-size:20px;font-family:var(--mono);font-weight:600;color:var(--green)">${pct}%</div>
+      <div style="font-size:22px;font-family:var(--mono);font-weight:600;color:var(--green);text-shadow:0 0 16px rgba(0,232,124,0.5)">${pct}%</div>
     </div>`;
   }).join('');
 }
@@ -374,7 +593,7 @@ function renderDash(){
 function renderTrays(){
   const el=document.getElementById('trays-list');
   if(!trays.length){
-    el.innerHTML=`<div class="empty"><div class="ei">🗂️</div><div style="margin-bottom:12px">ยังไม่มีถาดหลุม</div><button class="btn pr" onclick="openNewTray()">+ เพิ่มถาดแรก</button></div>`;
+    el.innerHTML=`<div class="empty"><div class="ei">🗂️</div><div style="margin-bottom:14px">ยังไม่มีถาดหลุม</div><button class="btn pr" onclick="openNewTray()">+ เพิ่มถาดแรก</button></div>`;
     return;
   }
   el.innerHTML=trays.map(t=>renderTrayCard(t)).join('');
@@ -382,7 +601,6 @@ function renderTrays(){
 
 function elapsedStr(dateStr){
   if(!dateStr) return null;
-  // parse as local time (not UTC) by replacing T with space
   const start=new Date(dateStr.replace('T',' '));
   const now=new Date();
   const diffMs=now-start;
@@ -406,8 +624,8 @@ function renderTrayCard(t){
   t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
 
   const holes=t.holes.map((h,i)=>{
-    const p=h.plantId ? plants.find(x=>x.id===h.plantId) : null;
-    const label=p ? (p.name.slice(0,2)) : '';
+    const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+    const label=p?(p.name.slice(0,2)):'';
     return `<div class="hole ${ST[h.st].hcls} ${h.note?'has-note':''}"
       style="width:${cw}px;height:${cw}px;font-size:${cw>24?9:7}px"
       title="${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[h.st].label}${h.note?' | '+h.note:''}"
@@ -427,9 +645,9 @@ function renderTrayCard(t){
       <div>
         <div class="tcard-name">${t.name}</div>
         <div class="tcard-sub">${t.rows}×${t.cols} = ${t.holes.length} หลุม${t.note?' · '+t.note:''}</div>
-        ${t.traySowDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap">
+        ${t.traySowDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
           <span style="font-size:11px;color:var(--text2);font-family:var(--mono)">📅 เริ่ม ${t.traySowDate.slice(0,10)}${t.traySowDate.length>10?' เวลา '+t.traySowDate.slice(11,16)+' น.':''}</span>
-          ${elapsed?`<span style="font-size:11px;background:var(--gdim);color:var(--green);border:1px solid rgba(63,185,80,.3);border-radius:20px;padding:2px 9px;font-family:var(--mono)">⏱ ${elapsed}</span>`:''}
+          ${elapsed?`<span style="font-size:11px;background:var(--gdim);color:var(--green);border:1px solid rgba(0,232,124,0.28);border-radius:20px;padding:2px 10px;font-family:var(--mono);box-shadow:0 0 8px rgba(0,232,124,0.15)">⏱ ${elapsed}</span>`:''}
         </div>`:''}
       </div>
       <div style="display:flex;gap:6px;align-items:flex-start">
@@ -444,10 +662,12 @@ function renderTrayCard(t){
             <div class="leg-dot" style="background:${v.col}22;border-color:${v.col}"></div>${v.label}
           </div>`).join('')}
       </div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">คลิก/ลาก = เปลี่ยนสถานะ · ดับเบิลคลิก = กำหนดพืช+โนต</div>
-      <div style="overflow-x:auto">
-        <div style="display:grid;grid-template-columns:repeat(${t.cols},${cw}px);gap:3px;width:fit-content">
-          ${holes}
+      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;letter-spacing:0.03em">คลิก = เปลี่ยนสถานะ · คลิก💀 = รายงานหลุมตาย · ดับเบิลคลิก = แก้ไขรายละเอียด</div>
+      <div style="overflow-x:auto;padding:4px 0">
+        <div style="display:inline-block;padding:12px;background:radial-gradient(ellipse at center,rgba(0,232,124,0.04),transparent 70%),linear-gradient(145deg,#0a1422,#060c14);border-radius:14px;border:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 4px 18px rgba(0,0,0,0.85),0 4px 16px rgba(0,0,0,0.4)">
+          <div style="display:grid;grid-template-columns:repeat(${t.cols},${cw}px);gap:4px;width:fit-content">
+            ${holes}
+          </div>
         </div>
       </div>
     </div>
@@ -456,10 +676,7 @@ function renderTrayCard(t){
 }
 
 function scrollToTray(id){
-  setTimeout(()=>{
-    const el=document.getElementById('tcard-'+id);
-    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-  },100);
+  setTimeout(()=>{ const el=document.getElementById('tcard-'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
 }
 
 function renderNotify(){
@@ -472,15 +689,11 @@ function renderNotify(){
       const name=p?p.name+(p.variety?' '+p.variety:''):`หลุม ${i+1}`;
       if(h.st==='seed'&&h.sowDate&&p){
         const d=Math.round((new Date()-new Date(h.sowDate))/(864e5));
-        if(d>=(p.sproutDays||7)){
-          items.push({type:'info',icon:'🌱',title:`เช็กการงอก: ${name}`,sub:`${t.name} หลุม ${i+1} — หยอดมา ${d} วัน`,tid:t.id,hi:i});
-        }
+        if(d>=(p.sproutDays||7)) items.push({type:'info',icon:'🌱',title:`เช็กการงอก: ${name}`,sub:`${t.name} หลุม ${i+1} — หยอดมา ${d} วัน`,tid:t.id,hi:i});
       }
       if(h.st==='sprout'&&h.sowDate&&p){
         const d=Math.round((new Date()-new Date(h.sowDate))/(864e5));
-        if(d>=(p.readyDays||21)){
-          items.push({type:'warn',icon:'⏰',title:`พร้อมย้ายปลูก: ${name}`,sub:`${t.name} หลุม ${i+1} — เพาะมา ${d} วัน`,tid:t.id,hi:i});
-        }
+        if(d>=(p.readyDays||21)) items.push({type:'warn',icon:'⏰',title:`พร้อมย้ายปลูก: ${name}`,sub:`${t.name} หลุม ${i+1} — เพาะมา ${d} วัน`,tid:t.id,hi:i});
       }
     });
   });
@@ -488,11 +701,14 @@ function renderNotify(){
     el.innerHTML=`<div class="empty"><div class="ei">✅</div><div>ไม่มีการแจ้งเตือน</div></div>`;
     return;
   }
-  const typeStyle={info:'border-color:rgba(88,166,255,.4);background:var(--bdim)',warn:'border-color:rgba(210,153,34,.4);background:var(--adim)',urgent:'border-color:rgba(248,81,73,.4);background:var(--rdim)'};
+  const typeStyle={
+    info:'border-color:rgba(0,200,255,0.3);background:rgba(0,200,255,0.06);box-shadow:0 0 20px rgba(0,200,255,0.07)',
+    warn:'border-color:rgba(255,186,0,0.3);background:rgba(255,186,0,0.06);box-shadow:0 0 20px rgba(255,186,0,0.07)'
+  };
   el.innerHTML=items.map(x=>`
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;${typeStyle[x.type]||''}">
-      <div style="font-size:20px">${x.icon}</div>
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${x.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${x.sub}</div></div>
+    <div style="background:linear-gradient(145deg,var(--s1),var(--bg));border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;${typeStyle[x.type]||''}">
+      <div style="font-size:22px">${x.icon}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${x.title}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${x.sub}</div></div>
       <button class="btn sm pr" onclick="openHole('${x.tid}',${x.hi},event)">อัปเดต</button>
     </div>`).join('');
 }
@@ -527,29 +743,23 @@ function renderBadge(){
 }
 
 // ---- TOOL ----
-function setTool(t, trayId){
+function setTool(t,trayId){
   curTool=t;
-  // update all legends
-  document.querySelectorAll('.leg').forEach(el=>{
-    el.classList.remove('on');
-  });
+  document.querySelectorAll('.leg').forEach(el=>el.classList.remove('on'));
   const leg=document.getElementById('leg-'+trayId);
-  if(leg){
-    const legs=leg.querySelectorAll('.leg');
-    legs.forEach((el,i)=>{
-      if(Object.keys(ST)[i]===t) el.classList.add('on');
-    });
-  }
+  if(leg){ const legs=leg.querySelectorAll('.leg'); legs.forEach((el,i)=>{ if(Object.keys(ST)[i]===t) el.classList.add('on'); }); }
 }
 
 let isPainting=false;
 document.addEventListener('mousedown',()=>isPainting=true);
 document.addEventListener('mouseup',()=>isPainting=false);
 
-function quickPaint(trayId, idx, e){
-  if(e.detail>=2) return; // let dblclick handle
+function quickPaint(trayId,idx,e){
+  if(e.detail>=2) return;
   const t=trays.find(x=>x.id===trayId);
   if(!t) return;
+  // dead hole → navigate to dead detail page instead of painting
+  if(t.holes[idx].st==='dead'){ openDeadPage(trayId,idx); return; }
   const prev=t.holes[idx].st;
   t.holes[idx].st=curTool;
   if(curTool==='seed'&&!t.holes[idx].sowDate) t.holes[idx].sowDate=td();
@@ -559,9 +769,7 @@ function quickPaint(trayId, idx, e){
       t.holes[idx].plantId?(plants.find(p=>p.id===t.holes[idx].plantId)||{}).name||'':''
     );
   }
-  sd();
-  refreshTrayCard(trayId);
-  renderBadge();
+  sd(); refreshTrayCard(trayId); renderBadge();
 }
 
 function refreshTrayCard(trayId){
@@ -574,7 +782,7 @@ function refreshTrayCard(trayId){
 }
 
 // ---- HOLE MODAL ----
-function openHole(trayId, idx, e){
+function openHole(trayId,idx,e){
   if(e) e.stopPropagation();
   const t=trays.find(x=>x.id===trayId);
   if(!t) return;
@@ -584,7 +792,6 @@ function openHole(trayId, idx, e){
   document.getElementById('h-status').value=h.st;
   document.getElementById('h-sow').value=h.sowDate||td();
   document.getElementById('h-note').value=h.note||'';
-  // plant picker
   const pp=document.getElementById('pp-grid');
   pp.innerHTML=`<div class="pp-clear ${!h.plantId?'on':''}" onclick="selectPlant(null)">ว่าง / ไม่ระบุ</div>`+
     plants.map(p=>`<div class="pp-item ${h.plantId===p.id?'on':''}" onclick="selectPlant('${p.id}')"><div class="pp-name">${p.name}</div><div class="pp-var">${p.variety||'—'}</div></div>`).join('');
@@ -593,11 +800,8 @@ function openHole(trayId, idx, e){
 
 function selectPlant(id){
   document.querySelectorAll('.pp-item,.pp-clear').forEach(el=>el.classList.remove('on'));
-  if(id){
-    document.querySelector(`.pp-item[onclick="selectPlant('${id}')"]`)?.classList.add('on');
-  } else {
-    document.querySelector('.pp-clear')?.classList.add('on');
-  }
+  if(id){ document.querySelector(`.pp-item[onclick="selectPlant('${id}')"]`)?.classList.add('on'); }
+  else   { document.querySelector('.pp-clear')?.classList.add('on'); }
   editHole._plant=id;
 }
 
@@ -621,11 +825,7 @@ function saveHole(){
       t.holes[idx].note
     );
   }
-  sd();
-  cm('ov-hole');
-  refreshTrayCard(trayId);
-  renderBadge();
-  renderNotify();
+  sd(); cm('ov-hole'); refreshTrayCard(trayId); renderBadge(); renderNotify();
 }
 
 function localDatetime(){
@@ -654,49 +854,29 @@ function saveTray(){
   const plantId=document.getElementById('nt-plant').value||null;
   const sowDate=document.getElementById('nt-sowdate').value||td();
   const t={
-    id:pid(),
-    name:document.getElementById('nt-name').value.trim()||`ถาด ${trays.length+1}`,
-    rows,cols,
-    note:document.getElementById('nt-note').value.trim(),
-    traySowDate: sowDate,
-    holes:Array(rows*cols).fill(null).map(()=>({
-      st: plantId?'seed':'empty',
-      plantId: plantId||null,
-      sowDate: plantId?sowDate:null,
-      note:''
-    })),
+    id:pid(), name:document.getElementById('nt-name').value.trim()||`ถาด ${trays.length+1}`,
+    rows,cols, note:document.getElementById('nt-note').value.trim(), traySowDate:sowDate,
+    holes:Array(rows*cols).fill(null).map(()=>({st:plantId?'seed':'empty',plantId:plantId||null,sowDate:plantId?sowDate:null,note:''})),
     created:Date.now()
   };
   trays.push(t);
-  if(plantId){
-    const p=plants.find(x=>x.id===plantId);
-    addLog('🌱',`สร้างถาด ${t.name}: หยอดเมล็ด ${rows*cols} หลุม`,p?p.name+(p.variety?' '+p.variety:''):'');
-  } else {
-    addLog('🗂️',`สร้างถาด ${t.name}`,`${rows}×${cols} = ${rows*cols} หลุม`);
-  }
-  sd();
-  cm('ov-tray');
-  render();
-  go('trays');
+  if(plantId){ const p=plants.find(x=>x.id===plantId); addLog('🌱',`สร้างถาด ${t.name}: หยอดเมล็ด ${rows*cols} หลุม`,p?p.name+(p.variety?' '+p.variety:''):''); }
+  else { addLog('🗂️',`สร้างถาด ${t.name}`,`${rows}×${cols} = ${rows*cols} หลุม`); }
+  sd(); cm('ov-tray'); render(); go('trays');
 }
 
 function delTray(id){
   if(!confirm('ลบถาดนี้?')) return;
-  trays=trays.filter(t=>t.id!==id);
-  sd();
-  render();
+  trays=trays.filter(t=>t.id!==id); sd(); render();
 }
 
 function editTray(id){
-  const t=trays.find(x=>x.id===id);
-  if(!t) return;
-  const name=prompt('ชื่อถาด:',t.name);
-  if(name===null) return;
+  const t=trays.find(x=>x.id===id); if(!t) return;
+  const name=prompt('ชื่อถาด:',t.name); if(name===null) return;
   if(name.trim()) t.name=name.trim();
   const dateStr=prompt('วันที่เริ่มหยอด (YYYY-MM-DD):',t.traySowDate||td());
   if(dateStr!==null&&dateStr.trim()) t.traySowDate=dateStr.trim();
-  sd();
-  render();
+  sd(); render();
 }
 
 // ---- PLANT CRUD ----
@@ -713,8 +893,7 @@ function savePlant(){
   const name=document.getElementById('np-name').value.trim();
   if(!name){alert('กรุณากรอกชื่อพืช');return;}
   const p={
-    id:pid(),
-    name,
+    id:pid(), name,
     variety:document.getElementById('np-var').value.trim(),
     sproutDays:parseInt(document.getElementById('np-sprout').value)||7,
     readyDays:parseInt(document.getElementById('np-ready').value)||21,
@@ -722,34 +901,17 @@ function savePlant(){
   };
   plants.push(p);
   addLog('🌿',`เพิ่มพืช: ${p.name}${p.variety?' ('+p.variety+')':''}`,p.note);
-  sd();
-  cm('ov-plant');
+  sd(); cm('ov-plant');
 }
 
 // ---- PLANTS PAGE ----
 function renderPlants(){
-  // aggregate per plant across all trays
   const stats={};
-  plants.forEach(p=>{
-    stats[p.id]={total:0,seed:0,sprout:0,ready:0,planted:0,dead:0,empty:0};
-  });
-  trays.forEach(t=>{
-    t.holes.forEach(h=>{
-      if(!h.plantId||!stats[h.plantId]) return;
-      stats[h.plantId].total++;
-      stats[h.plantId][h.st]=(stats[h.plantId][h.st]||0)+1;
-    });
-  });
+  plants.forEach(p=>{ stats[p.id]={total:0,seed:0,sprout:0,ready:0,planted:0,dead:0,empty:0}; });
+  trays.forEach(t=>{ t.holes.forEach(h=>{ if(!h.plantId||!stats[h.plantId]) return; stats[h.plantId].total++; stats[h.plantId][h.st]=(stats[h.plantId][h.st]||0)+1; }); });
 
-  // summary bar
   let totalSeeds=0,totalSprout=0,totalDead=0,totalPlanted=0;
-  plants.forEach(p=>{
-    const s=stats[p.id]||{};
-    totalSeeds+=s.total||0;
-    totalSprout+=(s.sprout||0)+(s.ready||0)+(s.planted||0);
-    totalDead+=s.dead||0;
-    totalPlanted+=s.planted||0;
-  });
+  plants.forEach(p=>{ const s=stats[p.id]||{}; totalSeeds+=s.total||0; totalSprout+=(s.sprout||0)+(s.ready||0)+(s.planted||0); totalDead+=s.dead||0; totalPlanted+=s.planted||0; });
   const germRate=totalSeeds>0?Math.round(totalSprout/totalSeeds*100):0;
   document.getElementById('plants-summary-bar').innerHTML=`
     <div class="sc cg"><div class="sc-l">พืชทั้งหมด</div><div class="sc-v">${plants.length}</div><div class="sc-s">ชนิด</div></div>
@@ -760,72 +922,66 @@ function renderPlants(){
 
   const el=document.getElementById('plants-list');
   if(!plants.length){
-    el.innerHTML=`<div class="empty"><div class="ei">🌿</div><div style="margin-bottom:12px">ยังไม่มีพืช</div><button class="btn pr" onclick="openNewPlant()">+ เพิ่มพืชแรก</button></div>`;
+    el.innerHTML=`<div class="empty"><div class="ei">🌿</div><div style="margin-bottom:14px">ยังไม่มีพืช</div><button class="btn pr" onclick="openNewPlant()">+ เพิ่มพืชแรก</button></div>`;
     return;
   }
 
   el.innerHTML=plants.map(p=>{
     const s=stats[p.id]||{total:0,seed:0,sprout:0,ready:0,planted:0,dead:0};
     const seeded=s.total;
-    const alive=(s.sprout||0)+(s.ready||0)+(s.planted||0)+(s.seed||0);
     const sprouted=(s.sprout||0)+(s.ready||0)+(s.planted||0);
     const germPct=seeded>0?Math.round(sprouted/seeded*100):0;
     const deadPct=seeded>0?Math.round((s.dead||0)/seeded*100):0;
     const barW=Math.max(1,germPct);
-
-    // which trays contain this plant
+    const barColor=germPct>=70?'var(--green)':germPct>=40?'var(--amber)':'var(--red)';
+    const barGlow=germPct>=70?'rgba(0,232,124,0.5)':germPct>=40?'rgba(255,186,0,0.5)':'rgba(255,69,96,0.5)';
     const inTrays=trays.filter(t=>t.holes.some(h=>h.plantId===p.id));
 
-    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden">
-      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+    return `<div style="background:linear-gradient(145deg,#0e1925,#080e17);border:1px solid var(--border);border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:var(--cshadow)">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.015)">
         <div>
           <div style="font-size:15px;font-weight:600">${p.name} ${p.variety?`<span style="font-size:12px;color:var(--text2);font-weight:400">(${p.variety})</span>`:''}</div>
-          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">
-            งอกใน ~${p.sproutDays} วัน · พร้อมย้ายในวันที่ ~${p.readyDays}
-            ${inTrays.length?` · ถาด: ${inTrays.map(t=>t.name).join(', ')}`:''}
+          <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:3px">
+            งอกใน ~${p.sproutDays} วัน · พร้อมย้ายวันที่ ~${p.readyDays}${inTrays.length?` · ถาด: ${inTrays.map(t=>t.name).join(', ')}` :''}
           </div>
         </div>
-        <div style="display:flex;gap:6px">
-          <button class="btn sm" onclick="deletePlant('${p.id}')">ลบ</button>
-        </div>
+        <button class="btn sm danger" onclick="deletePlant('${p.id}')">ลบ</button>
       </div>
-      <div style="padding:14px 16px">
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
-          <div style="text-align:center;background:var(--s2);border-radius:8px;padding:10px 6px">
-            <div style="font-size:20px;font-weight:600;font-family:var(--mono)">${seeded}</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">หลุมทั้งหมด</div>
+      <div style="padding:16px 18px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
+          <div style="text-align:center;background:linear-gradient(145deg,var(--s2),var(--s1));border-radius:10px;padding:10px 6px;border:1px solid var(--border);box-shadow:var(--cshadow)">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono)">${seeded}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px">ทั้งหมด</div>
           </div>
-          <div style="text-align:center;background:rgba(88,166,255,.1);border-radius:8px;padding:10px 6px;border:1px solid rgba(88,166,255,.2)">
-            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--blue)">${s.seed||0}</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">รองอก</div>
+          <div style="text-align:center;background:var(--bdim);border-radius:10px;padding:10px 6px;border:1px solid rgba(0,200,255,0.2);box-shadow:0 0 12px rgba(0,200,255,0.07)">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--blue);text-shadow:0 0 12px rgba(0,200,255,0.5)">${s.seed||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px">รองอก</div>
           </div>
-          <div style="text-align:center;background:var(--gdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(63,185,80,.2)">
-            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--green)">${sprouted}</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">งอกแล้ว</div>
+          <div style="text-align:center;background:var(--gdim);border-radius:10px;padding:10px 6px;border:1px solid rgba(0,232,124,0.2);box-shadow:0 0 12px rgba(0,232,124,0.08)">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--green);text-shadow:0 0 12px rgba(0,232,124,0.5)">${sprouted}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px">งอกแล้ว</div>
           </div>
-          <div style="text-align:center;background:var(--pdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(188,140,255,.2)">
-            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--purple)">${s.planted||0}</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">ย้ายแล้ว</div>
+          <div style="text-align:center;background:var(--pdim);border-radius:10px;padding:10px 6px;border:1px solid rgba(176,106,255,0.2);box-shadow:0 0 12px rgba(176,106,255,0.07)">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--purple);text-shadow:0 0 12px rgba(176,106,255,0.5)">${s.planted||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px">ย้ายแล้ว</div>
           </div>
-          <div style="text-align:center;background:var(--rdim);border-radius:8px;padding:10px 6px;border:1px solid rgba(248,81,73,.2)">
-            <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--red)">${s.dead||0}</div>
-            <div style="font-size:10px;color:var(--text2);margin-top:2px">ตาย</div>
+          <div style="text-align:center;background:var(--rdim);border-radius:10px;padding:10px 6px;border:1px solid rgba(255,69,96,0.2);box-shadow:0 0 12px rgba(255,69,96,0.07)">
+            <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--red);text-shadow:0 0 12px rgba(255,69,96,0.5)">${s.dead||0}</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px">ตาย</div>
           </div>
         </div>
-
         <div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
           <div style="font-size:11px;color:var(--text2)">อัตราการงอก</div>
-          <div style="font-size:12px;font-weight:600;font-family:var(--mono);color:${germPct>=70?'var(--green)':germPct>=40?'var(--amber)':'var(--red)'}">${germPct}%</div>
+          <div style="font-size:13px;font-weight:600;font-family:var(--mono);color:${barColor};text-shadow:0 0 10px ${barGlow}">${germPct}%</div>
         </div>
-        <div style="background:var(--s3);border-radius:4px;height:8px;overflow:hidden;margin-bottom:4px">
-          <div style="height:100%;border-radius:4px;background:${germPct>=70?'var(--green)':germPct>=40?'var(--amber)':'var(--red)'};width:${barW}%;transition:width .4s"></div>
+        <div style="background:var(--s3);border-radius:4px;height:7px;overflow:hidden;margin-bottom:5px">
+          <div style="height:100%;border-radius:4px;background:${barColor};width:${barW}%;transition:width .4s;box-shadow:0 0 8px ${barGlow}"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono)">
           <span>งอก ${sprouted}/${seeded} หลุม</span>
           <span style="color:var(--red)">ตาย ${deadPct}%</span>
         </div>
-
-        ${p.note?`<div style="margin-top:10px;font-size:12px;color:var(--text2);background:var(--s2);padding:7px 10px;border-radius:6px;border-left:2px solid var(--border2)">${p.note}</div>`:''}
+        ${p.note?`<div style="margin-top:12px;font-size:12px;color:var(--text2);background:var(--s2);padding:8px 12px;border-radius:8px;border-left:2px solid var(--green);box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)">${p.note}</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -833,15 +989,149 @@ function renderPlants(){
 
 function deletePlant(id){
   const inUse=trays.some(t=>t.holes.some(h=>h.plantId===id));
-  if(inUse){
-    if(!confirm('พืชนี้ถูกใช้งานในถาดอยู่ ยืนยันลบ?')) return;
-    trays.forEach(t=>t.holes.forEach(h=>{if(h.plantId===id)h.plantId=null;}));
-  } else {
-    if(!confirm('ลบพืชนี้?')) return;
+  if(inUse){ if(!confirm('พืชนี้ถูกใช้งานในถาดอยู่ ยืนยันลบ?')) return; trays.forEach(t=>t.holes.forEach(h=>{if(h.plantId===id)h.plantId=null;})); }
+  else { if(!confirm('ลบพืชนี้?')) return; }
+  plants=plants.filter(p=>p.id!==id); sd(); renderPlants();
+}
+
+// ---- DEAD DETAIL PAGE ----
+function openDeadPage(trayId, idx){
+  _deadFromTray = trayId;
+  renderDeadPage(trayId, idx);
+  go('dead');
+  setTimeout(()=>{
+    const el=document.getElementById(`dead-item-${trayId}-${idx}`);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+}
+
+let _deadFromTray = null;
+
+function renderDeadPage(focusTrayId, focusIdx){
+  // Back button destination
+  const backBtn=document.getElementById('dead-back-btn');
+  if(backBtn) backBtn.onclick=()=>{ if(focusTrayId){ go('trays'); scrollToTray(focusTrayId); } else go('trays'); };
+
+  // Collect all dead holes
+  const deadItems=[];
+  trays.forEach(t=>{
+    t.holes.forEach((h,i)=>{
+      if(h.st==='dead'){
+        const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+        deadItems.push({tray:t, hole:h, idx:i, plant:p});
+      }
+    });
+  });
+
+  // Summary stats
+  const totalDead=deadItems.length;
+  const byTray={};
+  deadItems.forEach(item=>{ byTray[item.tray.id]=(byTray[item.tray.id]||0)+1; });
+  const worstEntry=Object.entries(byTray).sort((a,b)=>b[1]-a[1])[0];
+  const worstTrayName=worstEntry?trays.find(t=>t.id===worstEntry[0])?.name||'—':'—';
+  const worstTrayCount=worstEntry?worstEntry[1]:0;
+  const uniquePlantIds=[...new Set(deadItems.map(x=>x.plant?.id).filter(Boolean))];
+  const uniquePlants=uniquePlantIds.length;
+
+  document.getElementById('dead-summary').innerHTML=`
+    <div class="sc cr">
+      <div class="sc-l">หลุมตายทั้งหมด</div>
+      <div class="sc-v">${totalDead}</div>
+      <div class="sc-s">หลุม</div>
+    </div>
+    <div class="sc" style="border-color:rgba(255,186,0,0.22);background:linear-gradient(145deg,#261b00,#090600);box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 24px rgba(255,186,0,0.07),inset 0 1px 0 rgba(255,186,0,0.09)">
+      <div class="sc-l" style="color:var(--text2)">พืชที่สูญเสีย</div>
+      <div class="sc-v" style="color:var(--amber);text-shadow:0 0 16px rgba(255,186,0,0.5)">${uniquePlants}</div>
+      <div class="sc-s">ชนิด</div>
+    </div>
+    <div class="sc" style="border-color:rgba(255,69,96,0.15)">
+      <div class="sc-l">ถาดสูญเสียมากสุด</div>
+      <div class="sc-v" style="font-size:16px;color:var(--text);padding-top:4px;line-height:1.3">${worstTrayName}</div>
+      <div class="sc-s">${worstTrayCount?worstTrayCount+' หลุม':totalDead?'—':'ไม่มี'}</div>
+    </div>
+  `;
+
+  const listEl=document.getElementById('dead-list');
+  if(!totalDead){
+    listEl.innerHTML=`<div class="empty"><div class="ei">✅</div><div>ยังไม่มีหลุมตาย</div></div>`;
+    return;
   }
-  plants=plants.filter(p=>p.id!==id);
+
+  // Group by plant (null plant = unknown)
+  const grouped={};
+  deadItems.forEach(item=>{
+    const key=item.plant?.id||'__unknown__';
+    if(!grouped[key]) grouped[key]={plant:item.plant,items:[]};
+    grouped[key].items.push(item);
+  });
+
+  listEl.innerHTML=Object.values(grouped).map(g=>{
+    const plantName=g.plant?g.plant.name+(g.plant.variety?` (${g.plant.variety})`:''): 'ไม่ระบุพืช';
+    const rows=g.items.map(item=>{
+      const isFocus=(item.tray.id===focusTrayId && item.idx===focusIdx);
+      const rowNum=Math.floor(item.idx/item.tray.cols)+1;
+      const colNum=(item.idx%item.tray.cols)+1;
+      const sowDate=item.hole.sowDate||'—';
+      // calc days since sow
+      let livedDays='—';
+      if(item.hole.sowDate){
+        const d=Math.round((new Date()-new Date(item.hole.sowDate))/(864e5));
+        livedDays=d>=0?d+' วัน':'—';
+      }
+      return `<tr id="dead-item-${item.tray.id}-${item.idx}"
+        style="${isFocus?'background:rgba(255,69,96,0.09);outline:1px solid rgba(255,69,96,0.3);':''}transition:background .2s">
+        <td>
+          <span class="stag st-dead">ตาย</span>
+          ${isFocus?'<span style="font-size:10px;color:var(--red);font-family:var(--mono);margin-left:6px">◀ หลุมนี้</span>':''}
+        </td>
+        <td style="font-family:var(--mono);font-size:11px">${item.tray.name}</td>
+        <td style="font-family:var(--mono);font-size:11px">ที่ ${item.idx+1}<span style="color:var(--text2)"> (R${rowNum}C${colNum})</span></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${sowDate}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--amber)">${livedDays}</td>
+        <td style="color:var(--text2);font-size:12px">${item.hole.note||'<span style="color:var(--text3)">—</span>'}</td>
+        <td>
+          <div style="display:flex;gap:5px">
+            <button class="btn sm pr" onclick="reviveHole('${item.tray.id}',${item.idx})" style="font-size:11px">🌱 ฟื้น</button>
+            <button class="btn sm" onclick="openHole('${item.tray.id}',${item.idx},{stopPropagation:()=>{}})" style="font-size:11px">แก้ไข</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    const deadRate=g.items.length;
+
+    return `<div style="background:linear-gradient(145deg,#0e1925,#080e17);border:1px solid rgba(255,69,96,0.2);border-radius:16px;margin-bottom:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 20px rgba(255,69,96,0.06)">
+      <div style="padding:14px 18px;border-bottom:1px solid rgba(255,69,96,0.15);display:flex;align-items:center;justify-content:space-between;background:rgba(255,69,96,0.04)">
+        <div>
+          <div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px">
+            💀 ${plantName}
+          </div>
+          ${g.plant?`<div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:3px">งอกใน ~${g.plant.sproutDays} วัน · พร้อมย้ายวันที่ ~${g.plant.readyDays}</div>`:''}
+        </div>
+        <span style="background:var(--rdim);color:var(--red);border:1px solid rgba(255,69,96,0.3);padding:3px 12px;border-radius:20px;font-size:12px;font-family:var(--mono);box-shadow:0 0 8px rgba(255,69,96,0.15)">${deadRate} หลุม</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead><tr>
+            <th>สถานะ</th><th>ถาด</th><th>ตำแหน่ง</th><th>วันหยอด</th><th>อายุ</th><th>โนต</th><th>จัดการ</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function reviveHole(trayId, idx){
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const p=t.holes[idx].plantId?plants.find(x=>x.id===t.holes[idx].plantId):null;
+  t.holes[idx].st='seed';
+  addLog('🌱',`ฟื้นฟูหลุม: ${t.name} ที่ ${idx+1}`,p?p.name+(p.variety?' '+p.variety:''):'');
   sd();
-  renderPlants();
+  renderDeadPage(trayId, null); // re-render (no focus after revive)
+  renderBadge();
+  renderDash();
 }
 
 // ---- NAV ----
@@ -850,23 +1140,20 @@ function go(id,btn){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   if(btn) btn.classList.add('on');
-  else document.querySelectorAll('.tab').forEach(b=>{
-    if(b.getAttribute('onclick')===`go('${id}',this)`) b.classList.add('on');
-  });
+  else document.querySelectorAll('.tab').forEach(b=>{ if(b.getAttribute('onclick')===`go('${id}',this)`) b.classList.add('on'); });
   if(id==='trays') renderTrays();
   else if(id==='plants') renderPlants();
   else if(id==='notify') renderNotify();
   else if(id==='log') renderLog();
+  else if(id==='dead') {} // rendered by renderDeadPage before go() is called
   else renderDash();
 }
 
-function cm(id){document.getElementById(id).classList.remove('on');}
+function cm(id){ document.getElementById(id).classList.remove('on'); }
 
-document.querySelectorAll('.ov').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');});
-});
+document.querySelectorAll('.ov').forEach(o=>{ o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('on'); }); });
 
-// ---- INIT DEMO ----
+// ---- INIT DEMO DATA ----
 if(!plants.length){
   plants=[
     {id:'p1',name:'มะเขือเทศ',variety:'ลูกท้อ',sproutDays:5,readyDays:25,note:'งอกใน 3–7 วัน (เฉลี่ย 5 วัน) · ย้ายปลูกเมื่ออายุ 20–30 วัน มีใบจริง 2–3 ใบ'},
@@ -878,9 +1165,7 @@ if(!plants.length){
     traySowDate:localDatetime(),
     holes:Array(50).fill(null).map((_,i)=>({
       st:i<38?(i<30?'sprout':'seed'):i<45?'seed':'empty',
-      plantId:'p1',
-      sowDate:'2026-06-01',
-      note:i===0?'งอกดีสุด':''
+      plantId:'p1', sowDate:'2026-06-01', note:i===0?'งอกดีสุด':''
     })),
     created:Date.now()
   }];
@@ -894,21 +1179,19 @@ if(!plants.length){
 
 render();
 
-// live timer — อัปเดตทุก 1 นาที
 setInterval(()=>{
   if(document.getElementById('pg-trays').classList.contains('on')) renderTrays();
   if(document.getElementById('pg-dash').classList.contains('on')) renderDash();
 },60000);
 </script>
+
 <!-- MODAL: EXPORT -->
 <div class="ov" id="ov-export">
 <div class="modal" style="max-width:420px">
   <div class="mhd"><div class="mtitle">ส่งออก Excel</div><button class="mclose" onclick="cm('ov-export')">✕</button></div>
   <div class="mbody">
     <div class="fr"><label>เลือกถาดที่ต้องการ Export</label>
-      <select id="ex-tray">
-        <option value="all">— ทุกถาด —</option>
-      </select>
+      <select id="ex-tray"><option value="all">— ทุกถาด —</option></select>
     </div>
     <div class="fr"><label>รูปแบบข้อมูล</label>
       <select id="ex-mode">
@@ -917,7 +1200,7 @@ setInterval(()=>{
         <option value="both">ทั้งสองแบบ (2 sheet)</option>
       </select>
     </div>
-    <div style="background:var(--s2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);margin-top:4px">
+    <div style="background:var(--s2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text2);margin-top:4px;border:1px solid var(--border)">
       💡 ไฟล์ที่ได้เป็น <strong style="color:var(--text)">.xlsx</strong> เปิดได้ใน Microsoft Excel, Google Sheets, LibreOffice
     </div>
   </div>
@@ -942,9 +1225,7 @@ function doExport(){
   const mode=document.getElementById('ex-mode').value;
   const selectedTrays=trayId==='all'?trays:trays.filter(t=>t.id===trayId);
   if(!selectedTrays.length){alert('ไม่พบถาดที่เลือก');return;}
-
   const wb=XLSX.utils.book_new();
-
   const stLabel={empty:'ว่าง',seed:'หยอดแล้ว',sprout:'งอกแล้ว',ready:'พร้อมย้าย',planted:'ย้ายแล้ว',dead:'ตาย'};
 
   if(mode==='detail'||mode==='both'){
@@ -952,26 +1233,12 @@ function doExport(){
     selectedTrays.forEach(t=>{
       t.holes.forEach((h,i)=>{
         const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
-        const row=Math.floor(i/t.cols)+1;
-        const col=(i%t.cols)+1;
-        rows.push([
-          t.name,
-          i+1,
-          row,
-          col,
-          p?p.name:'—',
-          p?(p.variety||'—'):'—',
-          stLabel[h.st]||h.st,
-          h.sowDate||'—',
-          h.note||''
-        ]);
+        rows.push([t.name,i+1,Math.floor(i/t.cols)+1,(i%t.cols)+1,p?p.name:'—',p?(p.variety||'—'):'—',stLabel[h.st]||h.st,h.sowDate||'—',h.note||'']);
       });
     });
     const ws=XLSX.utils.aoa_to_sheet(rows);
-    // column widths
     ws['!cols']=[{wch:22},{wch:8},{wch:6},{wch:8},{wch:14},{wch:12},{wch:12},{wch:12},{wch:24}];
-    // header style (xlsx-lite doesn't support rich style but column width helps)
-    XLSX.utils.book_append_sheet(wb, ws, 'รายหลุม');
+    XLSX.utils.book_append_sheet(wb,ws,'รายหลุม');
   }
 
   if(mode==='summary'||mode==='both'){
@@ -983,36 +1250,25 @@ function doExport(){
       const sprouted=cnt.sprout+cnt.ready+cnt.planted;
       const seeded=total-cnt.empty;
       const pct=seeded>0?Math.round(sprouted/seeded*100):0;
-      rows.push([
-        t.name,
-        `${t.rows}×${t.cols}`,
-        total,
-        cnt.empty,cnt.seed,cnt.sprout,cnt.ready,cnt.planted,cnt.dead,
-        pct+'%',
-        t.note||''
-      ]);
+      rows.push([t.name,`${t.rows}×${t.cols}`,total,cnt.empty,cnt.seed,cnt.sprout,cnt.ready,cnt.planted,cnt.dead,pct+'%',t.note||'']);
     });
     const ws=XLSX.utils.aoa_to_sheet(rows);
     ws['!cols']=[{wch:22},{wch:8},{wch:12},{wch:8},{wch:10},{wch:8},{wch:12},{wch:10},{wch:8},{wch:8},{wch:20}];
-    XLSX.utils.book_append_sheet(wb, ws, 'สรุปถาด');
+    XLSX.utils.book_append_sheet(wb,ws,'สรุปถาด');
   }
 
-  // metadata sheet
   const meta=[
-    ['SeedLog — Export'],
-    ['วันที่ Export', new Date().toLocaleDateString('th-TH')],
-    ['จำนวนถาด', selectedTrays.length],
-    ['จำนวนพืชในระบบ', plants.length],
-    [],
+    ['SeedLog — Export'],['วันที่ Export',new Date().toLocaleDateString('th-TH')],
+    ['จำนวนถาด',selectedTrays.length],['จำนวนพืชในระบบ',plants.length],[],
     ['รายชื่อพืช','สายพันธุ์','วันงอก (เฉลี่ย)','วันพร้อมย้าย'],
     ...plants.map(p=>[p.name,p.variety||'—',p.sproutDays+'วัน',p.readyDays+'วัน'])
   ];
   const wsMeta=XLSX.utils.aoa_to_sheet(meta);
   wsMeta['!cols']=[{wch:20},{wch:16},{wch:14},{wch:14}];
-  XLSX.utils.book_append_sheet(wb, wsMeta, 'ข้อมูล');
+  XLSX.utils.book_append_sheet(wb,wsMeta,'ข้อมูล');
 
   const fname=`SeedLog_${new Date().toISOString().slice(0,10)}.xlsx`;
-  XLSX.writeFile(wb, fname);
+  XLSX.writeFile(wb,fname);
   cm('ov-export');
   addLog('📊',`Export Excel: ${selectedTrays.map(t=>t.name).join(', ')}`,fname);
   sd();
