@@ -384,6 +384,7 @@ select option { background:var(--s1); }
   </div>
   <div class="nav-r">
     <span class="nbadge" id="nbadge">0</span>
+    <button class="btn sm" onclick="openBackup()" title="สำรอง/กู้คืนข้อมูล">💾 สำรอง</button>
     <button class="btn sm" onclick="openExport()" title="ส่งออก Excel">📊 Export</button>
     <button class="btn sm" onclick="openNewPlant()">+ พืช</button>
     <button class="btn sm pr" onclick="openNewTray()">+ ถาด</button>
@@ -447,7 +448,8 @@ select option { background:var(--s1); }
       <div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">คลิก "ฟื้น" เพื่อเปลี่ยนสถานะกลับ · ดับเบิลคลิกหลุมในถาดเพื่อแก้ไขโดยตรง</div>
     </div>
   </div>
-  <div id="dead-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px"></div>
+  <div id="dead-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px"></div>
+  <div id="dead-cause-breakdown" style="background:linear-gradient(145deg,var(--s1),var(--bg));border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:24px;box-shadow:var(--cshadow)"></div>
   <div id="dead-list"></div>
 </div>
 
@@ -504,7 +506,7 @@ select option { background:var(--s1); }
   <div class="mbody">
     <div class="fr"><label>พืชในหลุมนี้</label><div class="pp-grid" id="pp-grid"></div></div>
     <div class="fr"><label>สถานะ</label>
-      <select id="h-status">
+      <select id="h-status" onchange="toggleDeathCauseField()">
         <option value="empty">ว่าง</option>
         <option value="seed">หยอดเมล็ดแล้ว</option>
         <option value="sprout">งอกแล้ว</option>
@@ -512,6 +514,10 @@ select option { background:var(--s1); }
         <option value="planted">ย้ายปลูกแล้ว</option>
         <option value="dead">ตาย</option>
       </select>
+    </div>
+    <div class="fr" id="h-cause-wrap" style="display:none">
+      <label>สาเหตุการตาย</label>
+      <select id="h-cause"></select>
     </div>
     <div class="fr"><label>วันที่หยอด</label><input id="h-sow" type="date"></div>
     <div class="fr"><label>โนต</label><input id="h-note" placeholder="สังเกตการณ์..."></div>
@@ -536,6 +542,19 @@ const ST = {
   ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#ffba00'},
   planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#b06aff'},
   dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#ff4560'},
+};
+
+const CAUSES = {
+  '':        '— ไม่ระบุ —',
+  waterlog:  '💧 น้ำขัง',
+  pest:      '🐛 แมลงทำลาย',
+  fungus:    '🍄 เชื้อรา/โรคพืช',
+  heat:      '🔥 แดดเผา/ความร้อน',
+  cold:      '❄️ หนาวจัด/ช็อก',
+  nogerm:    '🌱 ไม่งอกเลย',
+  animal:    '🐀 สัตว์/หนูกัด',
+  neglect:   '🚿 ลืมรดน้ำ',
+  other:     '❓ อื่นๆ',
 };
 
 let curTool  = 'seed';
@@ -786,6 +805,7 @@ function paintHoleAt(trayId, idx){
   if(h.st==='dead' || h.st===paintTool) return; // skip dead mid-drag, skip no-op
   h.st=paintTool;
   if(paintTool==='seed' && !h.sowDate) h.sowDate=td();
+  if(paintTool==='dead') h.deathCause=''; // fresh death, cause set later via dead-report or modal
   paintedCount++;
   // update just this one cell directly — no full tray re-render mid-drag,
   // so the element under the cursor never gets swapped out and the drag stays smooth
@@ -840,6 +860,11 @@ function refreshTrayCard(trayId){
 }
 
 // ---- HOLE MODAL ----
+function toggleDeathCauseField(){
+  const isDead=document.getElementById('h-status').value==='dead';
+  document.getElementById('h-cause-wrap').style.display=isDead?'block':'none';
+}
+
 function openHole(trayId,idx,e){
   if(e) e.stopPropagation();
   const t=trays.find(x=>x.id===trayId);
@@ -850,6 +875,9 @@ function openHole(trayId,idx,e){
   document.getElementById('h-status').value=h.st;
   document.getElementById('h-sow').value=h.sowDate||td();
   document.getElementById('h-note').value=h.note||'';
+  document.getElementById('h-cause').innerHTML=Object.entries(CAUSES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  document.getElementById('h-cause').value=h.deathCause||'';
+  toggleDeathCauseField();
   const pp=document.getElementById('pp-grid');
   pp.innerHTML=`<div class="pp-clear ${!h.plantId?'on':''}" onclick="selectPlant(null)">ว่าง / ไม่ระบุ</div>`+
     plants.map(p=>`<div class="pp-item ${h.plantId===p.id?'on':''}" onclick="selectPlant('${p.id}')"><div class="pp-name">${p.name}</div><div class="pp-var">${p.variety||'—'}</div></div>`).join('');
@@ -875,12 +903,13 @@ function saveHole(){
   t.holes[idx].sowDate=document.getElementById('h-sow').value;
   t.holes[idx].note=document.getElementById('h-note').value.trim();
   t.holes[idx].plantId=plantId||null;
+  t.holes[idx].deathCause=newSt==='dead'?(document.getElementById('h-cause').value||''):'';
   const p=plantId?plants.find(x=>x.id===plantId):null;
   if(prev!==newSt||p){
     addLog(
       newSt==='seed'?'🌱':newSt==='sprout'?'🌿':newSt==='ready'?'⏰':newSt==='planted'?'🌳':newSt==='dead'?'💀':'📝',
       `${t.name} หลุม ${idx+1}: ${ST[newSt].label}${p?' ('+p.name+(p.variety?' '+p.variety:'')+')'  :''}`,
-      t.holes[idx].note
+      t.holes[idx].deathCause?CAUSES[t.holes[idx].deathCause]:t.holes[idx].note
     );
   }
   sd(); cm('ov-hole'); refreshTrayCard(trayId); renderBadge(); renderNotify();
@@ -1110,6 +1139,7 @@ function renderDeadPage(focusTrayId, focusIdx){
   `;
 
   const listEl=document.getElementById('dead-list');
+  renderCauseBreakdown();
   if(!totalDead){
     listEl.innerHTML=`<div class="empty"><div class="ei">✅</div><div>ยังไม่มีหลุมตาย</div></div>`;
     return;
@@ -1136,6 +1166,7 @@ function renderDeadPage(focusTrayId, focusIdx){
         const d=Math.round((new Date()-new Date(item.hole.sowDate))/(864e5));
         livedDays=d>=0?d+' วัน':'—';
       }
+      const causeVal=item.hole.deathCause||'';
       return `<tr id="dead-item-${item.tray.id}-${item.idx}"
         style="${isFocus?'background:rgba(255,69,96,0.09);outline:1px solid rgba(255,69,96,0.3);':''}transition:background .2s">
         <td>
@@ -1146,6 +1177,12 @@ function renderDeadPage(focusTrayId, focusIdx){
         <td style="font-family:var(--mono);font-size:11px">ที่ ${item.idx+1}<span style="color:var(--text2)"> (R${rowNum}C${colNum})</span></td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${sowDate}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--amber)">${livedDays}</td>
+        <td>
+          <select onchange="setDeathCause('${item.tray.id}',${item.idx},this.value)"
+            style="background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:5px 8px;color:var(--text);font-size:11px;font-family:'Sarabun',sans-serif;outline:none;min-width:128px;cursor:pointer">
+            ${Object.entries(CAUSES).map(([k,v])=>`<option value="${k}" ${causeVal===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </td>
         <td style="color:var(--text2);font-size:12px">${item.hole.note||'<span style="color:var(--text3)">—</span>'}</td>
         <td>
           <div style="display:flex;gap:5px">
@@ -1171,7 +1208,7 @@ function renderDeadPage(focusTrayId, focusIdx){
       <div style="overflow-x:auto">
         <table class="dtbl">
           <thead><tr>
-            <th>สถานะ</th><th>ถาด</th><th>ตำแหน่ง</th><th>วันหยอด</th><th>อายุ</th><th>โนต</th><th>จัดการ</th>
+            <th>สถานะ</th><th>ถาด</th><th>ตำแหน่ง</th><th>วันหยอด</th><th>อายุ</th><th>สาเหตุ</th><th>โนต</th><th>จัดการ</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -1180,16 +1217,108 @@ function renderDeadPage(focusTrayId, focusIdx){
   }).join('');
 }
 
+function renderCauseBreakdown(){
+  const counts={};
+  trays.forEach(t=>t.holes.forEach(h=>{
+    if(h.st==='dead' && h.deathCause) counts[h.deathCause]=(counts[h.deathCause]||0)+1;
+  }));
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const el=document.getElementById('dead-cause-breakdown');
+  if(!el) return;
+  if(!entries.length){
+    el.innerHTML=`<div style="font-size:12px;color:var(--text3)">🔍 ยังไม่ได้ระบุสาเหตุการตาย — เลือกจากตารางด้านล่างได้เลย ข้อมูลนี้จะช่วยดูแพทเทิร์นในฤดูกาลถัดไป</div>`;
+    return;
+  }
+  const total=entries.reduce((s,[,v])=>s+v,0);
+  el.innerHTML=`<div style="font-size:11px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">สาเหตุที่พบบ่อย</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${entries.map(([k,v])=>{
+        const pct=Math.round(v/total*100);
+        return `<span class="stag st-dead" style="font-size:12px">${CAUSES[k]||k} × ${v} <span style="opacity:.6">(${pct}%)</span></span>`;
+      }).join('')}
+    </div>`;
+}
+
+function setDeathCause(trayId, idx, val){
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  t.holes[idx].deathCause=val;
+  if(val){
+    const p=t.holes[idx].plantId?plants.find(x=>x.id===t.holes[idx].plantId):null;
+    addLog('🔍',`บันทึกสาเหตุ: ${t.name} ที่ ${idx+1} — ${CAUSES[val]}`,p?p.name+(p.variety?' '+p.variety:''):'');
+  }
+  sd();
+  renderCauseBreakdown(); // lightweight refresh only — keeps table/scroll/dropdown state untouched
+}
+
 function reviveHole(trayId, idx){
   const t=trays.find(x=>x.id===trayId);
   if(!t) return;
   const p=t.holes[idx].plantId?plants.find(x=>x.id===t.holes[idx].plantId):null;
   t.holes[idx].st='seed';
+  t.holes[idx].deathCause='';
   addLog('🌱',`ฟื้นฟูหลุม: ${t.name} ที่ ${idx+1}`,p?p.name+(p.variety?' '+p.variety:''):'');
   sd();
   renderDeadPage(trayId, null); // re-render (no focus after revive)
   renderBadge();
   renderDash();
+}
+
+// ---- BACKUP / RESTORE ----
+function openBackup(){
+  document.getElementById('ov-backup').classList.add('on');
+}
+
+function doBackup(){
+  const payload={
+    app:'SeedLog',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    plants, trays, logs
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`SeedLog_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  addLog('💾','สำรองข้อมูล',`${trays.length} ถาด · ${plants.length} พืช · ${logs.length} บันทึก`);
+  sd();
+}
+
+function doRestore(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    let data;
+    try{ data=JSON.parse(ev.target.result); }
+    catch(err){ alert('ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบว่าเป็นไฟล์ .json ที่ถูกต้อง'); return; }
+
+    if(!data || !Array.isArray(data.plants) || !Array.isArray(data.trays)){
+      alert('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ SeedLog หรือรูปแบบไม่ถูกต้อง');
+      return;
+    }
+
+    const logsArr=Array.isArray(data.logs)?data.logs:[];
+    const summary=`${data.trays.length} ถาด, ${data.plants.length} พืช, ${logsArr.length} บันทึก`;
+    if(!confirm(`กู้คืนข้อมูลนี้?\n\n${summary}\n\nข้อมูลปัจจุบันทั้งหมดจะถูกเขียนทับและไม่สามารถย้อนกลับได้ (เว้นแต่คุณมีไฟล์สำรองอื่น)`)) return;
+
+    plants=data.plants;
+    trays=data.trays;
+    logs=logsArr;
+    addLog('📂','กู้คืนข้อมูลจากไฟล์สำรอง',summary);
+    sd();
+    render();
+    cm('ov-backup');
+    go('dash');
+    alert('กู้คืนข้อมูลสำเร็จ');
+  };
+  reader.readAsText(file);
+  e.target.value=''; // reset so picking the same file again still fires onchange
 }
 
 // ---- NAV ----
@@ -1242,6 +1371,30 @@ setInterval(()=>{
   if(document.getElementById('pg-dash').classList.contains('on')) renderDash();
 },60000);
 </script>
+
+<!-- MODAL: BACKUP / RESTORE -->
+<div class="ov" id="ov-backup">
+<div class="modal" style="max-width:420px">
+  <div class="mhd"><div class="mtitle">สำรอง / กู้คืนข้อมูล</div><button class="mclose" onclick="cm('ov-backup')">✕</button></div>
+  <div class="mbody">
+    <div style="margin-bottom:20px">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em">สำรองข้อมูล</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">ดาวน์โหลดข้อมูลทั้งหมด (ถาด, พืช, บันทึก) เป็นไฟล์เดียว เก็บไว้กู้คืนภายหลังได้ทุกเมื่อ</div>
+      <button class="btn pr" style="width:100%" onclick="doBackup()">💾 ดาวน์โหลดไฟล์สำรอง (.json)</button>
+    </div>
+    <div style="height:1px;background:var(--border);margin:20px 0"></div>
+    <div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em">กู้คืนข้อมูล</div>
+      <div style="font-size:12px;color:var(--amber);margin-bottom:12px;background:var(--adim);padding:9px 12px;border-radius:9px;border:1px solid rgba(255,186,0,0.25);line-height:1.5">⚠️ การกู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด แนะนำให้สำรองข้อมูลปัจจุบันไว้ก่อน</div>
+      <input type="file" id="restore-file" accept="application/json,.json" style="display:none" onchange="doRestore(event)">
+      <button class="btn" style="width:100%" onclick="document.getElementById('restore-file').click()">📂 เลือกไฟล์เพื่อกู้คืน</button>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn" onclick="cm('ov-backup')">ปิด</button>
+  </div>
+</div>
+</div>
 
 <!-- MODAL: EXPORT -->
 <div class="ov" id="ov-export">
