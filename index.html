@@ -627,9 +627,11 @@ function renderTrayCard(t){
     const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
     const label=p?(p.name.slice(0,2)):'';
     return `<div class="hole ${ST[h.st].hcls} ${h.note?'has-note':''}"
+      id="hole-${t.id}-${i}"
       style="width:${cw}px;height:${cw}px;font-size:${cw>24?9:7}px"
       title="${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[h.st].label}${h.note?' | '+h.note:''}"
-      onmousedown="quickPaint('${t.id}',${i},event)"
+      onmousedown="paintStart('${t.id}',${i},event)"
+      onmouseenter="paintDrag('${t.id}',${i})"
       ondblclick="openHole('${t.id}',${i},event)"
     >${cw>=22?label:''}</div>`;
   }).join('');
@@ -750,27 +752,83 @@ function setTool(t,trayId){
   if(leg){ const legs=leg.querySelectorAll('.leg'); legs.forEach((el,i)=>{ if(Object.keys(ST)[i]===t) el.classList.add('on'); }); }
 }
 
-let isPainting=false;
-document.addEventListener('mousedown',()=>isPainting=true);
-document.addEventListener('mouseup',()=>isPainting=false);
+// ---- DRAG-PAINT ----
+// mousedown on a hole starts painting; dragging over other holes (mouseenter)
+// keeps painting them with the same tool until mouseup, anywhere on the page.
+let isPainting   = false;
+let paintTrayId  = null;
+let paintTool    = null;
+let paintedCount = 0;
 
-function quickPaint(trayId,idx,e){
-  if(e.detail>=2) return;
+function paintStart(trayId, idx, e){
+  if(e.detail>=2) return; // 2nd mousedown of a dblclick → let openHole handle it
   const t=trays.find(x=>x.id===trayId);
   if(!t) return;
-  // dead hole → navigate to dead detail page instead of painting
-  if(t.holes[idx].st==='dead'){ openDeadPage(trayId,idx); return; }
-  const prev=t.holes[idx].st;
-  t.holes[idx].st=curTool;
-  if(curTool==='seed'&&!t.holes[idx].sowDate) t.holes[idx].sowDate=td();
-  if(prev!==curTool){
-    addLog(curTool==='seed'?'🌱':curTool==='sprout'?'🌿':curTool==='ready'?'⏰':curTool==='planted'?'🌳':'💀',
-      `${ST[curTool].label}: ${t.name} หลุม ${idx+1}`,
-      t.holes[idx].plantId?(plants.find(p=>p.id===t.holes[idx].plantId)||{}).name||'':''
-    );
-  }
-  sd(); refreshTrayCard(trayId); renderBadge();
+  // dead hole → navigate to dead detail page instead of painting over it
+  if(t.holes[idx].st==='dead'){ openDeadPage(trayId, idx); return; }
+  isPainting   = true;
+  paintTrayId  = trayId;
+  paintTool    = curTool;
+  paintedCount = 0;
+  document.body.style.userSelect='none'; // avoid selecting page text while dragging
+  paintHoleAt(trayId, idx);
 }
+
+function paintDrag(trayId, idx){
+  if(!isPainting || trayId!==paintTrayId) return;
+  paintHoleAt(trayId, idx);
+}
+
+function paintHoleAt(trayId, idx){
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const h=t.holes[idx];
+  if(h.st==='dead' || h.st===paintTool) return; // skip dead mid-drag, skip no-op
+  h.st=paintTool;
+  if(paintTool==='seed' && !h.sowDate) h.sowDate=td();
+  paintedCount++;
+  // update just this one cell directly — no full tray re-render mid-drag,
+  // so the element under the cursor never gets swapped out and the drag stays smooth
+  const el=document.getElementById(`hole-${trayId}-${idx}`);
+  if(el){
+    el.className=`hole ${ST[paintTool].hcls}${h.note?' has-note':''}`;
+    const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
+    el.title=`${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[paintTool].label}${h.note?' | '+h.note:''}`;
+  }
+  updateTrayFooter(trayId);
+}
+
+function updateTrayFooter(trayId){
+  const t=trays.find(x=>x.id===trayId);
+  if(!t) return;
+  const card=document.getElementById('tcard-'+trayId);
+  if(!card) return;
+  const foot=card.querySelector('.tcard-foot');
+  if(!foot) return;
+  const cnt={};
+  t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
+  foot.innerHTML=Object.entries(cnt).map(([k,v])=>`<span class="stag ${ST[k].cls}">${ST[k].label} ${v}</span>`).join('');
+}
+
+document.addEventListener('mouseup', ()=>{
+  if(isPainting && paintedCount>0){
+    const t=trays.find(x=>x.id===paintTrayId);
+    addLog(
+      paintTool==='seed'?'🌱':paintTool==='sprout'?'🌿':paintTool==='ready'?'⏰':paintTool==='planted'?'🌳':'💀',
+      `${ST[paintTool].label}: ${t?t.name:''} ${paintedCount>1?paintedCount+' หลุม':'1 หลุม'}`,
+      ''
+    );
+    sd();
+    renderDash();
+    renderBadge();
+    renderNotify();
+  }
+  isPainting=false;
+  paintTrayId=null;
+  paintTool=null;
+  paintedCount=0;
+  document.body.style.userSelect='';
+});
 
 function refreshTrayCard(trayId){
   const t=trays.find(x=>x.id===trayId);
