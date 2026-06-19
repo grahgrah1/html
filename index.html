@@ -384,7 +384,6 @@ select option { background:var(--s1); }
   </div>
   <div class="nav-r">
     <span class="nbadge" id="nbadge">0</span>
-    <button class="btn sm" onclick="openBackup()" title="สำรอง/กู้คืนข้อมูล">💾 สำรอง</button>
     <button class="btn sm" onclick="openExport()" title="ส่งออก Excel">📊 Export</button>
     <button class="btn sm" onclick="openNewPlant()">+ พืช</button>
     <button class="btn sm pr" onclick="openNewTray()">+ ถาด</button>
@@ -1264,63 +1263,6 @@ function reviveHole(trayId, idx){
   renderDash();
 }
 
-// ---- BACKUP / RESTORE ----
-function openBackup(){
-  document.getElementById('ov-backup').classList.add('on');
-}
-
-function doBackup(){
-  const payload={
-    app:'SeedLog',
-    version:1,
-    exportedAt:new Date().toISOString(),
-    plants, trays, logs
-  };
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`SeedLog_backup_${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  addLog('💾','สำรองข้อมูล',`${trays.length} ถาด · ${plants.length} พืช · ${logs.length} บันทึก`);
-  sd();
-}
-
-function doRestore(e){
-  const file=e.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=(ev)=>{
-    let data;
-    try{ data=JSON.parse(ev.target.result); }
-    catch(err){ alert('ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบว่าเป็นไฟล์ .json ที่ถูกต้อง'); return; }
-
-    if(!data || !Array.isArray(data.plants) || !Array.isArray(data.trays)){
-      alert('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ SeedLog หรือรูปแบบไม่ถูกต้อง');
-      return;
-    }
-
-    const logsArr=Array.isArray(data.logs)?data.logs:[];
-    const summary=`${data.trays.length} ถาด, ${data.plants.length} พืช, ${logsArr.length} บันทึก`;
-    if(!confirm(`กู้คืนข้อมูลนี้?\n\n${summary}\n\nข้อมูลปัจจุบันทั้งหมดจะถูกเขียนทับและไม่สามารถย้อนกลับได้ (เว้นแต่คุณมีไฟล์สำรองอื่น)`)) return;
-
-    plants=data.plants;
-    trays=data.trays;
-    logs=logsArr;
-    addLog('📂','กู้คืนข้อมูลจากไฟล์สำรอง',summary);
-    sd();
-    render();
-    cm('ov-backup');
-    go('dash');
-    alert('กู้คืนข้อมูลสำเร็จ');
-  };
-  reader.readAsText(file);
-  e.target.value=''; // reset so picking the same file again still fires onchange
-}
-
 // ---- NAV ----
 function go(id,btn){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -1371,30 +1313,6 @@ setInterval(()=>{
   if(document.getElementById('pg-dash').classList.contains('on')) renderDash();
 },60000);
 </script>
-
-<!-- MODAL: BACKUP / RESTORE -->
-<div class="ov" id="ov-backup">
-<div class="modal" style="max-width:420px">
-  <div class="mhd"><div class="mtitle">สำรอง / กู้คืนข้อมูล</div><button class="mclose" onclick="cm('ov-backup')">✕</button></div>
-  <div class="mbody">
-    <div style="margin-bottom:20px">
-      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em">สำรองข้อมูล</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">ดาวน์โหลดข้อมูลทั้งหมด (ถาด, พืช, บันทึก) เป็นไฟล์เดียว เก็บไว้กู้คืนภายหลังได้ทุกเมื่อ</div>
-      <button class="btn pr" style="width:100%" onclick="doBackup()">💾 ดาวน์โหลดไฟล์สำรอง (.json)</button>
-    </div>
-    <div style="height:1px;background:var(--border);margin:20px 0"></div>
-    <div>
-      <div style="font-size:10px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em">กู้คืนข้อมูล</div>
-      <div style="font-size:12px;color:var(--amber);margin-bottom:12px;background:var(--adim);padding:9px 12px;border-radius:9px;border:1px solid rgba(255,186,0,0.25);line-height:1.5">⚠️ การกู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด แนะนำให้สำรองข้อมูลปัจจุบันไว้ก่อน</div>
-      <input type="file" id="restore-file" accept="application/json,.json" style="display:none" onchange="doRestore(event)">
-      <button class="btn" style="width:100%" onclick="document.getElementById('restore-file').click()">📂 เลือกไฟล์เพื่อกู้คืน</button>
-    </div>
-  </div>
-  <div class="mfoot">
-    <button class="btn" onclick="cm('ov-backup')">ปิด</button>
-  </div>
-</div>
-</div>
 
 <!-- MODAL: EXPORT -->
 <div class="ov" id="ov-export">
