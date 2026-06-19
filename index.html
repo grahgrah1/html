@@ -224,6 +224,44 @@ select option { background:var(--s1); }
 .sc.cr .sc-v { color:var(--red);    text-shadow:0 0 18px rgba(255,69,96,0.55); }
 .sc-s { font-size:11px; color:var(--text2); margin-top:4px; }
 
+/* ─── DASHBOARD HERO (total trays = headline, rest = secondary) ─── */
+.dash-hero {
+  background: linear-gradient(150deg, #002919 0%, #040d09 65%, #07090d 100%);
+  border:1px solid rgba(0,232,124,0.25); border-radius:20px;
+  padding:28px 30px 24px; margin-bottom:26px;
+  box-shadow:0 12px 44px rgba(0,0,0,0.6), 0 0 36px rgba(0,232,124,0.08), inset 0 1px 0 rgba(0,232,124,0.1);
+  position:relative; overflow:hidden;
+}
+.dash-hero::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,232,124,0.35),transparent);
+}
+.dash-hero-label {
+  font-size:11px; color:var(--text2); font-family:var(--mono);
+  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;
+}
+.dash-hero-row { display:flex; align-items:baseline; gap:10px; }
+.dash-hero-value {
+  font-size:68px; font-weight:700; font-family:var(--mono); line-height:1;
+  color:var(--green); text-shadow:0 0 34px rgba(0,232,124,0.6), 0 0 70px rgba(0,232,124,0.25);
+}
+.dash-hero-unit { font-size:14px; color:var(--text2); }
+.dash-hero-subrow {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  margin-top:22px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.07);
+}
+.dash-sub {
+  text-align:center; padding:12px 8px; border-radius:12px;
+  background:rgba(255,255,255,0.025); border:1px solid var(--border);
+  transition:transform .2s;
+}
+.dash-sub:hover { transform:translateY(-2px); }
+.dash-sub-val { font-size:24px; font-weight:600; font-family:var(--mono); line-height:1; }
+.dash-sub.cb .dash-sub-val { color:var(--blue);  text-shadow:0 0 14px rgba(0,200,255,0.5); }
+.dash-sub.ca .dash-sub-val { color:var(--amber); text-shadow:0 0 14px rgba(255,186,0,0.5); }
+.dash-sub.cr .dash-sub-val { color:var(--red);   text-shadow:0 0 14px rgba(255,69,96,0.5); }
+.dash-sub-label { font-size:10.5px; color:var(--text2); margin-top:5px; font-family:var(--mono); }
+
 /* ─── TRAY CARD ─── */
 .tcard {
   background: linear-gradient(145deg, #0e1925 0%, #080e17 100%);
@@ -394,11 +432,26 @@ select option { background:var(--s1); }
 
 <!-- DASHBOARD -->
 <div class="pg on" id="pg-dash">
-  <div class="sbar">
-    <div class="sc cg"><div class="sc-l">ถาดทั้งหมด</div><div class="sc-v" id="ds-trays">0</div><div class="sc-s">ถาด</div></div>
-    <div class="sc cb"><div class="sc-l">หลุมงอกแล้ว</div><div class="sc-v" id="ds-sprout">0</div><div class="sc-s">หลุม</div></div>
-    <div class="sc ca"><div class="sc-l">พร้อมย้ายปลูก</div><div class="sc-v" id="ds-ready">0</div><div class="sc-s">หลุม</div></div>
-    <div class="sc cr"><div class="sc-l">หลุมตาย</div><div class="sc-v" id="ds-dead">0</div><div class="sc-s">หลุม</div></div>
+  <div class="dash-hero">
+    <div class="dash-hero-label">ถาดทั้งหมด</div>
+    <div class="dash-hero-row">
+      <div class="dash-hero-value" id="ds-trays">0</div>
+      <div class="dash-hero-unit">ถาด</div>
+    </div>
+    <div class="dash-hero-subrow">
+      <div class="dash-sub cb">
+        <div class="dash-sub-val" id="ds-sprout">0</div>
+        <div class="dash-sub-label">🌿 งอกแล้ว</div>
+      </div>
+      <div class="dash-sub ca">
+        <div class="dash-sub-val" id="ds-ready">0</div>
+        <div class="dash-sub-label">🌼 พร้อมย้ายปลูก</div>
+      </div>
+      <div class="dash-sub cr">
+        <div class="dash-sub-val" id="ds-dead">0</div>
+        <div class="dash-sub-label">💀 ตาย</div>
+      </div>
+    </div>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:14px;font-weight:600">สรุปถาดทั้งหมด</div>
