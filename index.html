@@ -259,8 +259,9 @@ select option { background:var(--s1); }
   color:rgba(255,255,255,0.72);
   user-select:none; position:relative;
   touch-action:none; -webkit-touch-callout:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));
 }
-.hole:hover { transform:scale(1.24); z-index:2; filter:brightness(1.3); }
+.hole:hover { transform:scale(1.24); z-index:2; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6)) brightness(1.3); }
 .hole:active { transform:scale(0.93); }
 
 /* Each hole = physical cylindrical well viewed from above */
@@ -536,12 +537,12 @@ let trays  = JSON.parse(localStorage.getItem('sl_trays') ||'[]');
 let logs   = JSON.parse(localStorage.getItem('sl_logs')  ||'[]');
 
 const ST = {
-  empty:   {label:'ว่าง',          cls:'st-empty',  hcls:'hs-empty',  col:'#243444'},
-  seed:    {label:'หยอดแล้ว',      cls:'st-seed',   hcls:'hs-seed',   col:'#00c8ff'},
-  sprout:  {label:'งอกแล้ว',       cls:'st-sprout', hcls:'hs-sprout', col:'#00e87c'},
-  ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#ffba00'},
-  planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#b06aff'},
-  dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#ff4560'},
+  empty:   {label:'ว่าง',          cls:'st-empty',  hcls:'hs-empty',  col:'#243444',  icon:''},
+  seed:    {label:'หยอดแล้ว',      cls:'st-seed',   hcls:'hs-seed',   col:'#00c8ff',  icon:'🌰'},
+  sprout:  {label:'งอกแล้ว',       cls:'st-sprout', hcls:'hs-sprout', col:'#00e87c',  icon:'🌿'},
+  ready:   {label:'พร้อมย้าย',     cls:'st-ready',  hcls:'hs-ready',  col:'#ffba00',  icon:'🌼'},
+  planted: {label:'ย้ายแล้ว',      cls:'st-planted',hcls:'hs-planted',col:'#b06aff',  icon:'🌳'},
+  dead:    {label:'ตาย',           cls:'st-dead',   hcls:'hs-dead',   col:'#ff4560',  icon:'💀'},
 };
 
 const CAUSES = {
@@ -644,20 +645,23 @@ function renderTrayCard(t){
 
   const holes=t.holes.map((h,i)=>{
     const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
-    const label=p?(p.name.slice(0,2)):'';
+    const icon=ST[h.st].icon;
+    const showIcon=!!icon && cw>=14; // too small to read an icon below this size
+    const iconSize=Math.max(11,Math.round(cw*0.62));
     return `<div class="hole ${ST[h.st].hcls} ${h.note?'has-note':''}"
       id="hole-${t.id}-${i}"
-      style="width:${cw}px;height:${cw}px;font-size:${cw>24?9:7}px"
+      data-showicon="${showIcon?1:0}"
+      style="width:${cw}px;height:${cw}px;font-size:${showIcon?iconSize:7}px"
       title="${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[h.st].label}${h.note?' | '+h.note:''}"
       onmousedown="paintStart('${t.id}',${i},event)"
       onmouseenter="paintDrag('${t.id}',${i})"
       ontouchstart="paintStart('${t.id}',${i},event)"
       ondblclick="openHole('${t.id}',${i},event)"
-    >${cw>=22?label:''}</div>`;
+    >${showIcon?icon:''}</div>`;
   }).join('');
 
   const statSummary=Object.entries(cnt).map(([k,v])=>
-    `<span class="stag ${ST[k].cls}">${ST[k].label} ${v}</span>`
+    `<span class="stag ${ST[k].cls}">${ST[k].icon?ST[k].icon+' ':''}${ST[k].label} ${v}</span>`
   ).join('');
 
   const elapsed=t.traySowDate?elapsedStr(t.traySowDate):null;
@@ -681,7 +685,7 @@ function renderTrayCard(t){
       <div class="legend" id="leg-${t.id}">
         ${Object.entries(ST).map(([k,v])=>`
           <div class="leg ${curTool===k?'on':''}" onclick="setTool('${k}','${t.id}')">
-            <div class="leg-dot" style="background:${v.col}22;border-color:${v.col}"></div>${v.label}
+            <div class="leg-dot" style="background:${v.col}22;border-color:${v.col}"></div>${v.icon?v.icon+' ':''}${v.label}
           </div>`).join('')}
       </div>
       <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;letter-spacing:0.03em">แตะ/คลิก = เปลี่ยนสถานะ · ลากนิ้ว/เมาส์ = ทาหลายหลุม · คลิก💀 = รายงานหลุมตาย · ดับเบิลคลิก = แก้ไขรายละเอียด</div>
@@ -814,6 +818,7 @@ function paintHoleAt(trayId, idx){
   const el=document.getElementById(`hole-${trayId}-${idx}`);
   if(el){
     el.className=`hole ${ST[paintTool].hcls}${h.note?' has-note':''}`;
+    if(el.dataset.showicon==='1') el.textContent=ST[paintTool].icon||'';
     const p=h.plantId?plants.find(x=>x.id===h.plantId):null;
     el.title=`${p?p.name+' '+(p.variety||''):'ว่าง'} | ${ST[paintTool].label}${h.note?' | '+h.note:''}`;
   }
@@ -829,14 +834,14 @@ function updateTrayFooter(trayId){
   if(!foot) return;
   const cnt={};
   t.holes.forEach(h=>{cnt[h.st]=(cnt[h.st]||0)+1;});
-  foot.innerHTML=Object.entries(cnt).map(([k,v])=>`<span class="stag ${ST[k].cls}">${ST[k].label} ${v}</span>`).join('');
+  foot.innerHTML=Object.entries(cnt).map(([k,v])=>`<span class="stag ${ST[k].cls}">${ST[k].icon?ST[k].icon+' ':''}${ST[k].label} ${v}</span>`).join('');
 }
 
 function finishPainting(){
   if(isPainting && paintedCount>0){
     const t=trays.find(x=>x.id===paintTrayId);
     addLog(
-      paintTool==='seed'?'🌱':paintTool==='sprout'?'🌿':paintTool==='ready'?'⏰':paintTool==='planted'?'🌳':'💀',
+      paintTool==='empty'?'🧹':ST[paintTool].icon,
       `${ST[paintTool].label}: ${t?t.name:''} ${paintedCount>1?paintedCount+' หลุม':'1 หลุม'}`,
       ''
     );
@@ -928,7 +933,7 @@ function saveHole(){
   const p=plantId?plants.find(x=>x.id===plantId):null;
   if(prev!==newSt||p){
     addLog(
-      newSt==='seed'?'🌱':newSt==='sprout'?'🌿':newSt==='ready'?'⏰':newSt==='planted'?'🌳':newSt==='dead'?'💀':'📝',
+      newSt==='empty'?'🧹':ST[newSt].icon,
       `${t.name} หลุม ${idx+1}: ${ST[newSt].label}${p?' ('+p.name+(p.variety?' '+p.variety:'')+')'  :''}`,
       t.holes[idx].deathCause?CAUSES[t.holes[idx].deathCause]:t.holes[idx].note
     );
@@ -968,7 +973,7 @@ function saveTray(){
     created:Date.now()
   };
   trays.push(t);
-  if(plantId){ const p=plants.find(x=>x.id===plantId); addLog('🌱',`สร้างถาด ${t.name}: หยอดเมล็ด ${rows*cols} หลุม`,p?p.name+(p.variety?' '+p.variety:''):''); }
+  if(plantId){ const p=plants.find(x=>x.id===plantId); addLog(ST.seed.icon,`สร้างถาด ${t.name}: หยอดเมล็ด ${rows*cols} หลุม`,p?p.name+(p.variety?' '+p.variety:''):''); }
   else { addLog('🗂️',`สร้างถาด ${t.name}`,`${rows}×${cols} = ${rows*cols} หลุม`); }
   sd(); cm('ov-tray'); render(); go('trays');
 }
@@ -1191,7 +1196,7 @@ function renderDeadPage(focusTrayId, focusIdx){
       return `<tr id="dead-item-${item.tray.id}-${item.idx}"
         style="${isFocus?'background:rgba(255,69,96,0.09);outline:1px solid rgba(255,69,96,0.3);':''}transition:background .2s">
         <td>
-          <span class="stag st-dead">ตาย</span>
+          <span class="stag st-dead">${ST.dead.icon} ตาย</span>
           ${isFocus?'<span style="font-size:10px;color:var(--red);font-family:var(--mono);margin-left:6px">◀ หลุมนี้</span>':''}
         </td>
         <td style="font-family:var(--mono);font-size:11px">${item.tray.name}</td>
@@ -1278,7 +1283,7 @@ function reviveHole(trayId, idx){
   const p=t.holes[idx].plantId?plants.find(x=>x.id===t.holes[idx].plantId):null;
   t.holes[idx].st='seed';
   t.holes[idx].deathCause='';
-  addLog('🌱',`ฟื้นฟูหลุม: ${t.name} ที่ ${idx+1}`,p?p.name+(p.variety?' '+p.variety:''):'');
+  addLog(ST.seed.icon,`ฟื้นฟูหลุม: ${t.name} ที่ ${idx+1}`,p?p.name+(p.variety?' '+p.variety:''):'');
   sd();
   renderDeadPage(trayId, null); // re-render (no focus after revive)
   renderBadge();
@@ -1322,7 +1327,7 @@ if(!plants.length){
   }];
   logs=[
     {id:'l1',icon:'🗂️',text:'สร้างถาด A — มะเขือเทศลูกท้อ',note:'5×10 = 50 หลุม',date:'2026-06-01'},
-    {id:'l2',icon:'🌱',text:'หยอดเมล็ด 50 หลุม',note:'มะเขือเทศ ลูกท้อ',date:'2026-06-01'},
+    {id:'l2',icon:'🌰',text:'หยอดเมล็ด 50 หลุม',note:'มะเขือเทศ ลูกท้อ',date:'2026-06-01'},
     {id:'l3',icon:'🌿',text:'งอกแล้ว 30 หลุม',note:'',date:'2026-06-07'},
   ];
   sd();
